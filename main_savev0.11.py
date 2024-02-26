@@ -1,4 +1,5 @@
 import math
+import random
 import tkinter as tk
 from tkinter import scrolledtext, filedialog
 from datetime import datetime
@@ -48,6 +49,8 @@ class ChatApp:
         self.roles = ["KP", "DiceBot", "PL 1"]
         # 初始化当前聚焦的头像和文本框
         self.current_role = tk.StringVar(value=self.roles[0])
+        # 初始化TRPG模块
+        self.trpg_module = TRPGModule()
 
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
@@ -121,7 +124,7 @@ class ChatApp:
         label.bind("<Button-1>", lambda event, role=role, label=label: self.edit_role_name(event, role, label))
         if self.role_entries_name[role] != role:
             label.configure(text=self.role_entries_name[role])
-            #print(self.role_entries_name[role])
+            # print(self.role_entries_name[role])
 
         label = tk.Label(frame, text="@", relief=tk.FLAT)
         label.grid(row=2, column=0, pady=0, sticky="nsew")
@@ -171,8 +174,10 @@ class ChatApp:
     def add_role(self):
         new_role = f"PL {len(self.roles) - 1}"
         self.roles.append(new_role)
-        if self.role_entries_name[new_role] == "":
+        if new_role not in self.role_entries_name:
             self.role_entries_name[new_role] = new_role
+        elif self.role_entries_name[new_role] != new_role:
+            pass
 
         num_cols = 3
         idx = len(self.roles) - 1
@@ -297,6 +302,12 @@ class ChatApp:
                 label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
                 label.bind("<Button-1>", lambda event, role=role: self.on_avatar_click(role))
 
+    def roll_dice(self, role, expression):
+        result = self.trpg_module.roll(expression)
+        message = f'{role} 掷骰: {expression}，结果: {result}\n'
+        self.chat_log.insert(tk.END, message)
+        self.chat_log.yview(tk.END)
+
     def save_settings(self):
         # 将头像路径保存到JSON文件
         with open('avatar_settings.json', 'w') as file:
@@ -309,6 +320,19 @@ class ChatApp:
         # 在关闭窗口前保存设置
         self.save_settings()
         self.root.destroy()
+
+
+class TRPGModule:
+    def __init__(self):
+        self.random_seed = None
+
+    def roll(self, expression):
+        if self.random_seed is not None:
+            random.seed(self.random_seed)
+        try:
+            return eval(expression)
+        except Exception as e:
+            return f"Error: {e}"
 
 
 if __name__ == "__main__":
