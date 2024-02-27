@@ -10,12 +10,15 @@ import configparser
 from PIL import Image, ImageTk
 import json
 
-Critical_Success = "￥￥￥ 是大成功！￥￥￥"
+Critical_Success = "￥.。.￥。￥.。是大成功！.￥.。.￥。.￥。"
 Extreme_Success = "（深呼吸）...极难成功！恭喜您！"
 Hard_Success = "困难成功！"
 Success = "鉴定成功，期待您的表现。"
 Failure = "失败了，请您不要灰心..."
 Fumble = "嗯...抱歉，看起来是大失败呢..."
+
+Fumble_SKill = 20  # 启用96以上大失败的技能水平
+Critical_Success_SKill = 60  # 启用5以下大成功的技能水平
 
 
 def load_settings_avatar():
@@ -1373,7 +1376,7 @@ class TRPGModule:
                             if info != None:
                                 info_ = info
                                 info = None
-                                if result <= 5 and info_ >= 50:
+                                if result <= 5 and info_ >= Critical_Success_SKill:
                                     compare = "<"
                                     comment = Critical_Success
                                 elif result == 1:
@@ -1388,7 +1391,7 @@ class TRPGModule:
                                 elif result <= info_:
                                     compare = "<"
                                     comment = Success
-                                elif result >= 95 and info_ < 50:
+                                elif result >= 96 and info_ < Fumble_SKill:
                                     compare = ">"
                                     comment = Fumble
                                 elif result == 100:
@@ -1421,7 +1424,7 @@ class TRPGModule:
                 if info != None:
                     info_ = info
                     info = None
-                    if result <= 5 and info_ >= 50:
+                    if result <= 5 and info_ >= Critical_Success_SKill:
                         compare = "<"
                         comment = Critical_Success
                     elif result == 1:
@@ -1436,7 +1439,7 @@ class TRPGModule:
                     elif result <= info_:
                         compare = "<"
                         comment = Success
-                    elif result >= 95 and info_ < 50:
+                    elif result >= 96 and info_ < Fumble_SKill:
                         compare = ">"
                         comment = Fumble
                     elif result == 100:
@@ -1463,7 +1466,7 @@ class TRPGModule:
                     info_ = info
                     # print(info_)
                     info = None
-                    if result <= 5 and info_ >= 50:
+                    if result <= 5 and info_ >= Critical_Success_SKill:
                         compare = "<"
                         comment = Critical_Success
                     elif result == 1:
@@ -1478,7 +1481,7 @@ class TRPGModule:
                     elif result <= info_:
                         compare = "<"
                         comment = Success
-                    elif result >= 95 and info_ < 50:
+                    elif result >= 96 and info_ < Fumble_SKill:
                         compare = ">"
                         comment = Fumble
                     elif result == 100:
