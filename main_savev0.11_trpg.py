@@ -566,7 +566,7 @@ class ChatApp:
         initial_text = "Updates：\n更新了TRPG掷骰模块\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\nSC\n" \
                        "\nTodo:" \
                        "\n--计算" \
-                       "\n复杂掷骰算式（多个不同面骰子+常数）\n--features & bugs\n掷骰栏回车发送\n输出染色HTML(坑)\n\n"
+                       "\n--features & bugs\n掷骰栏回车发送\n复杂掷骰算式（多个不同面骰子+常数）优化\n输出染色HTML(坑)\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
         # 初始化输出聊天LOG按钮
@@ -1113,6 +1113,8 @@ class ChatApp:
                         expressionUPP = "1D100"
                         if ("sc" or "SC" or ".sc" or "。sc") in expression:
                             SANC = "[SAN CHECK:" + expression.split("sc")[1].upper() + "]"
+                        else:
+                            SANC = "[" + expression.upper() + "]"
                     if reason == "":
                         message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}掷骰{SANC}){expressionUPP}={parts_[0]}\n\n'
                     else:
@@ -1136,6 +1138,8 @@ class ChatApp:
                     expressionUPP = "1D100"
                     if ("sc" or "SC" or ".sc" or "。sc") in expression:
                         SANC = "[SAN CHECK:" + expression.split("sc")[1].upper() + "]"
+                    else:
+                        SANC = "[" + expression.upper() + "]"
                 if reason == "":
                     message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}掷骰{SANC}){expressionUPP}={parts_[0]}\n\n'
                 else:
@@ -1149,16 +1153,23 @@ class ChatApp:
             self.role_entries[role].insert(tk.END, parts_[1])
 
     def roll_dice_silent(self, role, expression, reason):
+        pattern = re.compile(r'[\u4e00-\u9fa5]')
+        SANC = ""
         self.role_entries[role].delete("1.0", tk.END)
         if reason == "":
             # 一系列字符串
             string_list = ["不可告人的妙计", "想到了开心的事情", "", "", ""]
             # 从列表中随机选择一个字符串
             reason = random.choice(string_list)
+        if bool(pattern.search(expression)) or ("sc" or "SC" or ".sc" or "。sc") in expression:
+            if ("sc" or "SC" or ".sc" or "。sc") in expression:
+                SANC = "[SAN CHECK:" + expression.split("sc")[1].upper() + "]"
+            else:
+                SANC = "[" + expression.upper() + "]"
         if reason == "":
-            message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}进行了一次暗骰。\n\n'
+            message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}进行了一次{SANC}暗骰。\n\n'
         else:
-            message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}因{reason}进行了一次暗骰。\n\n'
+            message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}因{reason}进行了一次{SANC}暗骰。\n\n'
         self.chat_log.insert(tk.END, message)
         self.chat_log.yview(tk.END)
         result = self.trpg_module.roll(expression, role)
@@ -1207,7 +1218,8 @@ class TRPGModule:
         sc_fail = ""
         try:
             pattern = re.compile(r'[\u4e00-\u9fa5]')
-            # pattern_ENG = re.compile(r'[\u4e00-\u9fa5]')
+            pattern_user = re.compile(r'([\u4e00-\u9fa5a-zA-Z]+)(\d+)')
+            part_eng = pattern_user.findall(expression)
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
                 print("SAN CHECK") #sc1/1d5
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
@@ -1215,21 +1227,29 @@ class TRPGModule:
                 if info == 0:
                     info = role_Chart_detail.get("POW")
                 parts_ = expression.split('sc')
-                parts_ = parts_[1].split('/')
-                print(parts_)
-                sc_success = parts_[0].replace(" ", "")
-                sc_fail = parts_[1].replace(" ", "")
-                expression = "SAN CHECK"
+                if parts_[1] == "":
+                    expression = "1d100"
+                else:
+                    parts_ = parts_[1].split('/')
+                    # print(parts_)
+                    sc_success = parts_[0].replace(" ", "")
+                    sc_fail = parts_[1].replace(" ", "")
+                    expression = "SAN CHECK"
 
-            elif ("san" or "San") in expression:
+            elif ("san" or "San" or "SAN") in expression:
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 info = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 if info == 0:
                     info = role_Chart_detail.get("POW")
                 expression = "1d100"
 
-            elif bool(pattern.search(expression)):
+            elif bool(pattern.search(expression)) or part_eng[0][0] != "d":
                 print("技能检定")
+                print(part_eng[0][0])
+                print(part_eng[0][1])
+                if part_eng[0][1] != "":
+                    expression = part_eng[0][0]
+                    info = int(part_eng[0][1])
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
                     print(expression)
@@ -1240,7 +1260,8 @@ class TRPGModule:
                         info = int(role_Chart_detail.get(parts_[1])/2)
                 else:
                     #print(expression)
-                    info = role_Chart_detail.get(expression)  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    if info == None:
+                        info = role_Chart_detail.get(expression)  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                     #print(info)
                 if str(info).isalpha():
                     info = role_Chart_detail.get(info)
@@ -1277,7 +1298,7 @@ class TRPGModule:
                             self.ChatApp.role_values_entry[role].insert("1.0",
                                                                      f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                             self.ChatApp.chat_log.insert(tk.END,
-                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                             return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，请扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_success)
@@ -1293,7 +1314,7 @@ class TRPGModule:
                             self.ChatApp.role_values_entry[role].insert("1.0",
                                                                 f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                             self.ChatApp.chat_log.insert(tk.END,
-                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                             return f"{result}/{info}={result2}：San Check成功，请扣除{result2}点SAN。"
                 else:
                     if "d" in sc_fail:
@@ -1313,7 +1334,7 @@ class TRPGModule:
                         self.ChatApp.role_values_entry[role].insert("1.0",
                                                                  f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                         self.ChatApp.chat_log.insert(tk.END,
-                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                         return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！请扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_fail)
@@ -1326,7 +1347,7 @@ class TRPGModule:
                         self.ChatApp.role_values_entry[role].insert("1.0",
                                                                  f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                         self.ChatApp.chat_log.insert(tk.END,
-                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                         return f"{result}/{info}={result2}：San Check失败！请扣除{result2}点SAN。"
 
             if ("+" or "-" or "*" or "/") in expression:
@@ -1335,27 +1356,19 @@ class TRPGModule:
                 for char in expression:
                     if char.isalpha():
                         if char in seen_letters:
-                            # 使用正则表达式分割算式
-                            parts = re.findall(r'(\d*)([d+-])(\d+)', expression)
-                            formula_add = []
-                            result = 0
-                            current_operator = "+"
-                            for num, operator, faces in parts:
-                                num = int(num) if num else 1
-                                faces = int(faces)
-                                # 模拟投掷骰子
-                                rolls = [random.randint(1, faces) for _ in range(num)]
-                                # 输出投掷结果
-                                print(f"{num}d{faces} rolls: {rolls}")
-                                # 根据运算符进行加减
-                                if current_operator == "+":
-                                    result += sum(rolls)
-                                elif current_operator == "-":
-                                    result -= sum(rolls)
-                                formula_add.append(str(rolls))
-                                formula_add.append(current_operator)
-                                # 更新当前运算符
-                                current_operator = operator
+                            # 使用正则表达式分割中文、英文和数字
+                            parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/d()]', expression)
+                            # 构建新的表达式，替换掉中文和英文
+                            num_expression = ''.join(parts)
+                            # 替换掷骰表达式
+                            num_expression = re.sub(r'(\d+)d(\d+)', lambda match: '+'.join(
+                                str(random.randint(1, int(match.group(2)))) for _ in range(int(match.group(1)))),
+                                                    num_expression)
+                            # 计算结果
+                            result = eval(num_expression)
+                            print(result)
+                            print(num_expression)
+
                             # formula_add.remove(formula_add.count() - 1)
                             if info != None:
                                 info_ = info
@@ -1385,10 +1398,10 @@ class TRPGModule:
                                     compare = ">"
                                     comment = Failure
                                 # 执行算式
-                                return f"{formula_add}={result}/{info_}：{comment}"
+                                return f"{num_expression}={result}/{info_}：{comment}"
                             else:
                                 # 执行算式
-                                return f"{formula_add}={result}"
+                                return f"{num_expression}={result}"
                         seen_letters.add(char)
 
                 # if(只有一个d)
@@ -1494,11 +1507,6 @@ class COCModule:
     def __init__(self):
         self.random_seed = None
 
-    def roll_complex_formula(self, formula):
-        # 复杂掷骰算式（多个不同面骰子+常数）
-        result = self.roll_dice(formula)
-        return f"Complex Formula Result: {result}"
-
     def roll_dice_san(self, expression):
         # 支持算式的掷骰
         if self.random_seed is not None:
@@ -1507,14 +1515,11 @@ class COCModule:
         try:
             # 使用正则表达式分割中文、英文和数字
             parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/d()]', expression)
-
             # 构建新的表达式，替换掉中文和英文
             num_expression = ''.join(parts)
-
             # 替换掷骰表达式
             num_expression = re.sub(r'(\d+)d(\d+)', lambda match: '+'.join(
                 str(random.randint(1, int(match.group(2)))) for _ in range(int(match.group(1)))), num_expression)
-
             # 计算结果
             result = eval(num_expression)
 
