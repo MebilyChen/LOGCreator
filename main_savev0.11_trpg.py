@@ -1223,6 +1223,7 @@ class TRPGModule:
             pattern = re.compile(r'[\u4e00-\u9fa5]')
             pattern_user = re.compile(r'([\u4e00-\u9fa5a-zA-Z]+)(\d+)')
             part_eng = pattern_user.findall(expression)
+            print(part_eng)
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
                 print("SAN CHECK") #sc1/1d5
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
@@ -1248,13 +1249,15 @@ class TRPGModule:
 
             elif bool(pattern.search(expression)) or part_eng[0][0] != "d":
                 print("技能检定")
-                print(part_eng[0][0])
-                print(part_eng[0][1])
-                if part_eng[0][1] != "":
+                # print(part_eng[0][0])
+                # print(part_eng[0][1])
+                if part_eng and part_eng[0] and part_eng[0][1] is not None:
+                    print("技能检定+数值")
                     expression = part_eng[0][0]
                     info = int(part_eng[0][1])
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
+                    print("困难极难")
                     print(expression)
                     parts_ = expression.split('难')
                     if parts_[0] == "极":
@@ -1265,6 +1268,7 @@ class TRPGModule:
                     #print(expression)
                     if info == None:
                         info = role_Chart_detail.get(expression)  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        print("info == None")
                     #print(info)
                 if str(info).isalpha():
                     info = role_Chart_detail.get(info)
