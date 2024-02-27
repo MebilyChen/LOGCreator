@@ -10,7 +10,11 @@ import configparser
 from PIL import Image, ImageTk
 import json
 
-Critical_Success = "￥.。.￥。￥.。是大成功！.￥.。.￥。.￥。"
+#import logging
+
+#logging.basicConfig(level=logging.DEBUG)  # 设置日志级别为 DEBUG
+
+Critical_Success = "￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。"
 Extreme_Success = "（深呼吸）...极难成功！恭喜您！"
 Hard_Success = "困难成功！"
 Success = "鉴定成功，期待您的表现。"
@@ -96,7 +100,22 @@ def load_Chart():
             "克苏鲁神话": 0,
             "克苏鲁": 0,
             "cm": 0,
+            "信用": 0,
+            "信用评级": 0,
             "会计": 5,
+            "表演": 5,
+            "美术": 5,
+            "写作": 5,
+            "书法": 5,
+            "木匠": 5,
+            "厨艺": 5,
+            "舞蹈": 5,
+            "歌剧": 5,
+            "声乐": 5,
+            "摄影": 5,
+            "雕塑": 5,
+            "伪造": 5,
+            "陶艺": 5,
             "人类学": 1,
             "估价": 5,
             "考古学": 1,
@@ -112,12 +131,37 @@ def load_Chart():
             "电子学": 1,
             "话术": 5,
             "斗殴": 25,
+            "电锯": 10,
+            "斧头": 25,
+            "连枷": 10,
+            "矛": 20,
+            "剑": 20,
+            "鞭子": 5,
+            "弓": 15,
             "手枪": 20,
+            "重武器": 10,
+            "火焰喷射器": 10,
+            "机枪": 10,
+            "步枪": 25,
+            "霰弹枪": 25,
+            "步枪/霰弹枪": 25,
+            "冲锋枪": 15,
             "急救": 30,
             "历史": 5,
             "恐吓": 15,
             "跳跃": 20,
             "拉丁语": 1,
+            "汉语": 1,
+            "日语": 1,
+            "英语": 1,
+            "德语": 1,
+            "法语": 1,
+            "西班牙语": 1,
+            "意大利语": 1,
+            "丹麦语": 1,
+            "土著语": 1,
+            "格陵兰语": 1,
+            "俄语": 1,
             "母语": "EDU",
             "法律": 5,
             "图书馆": 20,
@@ -126,12 +170,28 @@ def load_Chart():
             "机械维修": 10,
             "医学": 1,
             "博物学": 10,
-            "自然学": 10,
+            "天文学": 1,
+            "生物学": 1,
+            "植物学": 1,
+            "化学": 1,
+            "数学": 1,
+            "密码学": 1,
+            "工程学": 1,
+            "法学": 1,
+            "司法科学": 1,
+            "地质学": 1,
+            "气象学": 1,
+            "药学": 1,
+            "物理学": 1,
+            "动物学": 1,
             "领航": 10,
             "神秘学": 5,
             "重型机械": 1,
             "说服": 10,
             "精神分析": 1,
+            "驾驶": 1,
+            "飞行器驾驶": 1,
+            "船驾驶": 1,
             "心理学": 10,
             "骑术": 5,
             "科学": 1,
@@ -176,7 +236,22 @@ def load_Chart():
                 "克苏鲁神话": 0,
                 "克苏鲁": 0,
                 "cm": 0,
+                "信用": 0,
+                "信用评级": 0,
                 "会计": 5,
+                "表演": 5,
+                "美术": 5,
+                "写作": 5,
+                "书法": 5,
+                "木匠": 5,
+                "厨艺": 5,
+                "舞蹈": 5,
+                "歌剧": 5,
+                "声乐": 5,
+                "摄影": 5,
+                "雕塑": 5,
+                "伪造": 5,
+                "陶艺": 5,
                 "人类学": 1,
                 "估价": 5,
                 "考古学": 1,
@@ -192,12 +267,37 @@ def load_Chart():
                 "电子学": 1,
                 "话术": 5,
                 "斗殴": 25,
+                "电锯": 10,
+                "斧头": 25,
+                "连枷": 10,
+                "矛": 20,
+                "剑": 20,
+                "鞭子": 5,
+                "弓": 15,
                 "手枪": 20,
+                "重武器": 10,
+                "火焰喷射器": 10,
+                "机枪": 10,
+                "步枪": 25,
+                "霰弹枪": 25,
+                "步枪/霰弹枪": 25,
+                "冲锋枪": 15,
                 "急救": 30,
                 "历史": 5,
                 "恐吓": 15,
                 "跳跃": 20,
                 "拉丁语": 1,
+                "汉语": 1,
+                "日语": 1,
+                "英语": 1,
+                "德语": 1,
+                "法语": 1,
+                "西班牙语": 1,
+                "意大利语": 1,
+                "丹麦语": 1,
+                "土著语": 1,
+                "格陵兰语": 1,
+                "俄语": 1,
                 "母语": "EDU",
                 "法律": 5,
                 "图书馆": 20,
@@ -206,12 +306,28 @@ def load_Chart():
                 "机械维修": 10,
                 "医学": 1,
                 "博物学": 10,
-                "自然学": 10,
+                "天文学": 1,
+                "生物学": 1,
+                "植物学": 1,
+                "化学": 1,
+                "数学": 1,
+                "密码学": 1,
+                "工程学": 1,
+                "法学": 1,
+                "司法科学": 1,
+                "地质学": 1,
+                "气象学": 1,
+                "药学": 1,
+                "物理学": 1,
+                "动物学": 1,
                 "领航": 10,
                 "神秘学": 5,
                 "重型机械": 1,
                 "说服": 10,
                 "精神分析": 1,
+                "驾驶": 1,
+                "飞行器驾驶": 1,
+                "船驾驶": 1,
                 "心理学": 10,
                 "骑术": 5,
                 "科学": 1,
@@ -255,7 +371,22 @@ def load_Chart():
                 "克苏鲁神话": 0,
                 "克苏鲁": 0,
                 "cm": 0,
+                "信用": 0,
+                "信用评级": 0,
                 "会计": 5,
+                "表演": 5,
+                "美术": 5,
+                "写作": 5,
+                "书法": 5,
+                "木匠": 5,
+                "厨艺": 5,
+                "舞蹈": 5,
+                "歌剧": 5,
+                "声乐": 5,
+                "摄影": 5,
+                "雕塑": 5,
+                "伪造": 5,
+                "陶艺": 5,
                 "人类学": 1,
                 "估价": 5,
                 "考古学": 1,
@@ -271,12 +402,37 @@ def load_Chart():
                 "电子学": 1,
                 "话术": 5,
                 "斗殴": 25,
+                "电锯": 10,
+                "斧头": 25,
+                "连枷": 10,
+                "矛": 20,
+                "剑": 20,
+                "鞭子": 5,
+                "弓": 15,
                 "手枪": 20,
+                "重武器": 10,
+                "火焰喷射器": 10,
+                "机枪": 10,
+                "步枪": 25,
+                "霰弹枪": 25,
+                "步枪/霰弹枪": 25,
+                "冲锋枪": 15,
                 "急救": 30,
                 "历史": 5,
                 "恐吓": 15,
                 "跳跃": 20,
                 "拉丁语": 1,
+                "汉语": 1,
+                "日语": 1,
+                "英语": 1,
+                "德语": 1,
+                "法语": 1,
+                "西班牙语": 1,
+                "意大利语": 1,
+                "丹麦语": 1,
+                "土著语": 1,
+                "格陵兰语": 1,
+                "俄语": 1,
                 "母语": "EDU",
                 "法律": 5,
                 "图书馆": 20,
@@ -285,12 +441,28 @@ def load_Chart():
                 "机械维修": 10,
                 "医学": 1,
                 "博物学": 10,
-                "自然学": 10,
+                "天文学": 1,
+                "生物学": 1,
+                "植物学": 1,
+                "化学": 1,
+                "数学": 1,
+                "密码学": 1,
+                "工程学": 1,
+                "法学": 1,
+                "司法科学": 1,
+                "地质学": 1,
+                "气象学": 1,
+                "药学": 1,
+                "物理学": 1,
+                "动物学": 1,
                 "领航": 10,
                 "神秘学": 5,
                 "重型机械": 1,
                 "说服": 10,
                 "精神分析": 1,
+                "驾驶": 1,
+                "飞行器驾驶": 1,
+                "船驾驶": 1,
                 "心理学": 10,
                 "骑术": 5,
                 "科学": 1,
@@ -317,11 +489,39 @@ def load_Chart():
                 "POW": 0,
                 "SIZ": 0,
                 "LUCK": 0,
+                "教育": "EDU",
+                "外貌": "APP",
+                "敏捷": "DEX",
+                "力量": "STR",
+                "智力": "INT",
+                "体质": "CON",
+                "灵感": "INT",
+                "意志": "POW",
+                "体型": "SIZ",
+                "幸运": "LUCK",
                 "MOV": 8,
                 "HP": "(CON+SIZ)/10",
                 "MP": "POW/5",
                 "SAN": "POW",
+                "克苏鲁神话": 0,
+                "克苏鲁": 0,
+                "cm": 0,
+                "信用": 0,
+                "信用评级": 0,
                 "会计": 5,
+                "表演": 5,
+                "美术": 5,
+                "写作": 5,
+                "书法": 5,
+                "木匠": 5,
+                "厨艺": 5,
+                "舞蹈": 5,
+                "歌剧": 5,
+                "声乐": 5,
+                "摄影": 5,
+                "雕塑": 5,
+                "伪造": 5,
+                "陶艺": 5,
                 "人类学": 1,
                 "估价": 5,
                 "考古学": 1,
@@ -337,12 +537,37 @@ def load_Chart():
                 "电子学": 1,
                 "话术": 5,
                 "斗殴": 25,
+                "电锯": 10,
+                "斧头": 25,
+                "连枷": 10,
+                "矛": 20,
+                "剑": 20,
+                "鞭子": 5,
+                "弓": 15,
                 "手枪": 20,
+                "重武器": 10,
+                "火焰喷射器": 10,
+                "机枪": 10,
+                "步枪": 25,
+                "霰弹枪": 25,
+                "步枪/霰弹枪": 25,
+                "冲锋枪": 15,
                 "急救": 30,
                 "历史": 5,
                 "恐吓": 15,
                 "跳跃": 20,
                 "拉丁语": 1,
+                "汉语": 1,
+                "日语": 1,
+                "英语": 1,
+                "德语": 1,
+                "法语": 1,
+                "西班牙语": 1,
+                "意大利语": 1,
+                "丹麦语": 1,
+                "土著语": 1,
+                "格陵兰语": 1,
+                "俄语": 1,
                 "母语": "EDU",
                 "法律": 5,
                 "图书馆": 20,
@@ -351,12 +576,28 @@ def load_Chart():
                 "机械维修": 10,
                 "医学": 1,
                 "博物学": 10,
-                "自然学": 10,
+                "天文学": 1,
+                "生物学": 1,
+                "植物学": 1,
+                "化学": 1,
+                "数学": 1,
+                "密码学": 1,
+                "工程学": 1,
+                "法学": 1,
+                "司法科学": 1,
+                "地质学": 1,
+                "气象学": 1,
+                "药学": 1,
+                "物理学": 1,
+                "动物学": 1,
                 "领航": 10,
                 "神秘学": 5,
                 "重型机械": 1,
                 "说服": 10,
                 "精神分析": 1,
+                "驾驶": 1,
+                "飞行器驾驶": 1,
+                "船驾驶": 1,
                 "心理学": 10,
                 "骑术": 5,
                 "科学": 1,
@@ -383,11 +624,39 @@ def load_Chart():
                 "POW": 0,
                 "SIZ": 0,
                 "LUCK": 0,
+                "教育": "EDU",
+                "外貌": "APP",
+                "敏捷": "DEX",
+                "力量": "STR",
+                "智力": "INT",
+                "体质": "CON",
+                "灵感": "INT",
+                "意志": "POW",
+                "体型": "SIZ",
+                "幸运": "LUCK",
                 "MOV": 8,
                 "HP": "(CON+SIZ)/10",
                 "MP": "POW/5",
                 "SAN": "POW",
+                "克苏鲁神话": 0,
+                "克苏鲁": 0,
+                "cm": 0,
+                "信用": 0,
+                "信用评级": 0,
                 "会计": 5,
+                "表演": 5,
+                "美术": 5,
+                "写作": 5,
+                "书法": 5,
+                "木匠": 5,
+                "厨艺": 5,
+                "舞蹈": 5,
+                "歌剧": 5,
+                "声乐": 5,
+                "摄影": 5,
+                "雕塑": 5,
+                "伪造": 5,
+                "陶艺": 5,
                 "人类学": 1,
                 "估价": 5,
                 "考古学": 1,
@@ -403,12 +672,37 @@ def load_Chart():
                 "电子学": 1,
                 "话术": 5,
                 "斗殴": 25,
+                "电锯": 10,
+                "斧头": 25,
+                "连枷": 10,
+                "矛": 20,
+                "剑": 20,
+                "鞭子": 5,
+                "弓": 15,
                 "手枪": 20,
+                "重武器": 10,
+                "火焰喷射器": 10,
+                "机枪": 10,
+                "步枪": 25,
+                "霰弹枪": 25,
+                "步枪/霰弹枪": 25,
+                "冲锋枪": 15,
                 "急救": 30,
                 "历史": 5,
                 "恐吓": 15,
                 "跳跃": 20,
                 "拉丁语": 1,
+                "汉语": 1,
+                "日语": 1,
+                "英语": 1,
+                "德语": 1,
+                "法语": 1,
+                "西班牙语": 1,
+                "意大利语": 1,
+                "丹麦语": 1,
+                "土著语": 1,
+                "格陵兰语": 1,
+                "俄语": 1,
                 "母语": "EDU",
                 "法律": 5,
                 "图书馆": 20,
@@ -417,12 +711,28 @@ def load_Chart():
                 "机械维修": 10,
                 "医学": 1,
                 "博物学": 10,
-                "自然学": 10,
+                "天文学": 1,
+                "生物学": 1,
+                "植物学": 1,
+                "化学": 1,
+                "数学": 1,
+                "密码学": 1,
+                "工程学": 1,
+                "法学": 1,
+                "司法科学": 1,
+                "地质学": 1,
+                "气象学": 1,
+                "药学": 1,
+                "物理学": 1,
+                "动物学": 1,
                 "领航": 10,
                 "神秘学": 5,
                 "重型机械": 1,
                 "说服": 10,
                 "精神分析": 1,
+                "驾驶": 1,
+                "飞行器驾驶": 1,
+                "船驾驶": 1,
                 "心理学": 10,
                 "骑术": 5,
                 "科学": 1,
@@ -440,6 +750,295 @@ def load_Chart():
                 "催眠": 1,
                 "炮术": 1
             }}
+
+
+    except json.JSONDecodeError as e:
+        print(f"Error in JSON decoding: {e}")
+        print(f"Problematic data: {file.read()}")
+
+
+def load_Chart_at_name():
+    try:
+        # 按姓名牌加载自定义角色数值信息
+        with open('pl_Chart_at_name.json', 'r', encoding='utf-8') as file:
+            # print(f"Problematic data: {file.read()}")
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {"KP": {
+            "EDU": 0,
+            "APP": 0,
+            "DEX": 0,
+            "STR": 0,
+            "INT": 0,
+            "CON": 0,
+            "POW": 0,
+            "SIZ": 0,
+            "LUCK": 0,
+            "教育": "EDU",
+            "外貌": "APP",
+            "敏捷": "DEX",
+            "力量": "STR",
+            "智力": "INT",
+            "体质": "CON",
+            "灵感": "INT",
+            "意志": "POW",
+            "体型": "SIZ",
+            "幸运": "LUCK",
+            "MOV": 8,
+            "HP": "(CON+SIZ)/10",
+            "MP": "POW/5",
+            "SAN": "POW",
+            "克苏鲁神话": 0,
+            "克苏鲁": 0,
+            "cm": 0,
+            "信用": 0,
+            "信用评级": 0,
+            "会计": 5,
+            "表演": 5,
+            "美术": 5,
+            "写作": 5,
+            "书法": 5,
+            "木匠": 5,
+            "厨艺": 5,
+            "舞蹈": 5,
+            "歌剧": 5,
+            "声乐": 5,
+            "摄影": 5,
+            "雕塑": 5,
+            "伪造": 5,
+            "陶艺": 5,
+            "人类学": 1,
+            "估价": 5,
+            "考古学": 1,
+            "魅惑": 15,
+            "攀爬": 20,
+            "计算机": 5,
+            "计算机使用": 5,
+            "电脑": 5,
+            "乔装": 5,
+            "闪避": "DEX/2",
+            "汽车驾驶": 20,
+            "电气维修": 10,
+            "电子学": 1,
+            "话术": 5,
+            "斗殴": 25,
+            "电锯": 10,
+            "斧头": 25,
+            "连枷": 10,
+            "矛": 20,
+            "剑": 20,
+            "鞭子": 5,
+            "弓": 15,
+            "手枪": 20,
+            "重武器": 10,
+            "火焰喷射器": 10,
+            "机枪": 10,
+            "步枪": 25,
+            "霰弹枪": 25,
+            "步枪/霰弹枪": 25,
+            "冲锋枪": 15,
+            "急救": 30,
+            "历史": 5,
+            "恐吓": 15,
+            "跳跃": 20,
+            "拉丁语": 1,
+            "汉语": 1,
+            "日语": 1,
+            "英语": 1,
+            "德语": 1,
+            "法语": 1,
+            "西班牙语": 1,
+            "意大利语": 1,
+            "丹麦语": 1,
+            "土著语": 1,
+            "格陵兰语": 1,
+            "俄语": 1,
+            "母语": "EDU",
+            "法律": 5,
+            "图书馆": 20,
+            "聆听": 20,
+            "锁匠": 1,
+            "机械维修": 10,
+            "医学": 1,
+            "博物学": 10,
+            "天文学": 1,
+            "生物学": 1,
+            "植物学": 1,
+            "化学": 1,
+            "数学": 1,
+            "密码学": 1,
+            "工程学": 1,
+            "法学": 1,
+            "司法科学": 1,
+            "地质学": 1,
+            "气象学": 1,
+            "药学": 1,
+            "物理学": 1,
+            "动物学": 1,
+            "领航": 10,
+            "神秘学": 5,
+            "重型机械": 1,
+            "说服": 10,
+            "精神分析": 1,
+            "驾驶": 1,
+            "飞行器驾驶": 1,
+            "船驾驶": 1,
+            "心理学": 10,
+            "骑术": 5,
+            "科学": 1,
+            "妙手": 10,
+            "侦查": 25,
+            "潜行": 20,
+            "生存": 10,
+            "游泳": 20,
+            "投掷": 20,
+            "追踪": 10,
+            "驯兽": 5,
+            "潜水": 1,
+            "爆破": 1,
+            "读唇": 1,
+            "催眠": 1,
+            "炮术": 1,
+            "_AvatarPath":""
+        }
+            , "DiceBot": {
+                "EDU": 0,
+                "APP": 0,
+                "DEX": 0,
+                "STR": 0,
+                "INT": 0,
+                "CON": 0,
+                "POW": 0,
+                "SIZ": 0,
+                "LUCK": 0,
+                "教育": "EDU",
+                "外貌": "APP",
+                "敏捷": "DEX",
+                "力量": "STR",
+                "智力": "INT",
+                "体质": "CON",
+                "灵感": "INT",
+                "意志": "POW",
+                "体型": "SIZ",
+                "幸运": "LUCK",
+                "MOV": 8,
+                "HP": "(CON+SIZ)/10",
+                "MP": "POW/5",
+                "SAN": "POW",
+                "克苏鲁神话": 0,
+                "克苏鲁": 0,
+                "cm": 0,
+                "信用": 0,
+                "信用评级": 0,
+                "会计": 5,
+                "表演": 5,
+                "美术": 5,
+                "写作": 5,
+                "书法": 5,
+                "木匠": 5,
+                "厨艺": 5,
+                "舞蹈": 5,
+                "歌剧": 5,
+                "声乐": 5,
+                "摄影": 5,
+                "雕塑": 5,
+                "伪造": 5,
+                "陶艺": 5,
+                "人类学": 1,
+                "估价": 5,
+                "考古学": 1,
+                "魅惑": 15,
+                "攀爬": 20,
+                "计算机": 5,
+                "计算机使用": 5,
+                "电脑": 5,
+                "乔装": 5,
+                "闪避": "DEX/2",
+                "汽车驾驶": 20,
+                "电气维修": 10,
+                "电子学": 1,
+                "话术": 5,
+                "斗殴": 25,
+                "电锯": 10,
+                "斧头": 25,
+                "连枷": 10,
+                "矛": 20,
+                "剑": 20,
+                "鞭子": 5,
+                "弓": 15,
+                "手枪": 20,
+                "重武器": 10,
+                "火焰喷射器": 10,
+                "机枪": 10,
+                "步枪": 25,
+                "霰弹枪": 25,
+                "步枪/霰弹枪": 25,
+                "冲锋枪": 15,
+                "急救": 30,
+                "历史": 5,
+                "恐吓": 15,
+                "跳跃": 20,
+                "拉丁语": 1,
+                "汉语": 1,
+                "日语": 1,
+                "英语": 1,
+                "德语": 1,
+                "法语": 1,
+                "西班牙语": 1,
+                "意大利语": 1,
+                "丹麦语": 1,
+                "土著语": 1,
+                "格陵兰语": 1,
+                "俄语": 1,
+                "母语": "EDU",
+                "法律": 5,
+                "图书馆": 20,
+                "聆听": 20,
+                "锁匠": 1,
+                "机械维修": 10,
+                "医学": 1,
+                "博物学": 10,
+                "天文学": 1,
+                "生物学": 1,
+                "植物学": 1,
+                "化学": 1,
+                "数学": 1,
+                "密码学": 1,
+                "工程学": 1,
+                "法学": 1,
+                "司法科学": 1,
+                "地质学": 1,
+                "气象学": 1,
+                "药学": 1,
+                "物理学": 1,
+                "动物学": 1,
+                "领航": 10,
+                "神秘学": 5,
+                "重型机械": 1,
+                "说服": 10,
+                "精神分析": 1,
+                "驾驶": 1,
+                "飞行器驾驶": 1,
+                "船驾驶": 1,
+                "心理学": 10,
+                "骑术": 5,
+                "科学": 1,
+                "妙手": 10,
+                "侦查": 25,
+                "潜行": 20,
+                "生存": 10,
+                "游泳": 20,
+                "投掷": 20,
+                "追踪": 10,
+                "驯兽": 5,
+                "潜水": 1,
+                "爆破": 1,
+                "读唇": 1,
+                "催眠": 1,
+                "炮术": 1
+            }
+            }
     except json.JSONDecodeError as e:
         print(f"Error in JSON decoding: {e}")
         print(f"Problematic data: {file.read()}")
@@ -472,7 +1071,22 @@ role_Chart_detail_demo = {
     "克苏鲁神话": 0,
     "克苏鲁": 0,
     "cm": 0,
+    "信用": 0,
+    "信用评级": 0,
     "会计": 5,
+    "表演": 5,
+    "美术": 5,
+    "写作": 5,
+    "书法": 5,
+    "木匠": 5,
+    "厨艺": 5,
+    "舞蹈": 5,
+    "歌剧": 5,
+    "声乐": 5,
+    "摄影": 5,
+    "雕塑": 5,
+    "伪造": 5,
+    "陶艺": 5,
     "人类学": 1,
     "估价": 5,
     "考古学": 1,
@@ -488,12 +1102,37 @@ role_Chart_detail_demo = {
     "电子学": 1,
     "话术": 5,
     "斗殴": 25,
+    "电锯": 10,
+    "斧头": 25,
+    "连枷": 10,
+    "矛": 20,
+    "剑": 20,
+    "鞭子": 5,
+    "弓": 15,
     "手枪": 20,
+    "重武器": 10,
+    "火焰喷射器": 10,
+    "机枪": 10,
+    "步枪": 25,
+    "霰弹枪": 25,
+    "步枪/霰弹枪": 25,
+    "冲锋枪": 15,
     "急救": 30,
     "历史": 5,
     "恐吓": 15,
     "跳跃": 20,
     "拉丁语": 1,
+    "汉语": 1,
+    "日语": 1,
+    "英语": 1,
+    "德语": 1,
+    "法语": 1,
+    "西班牙语": 1,
+    "意大利语": 1,
+    "丹麦语": 1,
+    "土著语": 1,
+    "格陵兰语": 1,
+    "俄语": 1,
     "母语": "EDU",
     "法律": 5,
     "图书馆": 20,
@@ -502,12 +1141,28 @@ role_Chart_detail_demo = {
     "机械维修": 10,
     "医学": 1,
     "博物学": 10,
-    "自然学": 10,
+    "天文学": 1,
+    "生物学": 1,
+    "植物学": 1,
+    "化学": 1,
+    "数学": 1,
+    "密码学": 1,
+    "工程学": 1,
+    "法学": 1,
+    "司法科学": 1,
+    "地质学": 1,
+    "气象学": 1,
+    "药学": 1,
+    "物理学": 1,
+    "动物学": 1,
     "领航": 10,
     "神秘学": 5,
     "重型机械": 1,
     "说服": 10,
     "精神分析": 1,
+    "驾驶": 1,
+    "飞行器驾驶": 1,
+    "船驾驶": 1,
     "心理学": 10,
     "骑术": 5,
     "科学": 1,
@@ -527,13 +1182,15 @@ role_Chart_detail_demo = {
 }
 
 role_Chart = load_Chart()
+role_Chart_at_name = load_Chart_at_name()
 
+#logging.debug("Variable value: %s", role_Chart_at_name)
 
 class ChatApp:
     def __init__(self, root):
 
         self.root = root
-        self.root.title("自嗨团 v0.33")
+        self.root.title("自嗨团 v0.55")
 
         # 设置图标
         self.root.iconbitmap("icon.ico")
@@ -566,10 +1223,12 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\nSC\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\nSC\n技能成长自动判定\n导出技能st\n优劣势掷骰\n" \
                        "\nTodo:" \
-                       "\n--计算" \
-                       "\n--features & bugs\n掷骰栏回车发送\n复杂掷骰算式（多个不同面骰子+常数）优化\n输出染色HTML(坑)\n\n"
+                       "\n--计算\n对抗骰\n联合骰\n补正骰" \
+                       "\n--features" \
+                       "\n掷骰栏回车发送\n武器列表\n输出染色HTML(坑)"\
+                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
         # 初始化输出聊天LOG按钮
@@ -695,6 +1354,10 @@ class ChatApp:
         choose_avatar_button = tk.Button(frame, text="选择头像", command=lambda role=role: self.choose_avatar(role))
         choose_avatar_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
 
+        # 添加保存名牌按钮
+        #choose_avatar_button = tk.Button(frame, text="保存", command=lambda role=role: self.choose_avatar(role))
+        #choose_avatar_button.grid(row=2, column=3, padx=5, pady=5, sticky="nsew")
+
         # 添加掷骰按钮和面数输入框
         entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1)
         entry_roll.grid(row=2, column=2, padx=5, pady=5, sticky="nsew")
@@ -746,6 +1409,7 @@ class ChatApp:
             log = f"{self.role_entries_name[role]} {timestamp}\n{message}\n\n"  # 不加引号
             if message.startswith(".st") or message.startswith("。st"):
                 message = message[len("st") + 1:].strip()
+                parts_skill = re.findall(r'([\u4e00-\u9fa5a-zA-Z\s]+)(\d+)', message)
                 if ("+" or "-" or "*" or "/") in message:
                     parts = re.findall(r'([\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
                     role_Chart[role][str(parts[0][0]).upper()] = eval(
@@ -758,19 +1422,29 @@ class ChatApp:
                 else:
                     new_chart = self.parse_input_skill(message)
                     self.update_skills(role_Chart[role], new_chart)
+                    # if self.role_entries_name[role] in role_Chart_at_name:
+                    role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role]
+                    role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
                 SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 POW = role_Chart_detail.get("POW")
-                self.role_values_entry[role].insert("1.0", f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                self.role_values_entry[role].insert("1.0",
+                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert(tk.END, "已录入！")
-                # self.chat_log.insert(tk.END,
-                # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{MOV}\n\n\n')
-                self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
+                # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
+                # MOV}\n\n\n')
 
+                if "HP" in str(parts_skill[0][0]).upper() or "MP" in str(parts_skill[0][0]).upper() or "SAN" in str(parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
+                    self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                else:
+                    if len(parts_skill) == 1:
+                        self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
             else:
                 self.chat_log.insert(tk.END, log)
                 # 滚动到最底部
@@ -798,7 +1472,7 @@ class ChatApp:
             else:
                 # 如果技能不存在于旧字典中，将其添加到旧字典
                 old_dict[skill] = value
-        if old_dict["SIZ"] == 0 and old_dict["体型"] != 0:
+        if (old_dict["SIZ"] == 0) and (old_dict["体型"] != 0) and (old_dict["体型"] != "SIZ"):
             old_dict["EDU"] = old_dict["教育"]
             old_dict["APP"] = old_dict["外貌"]
             old_dict["DEX"] = old_dict["敏捷"]
@@ -828,6 +1502,18 @@ class ChatApp:
         old_dict["闪避"] = int(old_dict["敏捷"] / 2)
         old_dict["母语"] = old_dict["教育"]
         old_dict["魅力"] = old_dict["外貌"]
+        old_dict["cm"] = old_dict["克苏鲁神话"]
+        old_dict["克苏鲁"] = old_dict["克苏鲁神话"]
+        old_dict["计算机"] = old_dict["计算机使用"]
+        old_dict["电脑"] = old_dict["计算机使用"]
+        old_dict["法学"] = old_dict["司法科学"]
+        old_dict["霰弹枪"] = old_dict["步枪/霰弹枪"]
+        old_dict["步枪"] = old_dict["步枪/霰弹枪"]
+        if old_dict["信用评级"] != 0:
+            old_dict["信用"] = old_dict["信用评级"]
+        else:
+            old_dict["信用评级"] = old_dict["信用"]
+        self.save_role_skill_at_name()
 
     def edit_role_name(self, event, role, label):
         label.config(relief=tk.GROOVE)
@@ -851,6 +1537,32 @@ class ChatApp:
 
             entry.grid_forget()
             label.configure(text=new_name)
+
+            #按名牌加载设置
+            if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
+                role_Chart[role] = role_Chart_at_name[new_name]
+                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                # self.role_entries[role].delete("1.0", tk.END)
+                self.role_avatar_paths[role] = role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"]
+                self.load_and_display_avatar(role, self.role_entries[role].master)
+                SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                POW = role_Chart_detail.get("POW")
+                self.role_values_entry[role].insert("1.0",
+                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert(tk.END, "已录入！")
+                # self.chat_log.insert(tk.END,
+                # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{MOV}\n\n\n')
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+
+                self.role_entries[role].insert(tk.END, "已加载名牌为[" + new_name + "]的角色卡！\n")
+            else:
+                role_Chart[role] = role_Chart_detail_demo
+
 
             # 重新创建角色框架
             # for widget in self.root.grid_slaves(column=2):
@@ -1019,12 +1731,16 @@ class ChatApp:
             self.role_avatar_paths[role] = ""
             frame = self.role_entries[role].master
             self.load_and_display_avatar(role, frame)
+        if self.role_entries_name[role] in role_Chart_at_name:
+            role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
 
     def load_and_display_avatar(self, role, frame):
         if role in self.role_avatar_paths:
             # 加载头像
             image_path = self.role_avatar_paths[role]
             if image_path:
+                if self.role_entries_name[role] in role_Chart_at_name:
+                    role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = image_path
                 image = Image.open(image_path)
                 # 获取图像的宽和高
                 width, height = image.size
@@ -1046,6 +1762,7 @@ class ChatApp:
                 label = tk.Label(frame)
                 label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
                 label.bind("<Button-1>", lambda event, role=role: self.on_avatar_click(role))
+
 
     def get_and_roll(self, role):
         # 搜索包含 ">>>" 的行的起始索引
@@ -1099,7 +1816,6 @@ class ChatApp:
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                     reason = skill
-            # 调用掷骰方法
             self.roll_dice(role, expression, reason)
 
     def roll_dice(self, role, expression, reason):
@@ -1112,16 +1828,23 @@ class ChatApp:
                     parts_ = result.split('：')
                     SANC = ""
                     expressionUPP = expression.upper()
+                    if re.compile(r'^[+\-*/]').match(expressionUPP):
+                        pattern = re.compile(r'([+\-*/]+)(.*)')
+                        # 使用正则表达式进行匹配
+                        match = pattern.match(expressionUPP)
+                        # 提取匹配的结果
+                        if match:
+                            expressionUPP = match.group(2)
                     if bool(pattern.search(expression)) or ("sc" or "SC" or ".sc" or "。sc") in expression:
                         expressionUPP = "1D100"
                         if ("sc" or "SC" or ".sc" or "。sc") in expression:
-                            SANC = "[SAN CHECK:" + expression.split("sc")[1].upper() + "]"
+                            SANC = "[SAN CHECK" + expression.split("sc")[1].upper() + "]"
                         else:
                             SANC = "[" + expression.upper() + "]"
                     if reason == "":
-                        message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}掷骰{SANC}){expressionUPP}={parts_[0]}\n\n'
+                        message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}掷骰{SANC}{adv_comment}){expressionUPP}={parts_[0]}\n\n'
                     else:
-                        message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}因【{reason}】掷骰{SANC}){expressionUPP}={parts_[0]}\n\n'
+                        message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}因【{reason}】掷骰{SANC}{adv_comment}){expressionUPP}={parts_[0]}\n\n'
                     self.chat_log.insert(tk.END, message)
                     self.chat_log.yview(tk.END)
                     self.role_entries[role].delete("1.0", tk.END)
@@ -1137,16 +1860,23 @@ class ChatApp:
                 print(parts_)
                 SANC = ""
                 expressionUPP = expression.upper()
+                if re.compile(r'^[+\-*/]').match(expressionUPP):
+                    pattern = re.compile(r'([+\-*/]+)(.*)')
+                    # 使用正则表达式进行匹配
+                    match = pattern.match(expressionUPP)
+                    # 提取匹配的结果
+                    if match:
+                        expressionUPP = match.group(2)
                 if bool(pattern.search(expression)) or ("sc" or "SC" or ".sc" or "。sc") in expression:
                     expressionUPP = "1D100"
                     if ("sc" or "SC" or ".sc" or "。sc") in expression:
-                        SANC = "[SAN CHECK:" + expression.split("sc")[1].upper() + "]"
+                        SANC = "[SAN CHECK" + expression.split("sc")[1].upper() + "]"
                     else:
                         SANC = "[" + expression.upper() + "]"
                 if reason == "":
-                    message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}掷骰{SANC}){expressionUPP}={parts_[0]}\n\n'
+                    message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}掷骰{SANC}{adv_comment}){expressionUPP}={parts_[0]}\n\n'
                 else:
-                    message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}因【{reason}】掷骰{SANC}){expressionUPP}={parts_[0]}\n\n'
+                    message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n({self.role_entries_name[role]}因【{reason}】掷骰{SANC}{adv_comment}){expressionUPP}={parts_[0]}\n\n'
                 self.chat_log.insert(tk.END, message)
                 self.chat_log.yview(tk.END)
 
@@ -1164,9 +1894,16 @@ class ChatApp:
             string_list = ["不可告人的妙计", "想到了开心的事情", "", "", ""]
             # 从列表中随机选择一个字符串
             reason = random.choice(string_list)
+        if re.compile(r'^[+\-*/]').match(expression):
+            pattern = re.compile(r'([+\-*/]+)(.*)')
+            # 使用正则表达式进行匹配
+            match = pattern.match(expression)
+            # 提取匹配的结果
+            if match:
+                expression = match.group(2)
         if bool(pattern.search(expression)) or ("sc" or "SC" or ".sc" or "。sc") in expression:
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
-                SANC = "[SAN CHECK:" + expression.split("sc")[1].upper() + "]"
+                SANC = "[SAN CHECK" + expression.split("sc")[1].upper() + "]"
             else:
                 SANC = "[" + expression.upper() + "]"
         if reason == "":
@@ -1191,6 +1928,33 @@ class ChatApp:
         # 保存自定义角色数值信息
         with open('pl_Chart.json', 'w', encoding='utf-8') as file:
             json.dump(role_Chart, file)
+        # 保存自定义角色数值信息
+        with open('PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
+            for role, skills in role_Chart.items():
+                txt_file.write(f"【{role}】-{self.role_entries_name[role]}\n.st")
+                for skill, value in skills.items():
+                    if skill == "_AvatarPath":
+                        pass
+                    else:
+                        txt_file.write(f"{skill}{value} ")
+                txt_file.write("\n\n\n")
+        # 按姓名牌保存自定义角色数值信息
+        self.save_role_skill_at_name()
+
+    def save_role_skill_at_name(self):
+        with open('pl_Chart_at_name.json', 'w', encoding='utf-8') as file:
+            dicSkill = {}
+            dic = role_Chart_at_name
+            for role, skills in role_Chart.items():
+                for skill, value in skills.items():
+                    dicSkill[skill] = value
+                dicSkill["_AvatarPath"] = ""
+                if role in self.role_avatar_paths:
+                    # 保存头像路径
+                    dicSkill["_AvatarPath"] = self.role_avatar_paths[role]
+                if (self.role_entries_name[role] != role) and ("PL " not in self.role_entries_name[role]):
+                    dic[self.role_entries_name[role]] = dicSkill
+            json.dump(dic, file)
 
     def save_role_count(self):
         # 保存角色数量到配置文件
@@ -1212,6 +1976,82 @@ class TRPGModule:
         self.random_seed = None
         self.ChatApp = chat_app_instance
         self.root = root
+        adv_comment = ""
+
+    def skill_upgrade(self, info_, skill_name, role):
+        upgrade = ""
+        if "None" not in skill_name and "教育" not in skill_name and "魅力" not in skill_name and "力量" not in skill_name and "敏捷" not in skill_name and "外貌" not in skill_name and "智力" not in skill_name and "体质" not in skill_name and "灵感" not in skill_name and "意志" not in skill_name and "体型" not in skill_name and "信用" not in skill_name and "幸运" not in skill_name and "MOV" not in skill_name and "HP" not in skill_name and "MP" not in skill_name and "SAN" not in skill_name and "克苏鲁" not in skill_name and (
+                f".st{skill_name}" not in self.ChatApp.role_values_entry[role].get("1.0", tk.END).strip()) and skill_name != "":  # 成长检定
+            # 执行d100掷骰
+            rolls = [random.randint(1, 100) for _ in range(1)]
+            result = sum(rolls)
+            if result >= info_ or result >= 96:
+                # 执行d10掷骰
+                rolls = [random.randint(1, 10) for _ in range(1)]
+                result2 = sum(rolls)
+                upgrade = "[成长检定]【" + skill_name + "】技能获得了成长(1D100=" + str(result) + "/" + str(info_) + "):D10=" + str(
+                    result2)
+                result3 = role_Chart[role][skill_name] + result2
+                self.ChatApp.role_values_entry[role].insert(tk.END, f'\n.st{skill_name}{str(result3)}')
+            else:
+                upgrade = "[成长检定]【" + skill_name + "】技能的成长检定(1D100=" + str(result) + "/" + str(info_) + ")失败了..."
+        return upgrade
+
+    def skill_check(self, info_, result):
+        if result <= 5 and info_ >= Critical_Success_SKill:
+            compare = "<"
+            comment = Critical_Success
+        elif result == 1:
+            compare = "<"
+            comment = Critical_Success
+        elif result <= info_ // 5:
+            compare = "<"
+            comment = Extreme_Success
+        elif result <= info_ // 2:
+            compare = "<"
+            comment = Hard_Success
+        elif result <= info_:
+            compare = "<"
+            comment = Success
+        elif result >= 96 and info_ < Fumble_SKill:
+            compare = ">"
+            comment = Fumble
+        elif result == 100:
+            compare = ">"
+            comment = Fumble
+        else:
+            compare = ">"
+            comment = Failure
+        return comment
+
+    def cal_advantage(self, result, advantage):
+        global adv_comment
+        adv_comment_1 = ""
+        adv_comment_2 = ""
+        if advantage is not None:
+            list = []
+            # 获取个位
+            ones_place = result % 10
+            # 获取十位
+            tens_place = (result // 10) % 10
+            list.append(tens_place)
+            if "+" in advantage:
+                for a in advantage["+"]:
+                    list.append(a)
+                # self.ChatApp.chat_log.insert(tk.END, f"\n优势骰：{list} = {max(list)}")
+                adv_comment_1 = f"具备优势:{list}={min(list)}"
+                result = ones_place + min(list) * 10
+            list = [tens_place]
+            if "-" in advantage:
+                for a in advantage["-"]:
+                    list.append(a)
+                # self.ChatApp.chat_log.insert(tk.END, f"\n劣势骰：{list} = {min(list)}")
+                adv_comment_2 = f"造成劣势:{list}={max(list)}"
+                result = ones_place + max(list) * 10
+            adv_comment = adv_comment_1 + adv_comment_2
+        if result > 100:
+            result = 100
+        return result, adv_comment
 
     def roll(self, expression, role=None):
         if self.random_seed is not None:
@@ -1219,13 +2059,32 @@ class TRPGModule:
         info = None
         sc_success = ""
         sc_fail = ""
+        skill_name = ""
+        advantage = {}
         try:
             pattern = re.compile(r'[\u4e00-\u9fa5]')
             pattern_user = re.compile(r'([\u4e00-\u9fa5a-zA-Z]+)(\d+)')
+            pattern_advantage = re.compile(r'^[+\-*/]')
             part_eng = pattern_user.findall(expression)
-            print(part_eng)
+            part_advantage = pattern_advantage.findall(expression)
+            # print(part_eng)
+            if pattern_advantage.match(expression):
+                print("优劣势掷骰")  # 2优势xxx
+                matches = re.compile(r'[+\-*/]').findall(expression)
+                # print(matches)
+                for operator in matches:
+                    num_operators = matches.count(operator)
+                    roll_result = random.randint(1, 10)
+                    # 如果运算符在字典中，将结果添加到相应的列表
+                    if operator in advantage:
+                        advantage[operator].append(roll_result)
+                    else:
+                        advantage[operator] = [roll_result]
+                    expression = expression[1:]
+                # print(advantage)
+
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
-                print("SAN CHECK") #sc1/1d5
+                print("SAN CHECK")  # sc1/1d5
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 info = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 if info == 0:
@@ -1255,26 +2114,31 @@ class TRPGModule:
                     print("技能检定+数值")
                     expression = part_eng[0][0]
                     info = int(part_eng[0][1])
+                    skill_name = "None"
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
                     print("困难极难")
                     print(expression)
                     parts_ = expression.split('难')
+                    skill_name = parts_[1]
                     if parts_[0] == "极":
-                        info = int(role_Chart_detail.get(parts_[1])/5)
+                        info = int(role_Chart_detail.get(parts_[1]) / 5)
                     if parts_[0] == "困":
-                        info = int(role_Chart_detail.get(parts_[1])/2)
+                        info = int(role_Chart_detail.get(parts_[1]) / 2)
                 else:
-                    #print(expression)
+                    # print(expression)
                     if info == None:
+                        if skill_name == "None":
+                            skill_name = "None"
+                        else:
+                            skill_name = expression
                         info = role_Chart_detail.get(expression)  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                         print("info == None")
-                    #print(info)
+                    # print(info)
                 if str(info).isalpha():
                     info = role_Chart_detail.get(info)
-                    #print(info)
+                    # print(info)
                 expression = "1d100"
-
             if expression == "SAN CHECK":
                 # 解析表达式
                 expression = "1d100"
@@ -1284,6 +2148,7 @@ class TRPGModule:
                 # 执行掷骰
                 rolls = [random.randint(1, num_faces) for _ in range(num_rolls)]
                 result = sum(rolls)
+                result, adv_comment = self.cal_advantage(result, advantage)
                 if info >= result:
                     if "d" in sc_success:
                         expression = sc_success
@@ -1303,10 +2168,10 @@ class TRPGModule:
                             POW = role_Chart[role].get("POW")
                             SAN = role_Chart[role].get("SAN")
                             self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                     f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                        f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                             self.ChatApp.chat_log.insert(tk.END,
-                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-                            return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，请扣除{result2}点SAN。"
+                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                            return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_success)
                         if result2 == 0:
@@ -1319,10 +2184,10 @@ class TRPGModule:
                             POW = role_Chart[role].get("POW")
                             SAN = role_Chart[role].get("SAN")
                             self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                        f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                             self.ChatApp.chat_log.insert(tk.END,
-                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-                            return f"{result}/{info}={result2}：San Check成功，请扣除{result2}点SAN。"
+                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                            return f"{result}/{info}={result2}：San Check成功，扣除{result2}点SAN。"
                 else:
                     if "d" in sc_fail:
                         expression = sc_fail
@@ -1339,10 +2204,10 @@ class TRPGModule:
                         POW = role_Chart[role].get("POW")
                         SAN = role_Chart[role].get("SAN")
                         self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                 f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                         self.ChatApp.chat_log.insert(tk.END,
-                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-                        return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！请扣除{result2}点SAN。"
+                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                        return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_fail)
                         role_Chart[role]["SAN"] = role_Chart[role]["SAN"] - result2
@@ -1352,10 +2217,10 @@ class TRPGModule:
                         POW = role_Chart[role].get("POW")
                         SAN = role_Chart[role].get("SAN")
                         self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                 f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
                         self.ChatApp.chat_log.insert(tk.END,
-                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-                        return f"{result}/{info}={result2}：San Check失败！请扣除{result2}点SAN。"
+                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                        return f"{result}/{info}={result2}：San Check失败！扣除{result2}点SAN。"
 
             if ("+" or "-" or "*" or "/") in expression:
                 # if 有多个d
@@ -1373,37 +2238,15 @@ class TRPGModule:
                                                     num_expression)
                             # 计算结果
                             result = eval(num_expression)
-                            print(result)
-                            print(num_expression)
+                            result, adv_comment = self.cal_advantage(result, advantage)
+                            # print(result)
+                            # print(num_expression)
 
                             # formula_add.remove(formula_add.count() - 1)
                             if info != None:
                                 info_ = info
                                 info = None
-                                if result <= 5 and info_ >= Critical_Success_SKill:
-                                    compare = "<"
-                                    comment = Critical_Success
-                                elif result == 1:
-                                    compare = "<"
-                                    comment = Critical_Success
-                                elif result <= info_ // 5:
-                                    compare = "<"
-                                    comment = Extreme_Success
-                                elif result <= info_ // 2:
-                                    compare = "<"
-                                    comment = Hard_Success
-                                elif result <= info_:
-                                    compare = "<"
-                                    comment = Success
-                                elif result >= 96 and info_ < Fumble_SKill:
-                                    compare = ">"
-                                    comment = Fumble
-                                elif result == 100:
-                                    compare = ">"
-                                    comment = Fumble
-                                else:
-                                    compare = ">"
-                                    comment = Failure
+                                comment = self.skill_check(info_, result)
                                 # 执行算式
                                 return f"{num_expression}={result}/{info_}：{comment}"
                             else:
@@ -1425,33 +2268,11 @@ class TRPGModule:
                 result = sum(rolls)
                 formula_add = str(result) + parts[3] + parts[4]
                 result = eval(formula_add)
+                result, adv_comment = self.cal_advantage(result, advantage)
                 if info != None:
                     info_ = info
                     info = None
-                    if result <= 5 and info_ >= Critical_Success_SKill:
-                        compare = "<"
-                        comment = Critical_Success
-                    elif result == 1:
-                        compare = "<"
-                        comment = Critical_Success
-                    elif result <= info_ // 5:
-                        compare = "<"
-                        comment = Extreme_Success
-                    elif result <= info_ // 2:
-                        compare = "<"
-                        comment = Hard_Success
-                    elif result <= info_:
-                        compare = "<"
-                        comment = Success
-                    elif result >= 96 and info_ < Fumble_SKill:
-                        compare = ">"
-                        comment = Fumble
-                    elif result == 100:
-                        compare = ">"
-                        comment = Fumble
-                    else:
-                        compare = ">"
-                        comment = Failure
+                    comment = self.skill_check(info_, result)
                     # 执行算式
                     return f"{formula_add}={result}/{info_}：{comment}"
                 else:
@@ -1466,6 +2287,7 @@ class TRPGModule:
                 # 执行掷骰
                 rolls = [random.randint(1, num_faces) for _ in range(num_rolls)]
                 result = sum(rolls)
+                result, adv_comment = self.cal_advantage(result, advantage)
                 if info != None:
                     info_ = info
                     # print(info_)
@@ -1473,64 +2295,45 @@ class TRPGModule:
                     if result <= 5 and info_ >= Critical_Success_SKill:
                         compare = "<"
                         comment = Critical_Success
+                        upgrade = self.skill_upgrade(0, skill_name, role)
                     elif result == 1:
                         compare = "<"
                         comment = Critical_Success
+                        upgrade = self.skill_upgrade(0, skill_name, role)
                     elif result <= info_ // 5:
                         compare = "<"
                         comment = Extreme_Success
+                        upgrade = self.skill_upgrade(info_, skill_name, role)
                     elif result <= info_ // 2:
                         compare = "<"
                         comment = Hard_Success
+                        upgrade = self.skill_upgrade(info_, skill_name, role)
                     elif result <= info_:
                         compare = "<"
                         comment = Success
+                        upgrade = self.skill_upgrade(info_, skill_name, role)
                     elif result >= 96 and info_ < Fumble_SKill:
                         compare = ">"
                         comment = Fumble
+                        upgrade = ""
                     elif result == 100:
                         compare = ">"
                         comment = Fumble
+                        upgrade = ""
                     else:
                         compare = ">"
                         comment = Failure
+                        upgrade = ""
                     # 执行算式
                     if num_rolls == 1:
-                        return f"{result}/{info_}：{comment}"
+                        return f"{result}/{info_}：{comment}\n\n{upgrade}"
                     else:
-                        return f"{'+'.join(map(str, rolls))}={result}/{info_}：{comment}"
+                        return f"{'+'.join(map(str, rolls))}={result}/{info_}：{comment}\n\n{upgrade}"
                 else:
                     if num_rolls == 1:
                         return f"{result}"
                     else:
                         return f"{'+'.join(map(str, rolls))}={result}"
-
-
-        except Exception as e:
-            return f"Error: {e}"
-
-
-class COCModule:
-    def __init__(self):
-        self.random_seed = None
-
-    def roll_dice_san(self, expression):
-        # 支持算式的掷骰
-        if self.random_seed is not None:
-            random.seed(self.random_seed)
-
-        try:
-            # 使用正则表达式分割中文、英文和数字
-            parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/d()]', expression)
-            # 构建新的表达式，替换掉中文和英文
-            num_expression = ''.join(parts)
-            # 替换掷骰表达式
-            num_expression = re.sub(r'(\d+)d(\d+)', lambda match: '+'.join(
-                str(random.randint(1, int(match.group(2)))) for _ in range(int(match.group(1)))), num_expression)
-            # 计算结果
-            result = eval(num_expression)
-
-            return result
         except Exception as e:
             return f"Error: {e}"
 
