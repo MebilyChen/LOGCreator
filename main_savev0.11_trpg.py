@@ -10,9 +10,9 @@ import configparser
 from PIL import Image, ImageTk
 import json
 
-#import logging
+# import logging
 
-#logging.basicConfig(level=logging.DEBUG)  # 设置日志级别为 DEBUG
+# logging.basicConfig(level=logging.DEBUG)  # 设置日志级别为 DEBUG
 
 Critical_Success = "￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。"
 Extreme_Success = "（深呼吸）...极难成功！恭喜您！"
@@ -900,7 +900,7 @@ def load_Chart_at_name():
             "读唇": 1,
             "催眠": 1,
             "炮术": 1,
-            "_AvatarPath":""
+            "_AvatarPath": ""
         }
             , "DiceBot": {
                 "EDU": 0,
@@ -1038,7 +1038,7 @@ def load_Chart_at_name():
                 "催眠": 1,
                 "炮术": 1
             }
-            }
+        }
     except json.JSONDecodeError as e:
         print(f"Error in JSON decoding: {e}")
         print(f"Problematic data: {file.read()}")
@@ -1183,8 +1183,10 @@ role_Chart_detail_demo = {
 
 role_Chart = load_Chart()
 role_Chart_at_name = load_Chart_at_name()
+adv_comment = ""
 
-#logging.debug("Variable value: %s", role_Chart_at_name)
+
+# logging.debug("Variable value: %s", role_Chart_at_name)
 
 class ChatApp:
     def __init__(self, root):
@@ -1206,6 +1208,7 @@ class ChatApp:
         # 初始化角色列表
         self.role_count = load_role_count()
         self.roles = ["KP", "DiceBot", "PL 1"]
+        self.enemy_matches = {}
 
         # 初始化当前聚焦的头像和文本框
         self.current_role = tk.StringVar(value=self.roles[0])
@@ -1223,12 +1226,12 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\nSC\n技能成长自动判定\n导出技能st\n优劣势掷骰\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n" \
                        "\nTodo:" \
-                       "\n--计算\n对抗骰\n联合骰\n补正骰" \
+                       "\n--计算" \
                        "\n--features" \
-                       "\n掷骰栏回车发送\n武器列表\n输出染色HTML(坑)"\
-                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n\n"
+                       "\n掷骰栏回车发送\n武器伤害Built-in\n输出染色HTML(坑)" \
+                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
         # 初始化输出聊天LOG按钮
@@ -1309,6 +1312,10 @@ class ChatApp:
         if role == "DiceBot":
             # 在 Text 组件中插入初始文本
             initial_text = "复制Bot消息至此并发送，或：\n\n【掷骰】点击每个角色的掷骰按钮进行掷骰，公式栏填写公式或技能，留空默认1d100" \
+                           "\n\n【优劣势】命令头部的+/-表示优劣势（++意志30）" \
+                           "\n\n【补正骰】命令后部的+/-表示补正（意志+30）" \
+                           "\n\n【联合骰】技能1+技能2+技能3..." \
+                           "\n\n【对抗骰】在角色消息栏@其他对抗人 并点击掷骰" \
                            "\n\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
                            "\n\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色）" \
                            "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字来触发检定（例如“我使用斗殴击晕敌人”）"
@@ -1355,8 +1362,8 @@ class ChatApp:
         choose_avatar_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
 
         # 添加保存名牌按钮
-        #choose_avatar_button = tk.Button(frame, text="保存", command=lambda role=role: self.choose_avatar(role))
-        #choose_avatar_button.grid(row=2, column=3, padx=5, pady=5, sticky="nsew")
+        # choose_avatar_button = tk.Button(frame, text="保存", command=lambda role=role: self.choose_avatar(role))
+        # choose_avatar_button.grid(row=2, column=3, padx=5, pady=5, sticky="nsew")
 
         # 添加掷骰按钮和面数输入框
         entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1)
@@ -1438,13 +1445,14 @@ class ChatApp:
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
                 # MOV}\n\n\n')
 
-                if "HP" in str(parts_skill[0][0]).upper() or "MP" in str(parts_skill[0][0]).upper() or "SAN" in str(parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
+                if "HP" in str(parts_skill[0][0]).upper() or "MP" in str(parts_skill[0][0]).upper() or "SAN" in str(
+                        parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
                     self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                 else:
                     if len(parts_skill) == 1:
                         self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
+                                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
             else:
                 self.chat_log.insert(tk.END, log)
                 # 滚动到最底部
@@ -1538,7 +1546,7 @@ class ChatApp:
             entry.grid_forget()
             label.configure(text=new_name)
 
-            #按名牌加载设置
+            # 按名牌加载设置
             if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
                 role_Chart[role] = role_Chart_at_name[new_name]
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
@@ -1562,7 +1570,6 @@ class ChatApp:
                 self.role_entries[role].insert(tk.END, "已加载名牌为[" + new_name + "]的角色卡！\n")
             else:
                 role_Chart[role] = role_Chart_detail_demo
-
 
             # 重新创建角色框架
             # for widget in self.root.grid_slaves(column=2):
@@ -1763,7 +1770,6 @@ class ChatApp:
                 label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
                 label.bind("<Button-1>", lambda event, role=role: self.on_avatar_click(role))
 
-
     def get_and_roll(self, role):
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
@@ -1796,7 +1802,16 @@ class ChatApp:
                     self.roll_dice("全员", "1d100", self.role_entries[current_role].get("1.0", tk.END).strip())
         else:
             # 获取相应角色的输入框文本
+            enemy_matches = None
             reason = self.role_entries[role].get("1.0", tk.END).strip()
+            if "@" in reason:
+                print("对抗骰")
+                pattern = r"@[\w\s]+"
+                enemy_matches = re.findall(pattern, reason)
+                enemy_matches = [s.replace("@", "").strip() for s in enemy_matches]
+                print(enemy_matches)
+                reason = reason.replace("@", "对抗").strip()
+                reason = reason.replace(" 对抗", "，对抗")
             if reason == "":
                 # 一系列字符串
                 string_list = ["不可名状的原因", "懒得写原因", "", "", ""]
@@ -1806,6 +1821,17 @@ class ChatApp:
             expression = self.role_entries_roll[role].get("1.0", tk.END).strip().lower()
             if expression == "":
                 expression = "1d100"
+            if enemy_matches != None:
+                for enemy in enemy_matches:
+                    for key, nickname in self.role_entries_name.items():
+                        if enemy == nickname:
+                            role_ = key
+                    expression_ = self.role_entries_roll[role_].get("1.0", tk.END).strip()
+                    if expression_ == "" or expression_ == "1d100":
+                        self.enemy_matches[enemy] = expression
+                    else:
+                        # self.enemy_matches[enemy] = expression + self.role_entries_roll[enemy].get("1.0", tk.END).strip()
+                        self.enemy_matches[enemy] = self.role_entries_roll[enemy].get("1.0", tk.END).strip()
             role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
             for skill in role_Chart_detail:
                 if skill in reason:
@@ -1816,6 +1842,15 @@ class ChatApp:
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                     reason = skill
+            if enemy_matches is not None:
+                for enemy in self.enemy_matches:
+                    role_ = ""
+                    for key, nickname in self.role_entries_name.items():
+                        if enemy == nickname:
+                            role_ = key
+                    expression_ = self.enemy_matches[enemy]
+                    reason_ = f"与{self.role_entries_name[role]}对抗"
+                    self.roll_dice(role_, expression_, reason_)
             self.roll_dice(role, expression, reason)
 
     def roll_dice(self, role, expression, reason):
@@ -1981,7 +2016,8 @@ class TRPGModule:
     def skill_upgrade(self, info_, skill_name, role):
         upgrade = ""
         if "None" not in skill_name and "教育" not in skill_name and "魅力" not in skill_name and "力量" not in skill_name and "敏捷" not in skill_name and "外貌" not in skill_name and "智力" not in skill_name and "体质" not in skill_name and "灵感" not in skill_name and "意志" not in skill_name and "体型" not in skill_name and "信用" not in skill_name and "幸运" not in skill_name and "MOV" not in skill_name and "HP" not in skill_name and "MP" not in skill_name and "SAN" not in skill_name and "克苏鲁" not in skill_name and (
-                f".st{skill_name}" not in self.ChatApp.role_values_entry[role].get("1.0", tk.END).strip()) and skill_name != "":  # 成长检定
+                f".st{skill_name}" not in self.ChatApp.role_values_entry[role].get("1.0",
+                                                                                   tk.END).strip()) and skill_name != "":  # 成长检定
             # 执行d100掷骰
             rolls = [random.randint(1, 100) for _ in range(1)]
             result = sum(rolls)
@@ -2054,6 +2090,7 @@ class TRPGModule:
         return result, adv_comment
 
     def roll(self, expression, role=None):
+        combine_infos = {}
         if self.random_seed is not None:
             random.seed(self.random_seed)
         info = None
@@ -2065,12 +2102,25 @@ class TRPGModule:
             pattern = re.compile(r'[\u4e00-\u9fa5]')
             pattern_user = re.compile(r'([\u4e00-\u9fa5a-zA-Z]+)(\d+)')
             pattern_advantage = re.compile(r'^[+\-*/]')
+            pattern_combine = re.compile(r'[\u4e00-\u9fa5a-zA-Z]+[\u4e00-\u9fa5a-zA-Z]')
             part_eng = pattern_user.findall(expression)
-            part_advantage = pattern_advantage.findall(expression)
+            part_combine = pattern_combine.findall(expression)
             # print(part_eng)
+            if pattern_combine.match(expression) and len(part_combine) > 1:
+                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                print("联合掷骰")  # 意志+斗殴+潜行
+                # print(part_combine)
+                for a in part_combine:
+                    combine_infos[a] = role_Chart_detail[a]
+                print(combine_infos)
+                expression = "COMBINE CHECK"
             if pattern_advantage.match(expression):
-                print("优劣势掷骰")  # 2优势xxx
-                matches = re.compile(r'[+\-*/]').findall(expression)
+                print("优劣势掷骰")  # ++xxx
+                expression_slice = expression
+                matches = []
+                while pattern_advantage.match(expression_slice):
+                    matches.append(expression[0])
+                    expression_slice = expression_slice[1:]
                 # print(matches)
                 for operator in matches:
                     num_operators = matches.count(operator)
@@ -2081,6 +2131,8 @@ class TRPGModule:
                     else:
                         advantage[operator] = [roll_result]
                     expression = expression[1:]
+                    print(expression)
+                    print(advantage)
                 # print(advantage)
 
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
@@ -2106,10 +2158,133 @@ class TRPGModule:
                     info = role_Chart_detail.get("POW")
                 expression = "1d100"
 
+            # elif expression == "COMBINE CHECK": # 对每个技能都掷骰的方案
+            #     for a in combine_infos:
+            #         expression = a
+            #         info = int(combine_infos[a])
+            #         if "困难" in expression or "极难" in expression:
+            #             print("困难极难")
+            #             print(expression)
+            #             parts_ = expression.split('难')
+            #             skill_name = parts_[1]
+            #             if parts_[0] == "极":
+            #                 info = int(combine_infos[a] / 5)
+            #             if parts_[0] == "困":
+            #                 info = int(combine_infos[a] / 2)
+            #         # 执行掷骰
+            #         rolls = [random.randint(1, 100) for _ in range(1)]
+            #         result = sum(rolls)
+            #         result, adv_comment = self.cal_advantage(result, advantage)
+            #         if result <= 5 and info >= Critical_Success_SKill:
+            #             compare = "<"
+            #             comment = Critical_Success
+            #             upgrade = self.skill_upgrade(0, skill_name, role)
+            #         elif result == 1:
+            #             compare = "<"
+            #             comment = Critical_Success
+            #             upgrade = self.skill_upgrade(0, skill_name, role)
+            #         elif result <= info // 5:
+            #             compare = "<"
+            #             comment = Extreme_Success
+            #             upgrade = self.skill_upgrade(info, skill_name, role)
+            #         elif result <= info // 2:
+            #             compare = "<"
+            #             comment = Hard_Success
+            #             upgrade = self.skill_upgrade(info, skill_name, role)
+            #         elif result <= info:
+            #             compare = "<"
+            #             comment = Success
+            #             upgrade = self.skill_upgrade(info, skill_name, role)
+            #         elif result >= 96 and info < Fumble_SKill:
+            #             compare = ">"
+            #             comment = Fumble
+            #             upgrade = ""
+            #         elif result == 100:
+            #             compare = ">"
+            #             comment = Fumble
+            #             upgrade = ""
+            #         else:
+            #             compare = ">"
+            #             comment = Failure
+            #             upgrade = ""
+            #             # 执行算式
+            #         print(f"{result}/{info}：{comment}\n\n{upgrade}")
+
+            elif expression == "COMBINE CHECK":
+                rolls = [random.randint(1, 100) for _ in range(1)]
+                result = sum(rolls)
+                result, adv_comment = self.cal_advantage(result, advantage)
+                infos = []
+                upgrades = []
+                comments = []
+                for a in combine_infos:
+                    expression = a
+                    info = combine_infos[a]
+                    skill_name = a
+                    if "困难" in expression or "极难" in expression:
+                        print("困难极难")
+                        print(expression)
+                        parts_ = expression.split('难')
+                        skill_name = parts_[1]
+                        if parts_[0] == "极":
+                            info = int(combine_infos[a] / 5)
+                        if parts_[0] == "困":
+                            info = int(combine_infos[a] / 2)
+                    infos.append(info)
+                    # 执行掷骰
+                    if result <= 5 and info >= Critical_Success_SKill:
+                        compare = "<"
+                        comment = "大成功！！"
+                        upgrade = self.skill_upgrade(0, skill_name, role)
+                    elif result == 1:
+                        compare = "<"
+                        comment = "大成功！！"
+                        upgrade = self.skill_upgrade(0, skill_name, role)
+                    elif result <= info // 5:
+                        compare = "<"
+                        comment = "极难成功！"
+                        upgrade = self.skill_upgrade(info, skill_name, role)
+                    elif result <= info // 2:
+                        compare = "<"
+                        comment = "困难成功"
+                        upgrade = self.skill_upgrade(info, skill_name, role)
+                    elif result <= info:
+                        compare = "<"
+                        comment = "成功"
+                        upgrade = self.skill_upgrade(info, skill_name, role)
+                    elif result >= 96 and info < Fumble_SKill:
+                        compare = ">"
+                        comment = "大失败！"
+                        upgrade = ""
+                    elif result == 100:
+                        compare = ">"
+                        comment = "大失败！"
+                        upgrade = ""
+                    else:
+                        compare = ">"
+                        comment = "失败"
+                        upgrade = ""
+                        # 执行算式
+                    upgrades.append(upgrade)
+                    comments.append(comment)
+                    # print(f"{result}/{info}：{comment}\n\n{upgrade}")
+                str_ = '\n'.join(upgrades).strip()
+                return f"{result}/{infos}:{'/'.join(comments)}：{str_}"
+
             elif bool(pattern.search(expression)) or part_eng[0][0] != "d":
+                expression_num = 0
                 print("技能检定")
                 # print(part_eng[0][0])
                 # print(part_eng[0][1])
+                print(expression)
+                if "+" in expression or "-" in expression:
+                    print("补正骰")
+                    if "+" in expression:
+                        expression_num = expression.split("+")[1]
+                        expression = expression.split("+")[0]
+                    if "-" in expression:
+                        expression_num = expression.split("-")[1] * (-1)
+                        expression = expression.split("-")[0]
                 if part_eng and part_eng[0] and part_eng[0][1] is not None:
                     print("技能检定+数值")
                     expression = part_eng[0][0]
@@ -2139,6 +2314,7 @@ class TRPGModule:
                     info = role_Chart_detail.get(info)
                     # print(info)
                 expression = "1d100"
+                info += int(expression_num)
             if expression == "SAN CHECK":
                 # 解析表达式
                 expression = "1d100"
