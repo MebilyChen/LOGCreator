@@ -14,16 +14,32 @@ import json
 
 # logging.basicConfig(level=logging.DEBUG)  # 设置日志级别为 DEBUG
 
-Critical_Success = "￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。"
-Extreme_Success = "（深呼吸）...极难成功！恭喜您！"
-Hard_Success = "困难成功！"
-Success = "鉴定成功，期待您的表现。"
-Failure = "失败了，请您不要灰心..."
-Fumble = "嗯...抱歉，看起来是大失败呢..."
+# 便于直接编辑的一系列字符串
+string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。"]
+string_list_Extreme_Success = ["（深呼吸）...极难成功！恭喜您！", "极难成功！恭喜您。"]
+string_list_Hard_Success = ["困难成功！"]
+string_list_Success = ["鉴定成功，期待您的表现。"]
+string_list_Failure = ["失败了，请您不要灰心..."]
+string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 
 Fumble_SKill = 20  # 启用96以上大失败的技能水平
 Critical_Success_SKill = 60  # 启用5以下大成功的技能水平
 
+bot_personality_ = {"Critical_Success": string_list_Critical_Success, "Extreme_Success": string_list_Extreme_Success,
+                   "Hard_Success": string_list_Hard_Success, "Success": string_list_Success,
+                   "Failure": string_list_Failure, "Fumble": string_list_Fumble,
+                   "Fumble_at_96_SKill_Level": Fumble_SKill, "Critical_at_5_SKill_Level": Critical_Success_SKill}
+
+bot_personality_by_name_ = {"卢骰": bot_personality_, "DiceBot": bot_personality_}
+
+Critical_Success = random.choice(bot_personality_["Critical_Success"])
+Extreme_Success = random.choice(bot_personality_["Extreme_Success"])
+Hard_Success = random.choice(bot_personality_["Hard_Success"])
+Success = random.choice(bot_personality_["Success"])
+Failure = random.choice(bot_personality_["Failure"])
+Fumble = random.choice(bot_personality_["Fumble"])
+Fumble_SKill = bot_personality_["Fumble_at_96_SKill_Level"]
+Critical_Success_SKill = bot_personality_["Critical_at_5_SKill_Level"]
 
 def load_settings_avatar():
     try:
@@ -34,6 +50,15 @@ def load_settings_avatar():
         # 如果文件不存在，返回默认设置
         return {'KP': '', 'DiceBot': '',
                 'PL 1': ''}
+
+def load_DiceBot_personality():
+    try:
+        # 尝试从JSON文件加载头像路径
+        with open('bot_personality_by_name.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return bot_personality_by_name_
 
 
 def load_settings_name():
@@ -1012,8 +1037,8 @@ def load_Chart_at_name():
 
 role_Chart = load_Chart()
 role_Chart_at_name = load_Chart_at_name()
+bot_personality_by_name = load_DiceBot_personality()
 adv_comment = ""
-
 
 # logging.debug("Variable value: %s", role_Chart_at_name)
 
@@ -1021,7 +1046,11 @@ class ChatApp:
     def __init__(self, root):
 
         self.root = root
-        self.root.title("自嗨团 v0.67")
+        # 一系列字符串
+        string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！", " - 陛下所言甚是/陶醉", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        # 从列表中随机选择一个字符串
+        encouragement = random.choice(string_list_encouragement)
+        self.root.title("自嗨团 v0.67" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("icon.ico")
@@ -1059,7 +1088,7 @@ class ChatApp:
                        "\nTodo:" \
                        "\n--计算" \
                        "\n--features" \
-                       "\n掷骰栏回车发送\n输出染色HTML(坑)" \
+                       "\n输出染色HTML(坑)" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n"\
                        "===以上可删除===\n\n"
@@ -1087,6 +1116,7 @@ class ChatApp:
             self.role_entries_name[role] = role
             if load_settings_name() != "":
                 self.role_entries_name = load_settings_name()  # 从文件加载设置
+
         self.create_role_frames()
         for i in range(self.role_count):
             self.add_role_init()
@@ -1097,7 +1127,7 @@ class ChatApp:
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
         for role in self.roles:
             entry_roll = self.role_entries_roll[role]
-            entry_roll.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
+            entry_roll.bind("<FocusIn>", lambda event2, role=role: self.bind_enter_to_send_roll(event2, role))
 
         # 初始化删除角色按钮
         delete_role_button = tk.Button(root, text="删除角色", command=self.delete_role)
@@ -1106,6 +1136,28 @@ class ChatApp:
         # 初始化添加角色按钮
         add_role_button = tk.Button(root, text="添加角色", command=self.add_role)
         add_role_button.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+
+        for names in bot_personality_by_name:
+            if names == self.role_entries_name["DiceBot"]:
+                global Critical_Success
+                global Extreme_Success
+                global Hard_Success
+                global Success
+                global Failure
+                global Fumble
+                global Fumble_SKill
+                global Critical_Success_SKill
+                bot_personality = bot_personality_by_name[names]
+                Critical_Success = random.choice(bot_personality["Critical_Success"])
+                Extreme_Success = random.choice(bot_personality["Extreme_Success"])
+                Hard_Success = random.choice(bot_personality["Hard_Success"])
+                Success = random.choice(bot_personality["Success"])
+                Failure = random.choice(bot_personality["Failure"])
+                Fumble = random.choice(bot_personality["Fumble"])
+                Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
+                Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                self.role_entries["DiceBot"].insert("1.0", f"已录入[{names}]的性格！")
+                break
 
     def create_role_frames(self):
         num_cols = 3
@@ -1422,6 +1474,30 @@ class ChatApp:
             entry.grid_forget()
             label.configure(text=new_name)
 
+            if role == "DiceBot":
+                # 按名牌加载Bot性格
+                for names in bot_personality_by_name:
+                    if names == self.role_entries_name["DiceBot"]:
+                        global Critical_Success
+                        global Extreme_Success
+                        global Hard_Success
+                        global Success
+                        global Failure
+                        global Fumble
+                        global Fumble_SKill
+                        global Critical_Success_SKill
+                        bot_personality = bot_personality_by_name[names]
+                        Critical_Success = random.choice(bot_personality["Critical_Success"])
+                        Extreme_Success = random.choice(bot_personality["Extreme_Success"])
+                        Hard_Success = random.choice(bot_personality["Hard_Success"])
+                        Success = random.choice(bot_personality["Success"])
+                        Failure = random.choice(bot_personality["Failure"])
+                        Fumble = random.choice(bot_personality["Fumble"])
+                        Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
+                        Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                        self.role_entries["DiceBot"].insert("1.0", f"已录入[{names}]的性格！\n")
+                        break
+
             # 按名牌加载设置
             if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
                 role_Chart[role] = role_Chart_at_name[new_name]
@@ -1435,16 +1511,17 @@ class ChatApp:
                 MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 POW = role_Chart_detail.get("POW")
                 DB = role_Chart_detail.get("DB")
+                SAN_ = role_Chart_detail.get("#SAN")
                 self.role_values_entry[role].insert("1.0",
-                                                    f'{SAN}/{POW}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
-                self.role_entries[role].delete("1.0", tk.END)
-                self.role_entries[role].insert(tk.END, "已录入！")
+                                                    f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                # self.role_entries[role].delete("1.0", tk.END)
+                # self.role_entries[role].insert(tk.END, "已录入！")
                 # self.chat_log.insert(tk.END,
                 # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{MOV}\n\n\n')
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
 
-                self.role_entries[role].insert(tk.END, "已加载名牌为[" + new_name + "]的角色卡！\n")
+                self.role_entries[role].insert("1.0", "已加载名牌为[" + new_name + "]的角色卡！\n")
             else:
                 role_Chart[role] = role_Chart_detail_demo
 
@@ -1485,7 +1562,7 @@ class ChatApp:
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
         for role in self.roles:
             entry_roll = self.role_entries_roll[role]
-            entry_roll.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
+            entry_roll.bind("<FocusIn>", lambda event2, role=role: self.bind_enter_to_send_roll(event2, role))
 
     def add_role_init(self):
         self.role_count = self.role_count
@@ -1516,7 +1593,7 @@ class ChatApp:
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
         for role in self.roles:
             entry_roll = self.role_entries_roll[role]
-            entry_roll.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
+            entry_roll.bind("<FocusIn>", lambda event2, role=role: self.bind_enter_to_send_roll(event2, role))
 
     def delete_role(self):
         if len(self.roles) > 3:
@@ -1549,6 +1626,12 @@ class ChatApp:
         self.root.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
 
+    def bind_enter_to_send_roll(self, event, role):
+        # 为当前文本框绑定回车键发送消息
+        self.current_role.set(role)
+        self.root.bind("<Return>", lambda event, role=role: self.send_roll_on_enter(event, role))
+        self.highlight_role_frame_roll(role)
+
     def send_message_on_enter(self, event, role=None):
         self.current_role.set(role)
         # 判断是否同时按下了 Ctrl 键
@@ -1557,8 +1640,17 @@ class ChatApp:
         # 发送消息
         current_role = role or self.current_role.get()
         self.send_message(current_role)
-        self.get_and_roll(current_role)
         self.highlight_role_frame(current_role)
+
+    def send_roll_on_enter(self, event, role=None):
+        self.current_role.set(role)
+        # 判断是否同时按下了 Ctrl 键
+        if event.state - 4 == 0:  # 4 表示 Ctrl 键的状态值
+            return
+        # 发送消息
+        current_role = role or self.current_role.get()
+        self.get_and_roll(current_role)
+        self.highlight_role_frame_roll(current_role)
 
     def newline_on_ctrl_enter(self, event):
         # 换行
@@ -1586,7 +1678,18 @@ class ChatApp:
         self.chat_log.insert(tk.END, ">>> " + self.role_entries_name[role] + "正在输入...")
         for role in self.roles:
             self.role_entries_frame[role].config(relief=tk.GROOVE)
+            self.role_entries_roll[role].config(relief=tk.GROOVE)
         self.role_entries_frame[self.highlighted_role.get()].config(relief=tk.SOLID)
+        # self.create_role_frames()
+
+    def highlight_role_frame_roll(self, role):
+        # 高亮指定角色的 Frame
+        self.highlighted_role.set(role)
+        for role in self.roles:
+            self.role_entries_frame[role].config(relief=tk.GROOVE)
+            self.role_entries_roll[role].config(relief=tk.GROOVE)
+        self.role_entries_frame[self.highlighted_role.get()].config(relief=tk.SOLID)
+        self.role_entries_roll[self.highlighted_role.get()].config(relief=tk.SOLID)
         # self.create_role_frames()
 
     def on_avatar_click(self, role):
@@ -1973,6 +2076,8 @@ class ChatApp:
         # 保存自定义角色数值信息
         with open('pl_Chart.json', 'w', encoding='utf-8') as file:
             json.dump(role_Chart, file)
+        with open('bot_personality_by_name.json', 'w', encoding='utf-8') as file:
+            json.dump(bot_personality_by_name, file)
         # 保存自定义角色数值信息
         with open('PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
             for role, skills in role_Chart.items():
