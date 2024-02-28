@@ -1351,17 +1351,16 @@ class ChatApp:
                     SAN_ = self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("1.0", "2.0")
                     self.role_values_entry[role].insert("1.0",
-                                                        f'{SAN_}/{POW}/{_SAN}:S')
+                                                        f'{SAN_}/{POW}/{_SAN}:S\n')
                 if "MOV" in message:
                     MOV_ = self.role_values_entry[role].get("4.0", "5.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("4.0", "5.0")
                     self.role_values_entry[role].insert("4.0",
                                                         f'{MOV_}/{MOV}:MOV\n')
                 if "DB" in message:
-                    DB_ = self.role_values_entry[role].get("5.0", "6.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("5.0", "6.0")
                     self.role_values_entry[role].insert("5.0",
-                                                        f'{DB_}/{DB}:DB\n')
+                                                        f'\n{DB}:DB\n')
                 #self.role_values_entry[role].insert("1.0",
                                                     #f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
@@ -1463,6 +1462,17 @@ class ChatApp:
                 old_dict["MOV"] = 7
             else:
                 old_dict["MOV"] = 9
+        if old_dict["DB"] == 1:
+            old_dict["DB"] = "1(+1D4)"
+        if old_dict["DB"] == 2:
+            old_dict["DB"] = "2(+1D6)"
+        if old_dict["DB"] == -2:
+            old_dict["DB"] = "-2(-2)"
+        if old_dict["DB"] == -1:
+            old_dict["DB"] = "-1(-1)"
+        if old_dict["DB"] == 0:
+            old_dict["DB"] = "0(0)"
+
         if old_dict["力量"] + old_dict["体型"] <= 164:
             old_dict["DB"] = "1(+1D4)"
             if old_dict["力量"] + old_dict["体型"] <= 124:
@@ -1475,6 +1485,7 @@ class ChatApp:
                 old_dict["DB"] = "0(0)"
         else:
             old_dict["DB"] = "2(+1D6)"
+
         old_dict["#SAN"] = 100 - old_dict["克苏鲁神话"]
         self.save_role_skill_at_name()
 
