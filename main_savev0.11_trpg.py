@@ -1050,7 +1050,7 @@ class ChatApp:
         string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！", " - 陛下所言甚是/陶醉", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v0.67" + encouragement)
+        self.root.title("自嗨团 v0.71" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("icon.ico")
