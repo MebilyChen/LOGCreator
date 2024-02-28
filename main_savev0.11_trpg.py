@@ -64,6 +64,159 @@ def load_role_count():
     config.read('config.ini')
     return int(config.get('Settings', 'RoleCount', fallback=0))
 
+role_Chart_detail_demo = {
+    "EDU": 0,
+    "APP": 0,
+    "DEX": 0,
+    "STR": 0,
+    "INT": 0,
+    "CON": 0,
+    "POW": 0,
+    "SIZ": 0,
+    "LUCK": 0,
+    "教育": "EDU",
+    "外貌": "APP",
+    "敏捷": "DEX",
+    "力量": "STR",
+    "智力": "INT",
+    "体质": "CON",
+    "灵感": "INT",
+    "意志": "POW",
+    "体型": "SIZ",
+    "幸运": "LUCK",
+    "MOV": 8,
+    "HP": "(CON+SIZ)/10",
+    "MP": "POW/5",
+    "SAN": "POW",
+    "克苏鲁神话": 0,
+    "克苏鲁": 0,
+    "cm": 0,
+    "信用": 0,
+    "信用评级": 0,
+    "会计": 5,
+    "表演": 5,
+    "美术": 5,
+    "写作": 5,
+    "书法": 5,
+    "木匠": 5,
+    "厨艺": 5,
+    "舞蹈": 5,
+    "歌剧": 5,
+    "声乐": 5,
+    "摄影": 5,
+    "雕塑": 5,
+    "伪造": 5,
+    "陶艺": 5,
+    "人类学": 1,
+    "估价": 5,
+    "考古学": 1,
+    "魅惑": 15,
+    "攀爬": 20,
+    "计算机": 5,
+    "计算机使用": 5,
+    "电脑": 5,
+    "乔装": 5,
+    "闪避": "DEX/2",
+    "汽车驾驶": 20,
+    "电气维修": 10,
+    "电子学": 1,
+    "话术": 5,
+    "斗殴": 25,
+    "链锯": 10,
+    "斧头": 25,
+    "连枷": 10,
+    "矛": 20,
+    "剑": 20,
+    "鞭子": 5,
+    "弓": 15,
+    "手枪": 20,
+    "重武器": 10,
+    "火焰喷射器": 10,
+    "机枪": 10,
+    "步枪": 25,
+    "霰弹枪": 25,
+    "步枪/霰弹枪": 25,
+    "冲锋枪": 15,
+    "急救": 30,
+    "历史": 5,
+    "恐吓": 15,
+    "跳跃": 20,
+    "拉丁语": 1,
+    "汉语": 1,
+    "日语": 1,
+    "英语": 1,
+    "德语": 1,
+    "法语": 1,
+    "西班牙语": 1,
+    "意大利语": 1,
+    "丹麦语": 1,
+    "土著语": 1,
+    "格陵兰语": 1,
+    "俄语": 1,
+    "母语": "EDU",
+    "法律": 5,
+    "图书馆": 20,
+    "聆听": 20,
+    "锁匠": 1,
+    "机械维修": 10,
+    "医学": 1,
+    "博物学": 10,
+    "天文学": 1,
+    "生物学": 1,
+    "植物学": 1,
+    "化学": 1,
+    "数学": 1,
+    "密码学": 1,
+    "工程学": 1,
+    "法学": 1,
+    "司法科学": 1,
+    "地质学": 1,
+    "气象学": 1,
+    "药学": 1,
+    "物理学": 1,
+    "动物学": 1,
+    "领航": 10,
+    "神秘学": 5,
+    "重型机械": 1,
+    "说服": 10,
+    "精神分析": 1,
+    "驾驶": 1,
+    "飞行器驾驶": 1,
+    "船驾驶": 1,
+    "心理学": 10,
+    "骑术": 5,
+    "科学": 1,
+    "妙手": 10,
+    "侦查": 25,
+    "潜行": 20,
+    "生存": 10,
+    "游泳": 20,
+    "投掷": 20,
+    "追踪": 10,
+    "驯兽": 5,
+    "潜水": 1,
+    "爆破": 1,
+    "读唇": 1,
+    "催眠": 1,
+    "炮术": 1,
+    "DB": 1,
+    "#斗殴": "1D3+DB",
+    "#链锯": "2D8穿",
+    "#斧头": "1D8+2+DB穿",
+    "#连枷": "1D8+DB",
+    "#矛": "1D8+1穿",
+    "#剑": "1D6+DB穿",
+    "#鞭子": "1D3+DB/2",
+    "#弓": "1D6+DB/2",
+    "#手枪": "1D8穿",
+    "#重武器": "5D10穿",
+    "#火焰喷射器": "2D6+烧穿",
+    "#机枪": "2D6+4穿",
+    "#步枪": "1D6+1穿",
+    "#霰弹枪": "4D6/2D6/1D6",
+    "#冲锋枪": "1D10穿",
+    "#步枪/霰弹枪": "1D6+1穿",
+}
 
 def load_Chart():
     try:
@@ -73,685 +226,7 @@ def load_Chart():
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
-        return {"KP": {
-            "EDU": 0,
-            "APP": 0,
-            "DEX": 0,
-            "STR": 0,
-            "INT": 0,
-            "CON": 0,
-            "POW": 0,
-            "SIZ": 0,
-            "LUCK": 0,
-            "教育": "EDU",
-            "外貌": "APP",
-            "敏捷": "DEX",
-            "力量": "STR",
-            "智力": "INT",
-            "体质": "CON",
-            "灵感": "INT",
-            "意志": "POW",
-            "体型": "SIZ",
-            "幸运": "LUCK",
-            "MOV": 8,
-            "HP": "(CON+SIZ)/10",
-            "MP": "POW/5",
-            "SAN": "POW",
-            "克苏鲁神话": 0,
-            "克苏鲁": 0,
-            "cm": 0,
-            "信用": 0,
-            "信用评级": 0,
-            "会计": 5,
-            "表演": 5,
-            "美术": 5,
-            "写作": 5,
-            "书法": 5,
-            "木匠": 5,
-            "厨艺": 5,
-            "舞蹈": 5,
-            "歌剧": 5,
-            "声乐": 5,
-            "摄影": 5,
-            "雕塑": 5,
-            "伪造": 5,
-            "陶艺": 5,
-            "人类学": 1,
-            "估价": 5,
-            "考古学": 1,
-            "魅惑": 15,
-            "攀爬": 20,
-            "计算机": 5,
-            "计算机使用": 5,
-            "电脑": 5,
-            "乔装": 5,
-            "闪避": "DEX/2",
-            "汽车驾驶": 20,
-            "电气维修": 10,
-            "电子学": 1,
-            "话术": 5,
-            "斗殴": 25,
-            "电锯": 10,
-            "斧头": 25,
-            "连枷": 10,
-            "矛": 20,
-            "剑": 20,
-            "鞭子": 5,
-            "弓": 15,
-            "手枪": 20,
-            "重武器": 10,
-            "火焰喷射器": 10,
-            "机枪": 10,
-            "步枪": 25,
-            "霰弹枪": 25,
-            "步枪/霰弹枪": 25,
-            "冲锋枪": 15,
-            "急救": 30,
-            "历史": 5,
-            "恐吓": 15,
-            "跳跃": 20,
-            "拉丁语": 1,
-            "汉语": 1,
-            "日语": 1,
-            "英语": 1,
-            "德语": 1,
-            "法语": 1,
-            "西班牙语": 1,
-            "意大利语": 1,
-            "丹麦语": 1,
-            "土著语": 1,
-            "格陵兰语": 1,
-            "俄语": 1,
-            "母语": "EDU",
-            "法律": 5,
-            "图书馆": 20,
-            "聆听": 20,
-            "锁匠": 1,
-            "机械维修": 10,
-            "医学": 1,
-            "博物学": 10,
-            "天文学": 1,
-            "生物学": 1,
-            "植物学": 1,
-            "化学": 1,
-            "数学": 1,
-            "密码学": 1,
-            "工程学": 1,
-            "法学": 1,
-            "司法科学": 1,
-            "地质学": 1,
-            "气象学": 1,
-            "药学": 1,
-            "物理学": 1,
-            "动物学": 1,
-            "领航": 10,
-            "神秘学": 5,
-            "重型机械": 1,
-            "说服": 10,
-            "精神分析": 1,
-            "驾驶": 1,
-            "飞行器驾驶": 1,
-            "船驾驶": 1,
-            "心理学": 10,
-            "骑术": 5,
-            "科学": 1,
-            "妙手": 10,
-            "侦查": 25,
-            "潜行": 20,
-            "生存": 10,
-            "游泳": 20,
-            "投掷": 20,
-            "追踪": 10,
-            "驯兽": 5,
-            "潜水": 1,
-            "爆破": 1,
-            "读唇": 1,
-            "催眠": 1,
-            "炮术": 1
-        }
-            , "DiceBot": {
-                "EDU": 0,
-                "APP": 0,
-                "DEX": 0,
-                "STR": 0,
-                "INT": 0,
-                "CON": 0,
-                "POW": 0,
-                "SIZ": 0,
-                "LUCK": 0,
-                "教育": "EDU",
-                "外貌": "APP",
-                "敏捷": "DEX",
-                "力量": "STR",
-                "智力": "INT",
-                "体质": "CON",
-                "灵感": "INT",
-                "意志": "POW",
-                "体型": "SIZ",
-                "幸运": "LUCK",
-                "MOV": 8,
-                "HP": "(CON+SIZ)/10",
-                "MP": "POW/5",
-                "SAN": "POW",
-                "克苏鲁神话": 0,
-                "克苏鲁": 0,
-                "cm": 0,
-                "信用": 0,
-                "信用评级": 0,
-                "会计": 5,
-                "表演": 5,
-                "美术": 5,
-                "写作": 5,
-                "书法": 5,
-                "木匠": 5,
-                "厨艺": 5,
-                "舞蹈": 5,
-                "歌剧": 5,
-                "声乐": 5,
-                "摄影": 5,
-                "雕塑": 5,
-                "伪造": 5,
-                "陶艺": 5,
-                "人类学": 1,
-                "估价": 5,
-                "考古学": 1,
-                "魅惑": 15,
-                "攀爬": 20,
-                "计算机": 5,
-                "计算机使用": 5,
-                "电脑": 5,
-                "乔装": 5,
-                "闪避": "DEX/2",
-                "汽车驾驶": 20,
-                "电气维修": 10,
-                "电子学": 1,
-                "话术": 5,
-                "斗殴": 25,
-                "电锯": 10,
-                "斧头": 25,
-                "连枷": 10,
-                "矛": 20,
-                "剑": 20,
-                "鞭子": 5,
-                "弓": 15,
-                "手枪": 20,
-                "重武器": 10,
-                "火焰喷射器": 10,
-                "机枪": 10,
-                "步枪": 25,
-                "霰弹枪": 25,
-                "步枪/霰弹枪": 25,
-                "冲锋枪": 15,
-                "急救": 30,
-                "历史": 5,
-                "恐吓": 15,
-                "跳跃": 20,
-                "拉丁语": 1,
-                "汉语": 1,
-                "日语": 1,
-                "英语": 1,
-                "德语": 1,
-                "法语": 1,
-                "西班牙语": 1,
-                "意大利语": 1,
-                "丹麦语": 1,
-                "土著语": 1,
-                "格陵兰语": 1,
-                "俄语": 1,
-                "母语": "EDU",
-                "法律": 5,
-                "图书馆": 20,
-                "聆听": 20,
-                "锁匠": 1,
-                "机械维修": 10,
-                "医学": 1,
-                "博物学": 10,
-                "天文学": 1,
-                "生物学": 1,
-                "植物学": 1,
-                "化学": 1,
-                "数学": 1,
-                "密码学": 1,
-                "工程学": 1,
-                "法学": 1,
-                "司法科学": 1,
-                "地质学": 1,
-                "气象学": 1,
-                "药学": 1,
-                "物理学": 1,
-                "动物学": 1,
-                "领航": 10,
-                "神秘学": 5,
-                "重型机械": 1,
-                "说服": 10,
-                "精神分析": 1,
-                "驾驶": 1,
-                "飞行器驾驶": 1,
-                "船驾驶": 1,
-                "心理学": 10,
-                "骑术": 5,
-                "科学": 1,
-                "妙手": 10,
-                "侦查": 25,
-                "潜行": 20,
-                "生存": 10,
-                "游泳": 20,
-                "投掷": 20,
-                "追踪": 10,
-                "驯兽": 5,
-                "潜水": 1,
-                "爆破": 1,
-                "读唇": 1,
-                "催眠": 1,
-                "炮术": 1
-            }, "PL 1": {
-                "EDU": 0,
-                "APP": 0,
-                "DEX": 0,
-                "STR": 0,
-                "INT": 0,
-                "CON": 0,
-                "POW": 0,
-                "SIZ": 0,
-                "LUCK": 0,
-                "教育": "EDU",
-                "外貌": "APP",
-                "敏捷": "DEX",
-                "力量": "STR",
-                "智力": "INT",
-                "体质": "CON",
-                "灵感": "INT",
-                "意志": "POW",
-                "体型": "SIZ",
-                "幸运": "LUCK",
-                "MOV": 8,
-                "HP": "(CON+SIZ)/10",
-                "MP": "POW/5",
-                "SAN": "POW",
-                "克苏鲁神话": 0,
-                "克苏鲁": 0,
-                "cm": 0,
-                "信用": 0,
-                "信用评级": 0,
-                "会计": 5,
-                "表演": 5,
-                "美术": 5,
-                "写作": 5,
-                "书法": 5,
-                "木匠": 5,
-                "厨艺": 5,
-                "舞蹈": 5,
-                "歌剧": 5,
-                "声乐": 5,
-                "摄影": 5,
-                "雕塑": 5,
-                "伪造": 5,
-                "陶艺": 5,
-                "人类学": 1,
-                "估价": 5,
-                "考古学": 1,
-                "魅惑": 15,
-                "攀爬": 20,
-                "计算机": 5,
-                "计算机使用": 5,
-                "电脑": 5,
-                "乔装": 5,
-                "闪避": "DEX/2",
-                "汽车驾驶": 20,
-                "电气维修": 10,
-                "电子学": 1,
-                "话术": 5,
-                "斗殴": 25,
-                "电锯": 10,
-                "斧头": 25,
-                "连枷": 10,
-                "矛": 20,
-                "剑": 20,
-                "鞭子": 5,
-                "弓": 15,
-                "手枪": 20,
-                "重武器": 10,
-                "火焰喷射器": 10,
-                "机枪": 10,
-                "步枪": 25,
-                "霰弹枪": 25,
-                "步枪/霰弹枪": 25,
-                "冲锋枪": 15,
-                "急救": 30,
-                "历史": 5,
-                "恐吓": 15,
-                "跳跃": 20,
-                "拉丁语": 1,
-                "汉语": 1,
-                "日语": 1,
-                "英语": 1,
-                "德语": 1,
-                "法语": 1,
-                "西班牙语": 1,
-                "意大利语": 1,
-                "丹麦语": 1,
-                "土著语": 1,
-                "格陵兰语": 1,
-                "俄语": 1,
-                "母语": "EDU",
-                "法律": 5,
-                "图书馆": 20,
-                "聆听": 20,
-                "锁匠": 1,
-                "机械维修": 10,
-                "医学": 1,
-                "博物学": 10,
-                "天文学": 1,
-                "生物学": 1,
-                "植物学": 1,
-                "化学": 1,
-                "数学": 1,
-                "密码学": 1,
-                "工程学": 1,
-                "法学": 1,
-                "司法科学": 1,
-                "地质学": 1,
-                "气象学": 1,
-                "药学": 1,
-                "物理学": 1,
-                "动物学": 1,
-                "领航": 10,
-                "神秘学": 5,
-                "重型机械": 1,
-                "说服": 10,
-                "精神分析": 1,
-                "驾驶": 1,
-                "飞行器驾驶": 1,
-                "船驾驶": 1,
-                "心理学": 10,
-                "骑术": 5,
-                "科学": 1,
-                "妙手": 10,
-                "侦查": 25,
-                "潜行": 20,
-                "生存": 10,
-                "游泳": 20,
-                "投掷": 20,
-                "追踪": 10,
-                "驯兽": 5,
-                "潜水": 1,
-                "爆破": 1,
-                "读唇": 1,
-                "催眠": 1,
-                "炮术": 1
-            }, "PL 2": {
-                "EDU": 0,
-                "APP": 0,
-                "DEX": 0,
-                "STR": 0,
-                "INT": 0,
-                "CON": 0,
-                "POW": 0,
-                "SIZ": 0,
-                "LUCK": 0,
-                "教育": "EDU",
-                "外貌": "APP",
-                "敏捷": "DEX",
-                "力量": "STR",
-                "智力": "INT",
-                "体质": "CON",
-                "灵感": "INT",
-                "意志": "POW",
-                "体型": "SIZ",
-                "幸运": "LUCK",
-                "MOV": 8,
-                "HP": "(CON+SIZ)/10",
-                "MP": "POW/5",
-                "SAN": "POW",
-                "克苏鲁神话": 0,
-                "克苏鲁": 0,
-                "cm": 0,
-                "信用": 0,
-                "信用评级": 0,
-                "会计": 5,
-                "表演": 5,
-                "美术": 5,
-                "写作": 5,
-                "书法": 5,
-                "木匠": 5,
-                "厨艺": 5,
-                "舞蹈": 5,
-                "歌剧": 5,
-                "声乐": 5,
-                "摄影": 5,
-                "雕塑": 5,
-                "伪造": 5,
-                "陶艺": 5,
-                "人类学": 1,
-                "估价": 5,
-                "考古学": 1,
-                "魅惑": 15,
-                "攀爬": 20,
-                "计算机": 5,
-                "计算机使用": 5,
-                "电脑": 5,
-                "乔装": 5,
-                "闪避": "DEX/2",
-                "汽车驾驶": 20,
-                "电气维修": 10,
-                "电子学": 1,
-                "话术": 5,
-                "斗殴": 25,
-                "电锯": 10,
-                "斧头": 25,
-                "连枷": 10,
-                "矛": 20,
-                "剑": 20,
-                "鞭子": 5,
-                "弓": 15,
-                "手枪": 20,
-                "重武器": 10,
-                "火焰喷射器": 10,
-                "机枪": 10,
-                "步枪": 25,
-                "霰弹枪": 25,
-                "步枪/霰弹枪": 25,
-                "冲锋枪": 15,
-                "急救": 30,
-                "历史": 5,
-                "恐吓": 15,
-                "跳跃": 20,
-                "拉丁语": 1,
-                "汉语": 1,
-                "日语": 1,
-                "英语": 1,
-                "德语": 1,
-                "法语": 1,
-                "西班牙语": 1,
-                "意大利语": 1,
-                "丹麦语": 1,
-                "土著语": 1,
-                "格陵兰语": 1,
-                "俄语": 1,
-                "母语": "EDU",
-                "法律": 5,
-                "图书馆": 20,
-                "聆听": 20,
-                "锁匠": 1,
-                "机械维修": 10,
-                "医学": 1,
-                "博物学": 10,
-                "天文学": 1,
-                "生物学": 1,
-                "植物学": 1,
-                "化学": 1,
-                "数学": 1,
-                "密码学": 1,
-                "工程学": 1,
-                "法学": 1,
-                "司法科学": 1,
-                "地质学": 1,
-                "气象学": 1,
-                "药学": 1,
-                "物理学": 1,
-                "动物学": 1,
-                "领航": 10,
-                "神秘学": 5,
-                "重型机械": 1,
-                "说服": 10,
-                "精神分析": 1,
-                "驾驶": 1,
-                "飞行器驾驶": 1,
-                "船驾驶": 1,
-                "心理学": 10,
-                "骑术": 5,
-                "科学": 1,
-                "妙手": 10,
-                "侦查": 25,
-                "潜行": 20,
-                "生存": 10,
-                "游泳": 20,
-                "投掷": 20,
-                "追踪": 10,
-                "驯兽": 5,
-                "潜水": 1,
-                "爆破": 1,
-                "读唇": 1,
-                "催眠": 1,
-                "炮术": 1
-            }, "PL 3": {
-                "EDU": 0,
-                "APP": 0,
-                "DEX": 0,
-                "STR": 0,
-                "INT": 0,
-                "CON": 0,
-                "POW": 0,
-                "SIZ": 0,
-                "LUCK": 0,
-                "教育": "EDU",
-                "外貌": "APP",
-                "敏捷": "DEX",
-                "力量": "STR",
-                "智力": "INT",
-                "体质": "CON",
-                "灵感": "INT",
-                "意志": "POW",
-                "体型": "SIZ",
-                "幸运": "LUCK",
-                "MOV": 8,
-                "HP": "(CON+SIZ)/10",
-                "MP": "POW/5",
-                "SAN": "POW",
-                "克苏鲁神话": 0,
-                "克苏鲁": 0,
-                "cm": 0,
-                "信用": 0,
-                "信用评级": 0,
-                "会计": 5,
-                "表演": 5,
-                "美术": 5,
-                "写作": 5,
-                "书法": 5,
-                "木匠": 5,
-                "厨艺": 5,
-                "舞蹈": 5,
-                "歌剧": 5,
-                "声乐": 5,
-                "摄影": 5,
-                "雕塑": 5,
-                "伪造": 5,
-                "陶艺": 5,
-                "人类学": 1,
-                "估价": 5,
-                "考古学": 1,
-                "魅惑": 15,
-                "攀爬": 20,
-                "计算机": 5,
-                "计算机使用": 5,
-                "电脑": 5,
-                "乔装": 5,
-                "闪避": "DEX/2",
-                "汽车驾驶": 20,
-                "电气维修": 10,
-                "电子学": 1,
-                "话术": 5,
-                "斗殴": 25,
-                "电锯": 10,
-                "斧头": 25,
-                "连枷": 10,
-                "矛": 20,
-                "剑": 20,
-                "鞭子": 5,
-                "弓": 15,
-                "手枪": 20,
-                "重武器": 10,
-                "火焰喷射器": 10,
-                "机枪": 10,
-                "步枪": 25,
-                "霰弹枪": 25,
-                "步枪/霰弹枪": 25,
-                "冲锋枪": 15,
-                "急救": 30,
-                "历史": 5,
-                "恐吓": 15,
-                "跳跃": 20,
-                "拉丁语": 1,
-                "汉语": 1,
-                "日语": 1,
-                "英语": 1,
-                "德语": 1,
-                "法语": 1,
-                "西班牙语": 1,
-                "意大利语": 1,
-                "丹麦语": 1,
-                "土著语": 1,
-                "格陵兰语": 1,
-                "俄语": 1,
-                "母语": "EDU",
-                "法律": 5,
-                "图书馆": 20,
-                "聆听": 20,
-                "锁匠": 1,
-                "机械维修": 10,
-                "医学": 1,
-                "博物学": 10,
-                "天文学": 1,
-                "生物学": 1,
-                "植物学": 1,
-                "化学": 1,
-                "数学": 1,
-                "密码学": 1,
-                "工程学": 1,
-                "法学": 1,
-                "司法科学": 1,
-                "地质学": 1,
-                "气象学": 1,
-                "药学": 1,
-                "物理学": 1,
-                "动物学": 1,
-                "领航": 10,
-                "神秘学": 5,
-                "重型机械": 1,
-                "说服": 10,
-                "精神分析": 1,
-                "驾驶": 1,
-                "飞行器驾驶": 1,
-                "船驾驶": 1,
-                "心理学": 10,
-                "骑术": 5,
-                "科学": 1,
-                "妙手": 10,
-                "侦查": 25,
-                "潜行": 20,
-                "生存": 10,
-                "游泳": 20,
-                "投掷": 20,
-                "追踪": 10,
-                "驯兽": 5,
-                "潜水": 1,
-                "爆破": 1,
-                "读唇": 1,
-                "催眠": 1,
-                "炮术": 1
-            }}
-
-
+        return role_Chart_detail_demo
     except json.JSONDecodeError as e:
         print(f"Error in JSON decoding: {e}")
         print(f"Problematic data: {file.read()}")
@@ -823,7 +298,7 @@ def load_Chart_at_name():
             "电子学": 1,
             "话术": 5,
             "斗殴": 25,
-            "电锯": 10,
+            "链锯": 10,
             "斧头": 25,
             "连枷": 10,
             "矛": 20,
@@ -900,6 +375,23 @@ def load_Chart_at_name():
             "读唇": 1,
             "催眠": 1,
             "炮术": 1,
+            "DB": 1,
+            "#斗殴": "1D3+DB",
+            "#链锯": "2D8穿",
+            "#斧头": "1D8+2+DB穿",
+            "#连枷": "1D8+DB",
+            "#矛": "1D8+1穿",
+            "#剑": "1D6+DB穿",
+            "#鞭子": "1D3+DB/2",
+            "#弓": "1D6+DB/2",
+            "#手枪": "1D8穿",
+            "#重武器": "5D10穿",
+            "#火焰喷射器": "2D6+烧穿",
+            "#机枪": "2D6+4穿",
+            "#步枪": "1D6+1穿",
+            "#霰弹枪": "4D6/2D6/1D6",
+            "#冲锋枪": "1D10穿",
+            "#步枪/霰弹枪": "1D6+1穿",
             "_AvatarPath": ""
         }
             , "DiceBot": {
@@ -960,7 +452,7 @@ def load_Chart_at_name():
                 "电子学": 1,
                 "话术": 5,
                 "斗殴": 25,
-                "电锯": 10,
+                "链锯": 10,
                 "斧头": 25,
                 "连枷": 10,
                 "矛": 20,
@@ -1036,150 +528,30 @@ def load_Chart_at_name():
                 "爆破": 1,
                 "读唇": 1,
                 "催眠": 1,
-                "炮术": 1
+                "炮术": 1,
+                "DB": 1,
+                "#斗殴": "1D3+DB",
+                "#链锯": "2D8穿",
+                "#斧头": "1D8+2+DB穿",
+                "#连枷": "1D8+DB",
+                "#矛": "1D8+1穿",
+                "#剑": "1D6+DB穿",
+                "#鞭子": "1D3+DB/2",
+                "#弓": "1D6+DB/2",
+                "#手枪": "1D8穿",
+                "#重武器": "5D10穿",
+                "#火焰喷射器": "2D6+烧穿",
+                "#机枪": "2D6+4穿",
+                "#步枪": "1D6+1穿",
+                "#霰弹枪": "4D6/2D6/1D6",
+                "#冲锋枪": "1D10穿",
+                "#步枪/霰弹枪": "1D6+1穿",
+                "_AvatarPath": ""
             }
         }
     except json.JSONDecodeError as e:
         print(f"Error in JSON decoding: {e}")
         print(f"Problematic data: {file.read()}")
-
-
-role_Chart_detail_demo = {
-    "EDU": 0,
-    "APP": 0,
-    "DEX": 0,
-    "STR": 0,
-    "INT": 0,
-    "CON": 0,
-    "POW": 0,
-    "SIZ": 0,
-    "LUCK": 0,
-    "教育": "EDU",
-    "外貌": "APP",
-    "敏捷": "DEX",
-    "力量": "STR",
-    "智力": "INT",
-    "体质": "CON",
-    "灵感": "INT",
-    "意志": "POW",
-    "体型": "SIZ",
-    "幸运": "LUCK",
-    "MOV": 8,
-    "HP": "(CON+SIZ)/10",
-    "MP": "POW/5",
-    "SAN": "POW",
-    "克苏鲁神话": 0,
-    "克苏鲁": 0,
-    "cm": 0,
-    "信用": 0,
-    "信用评级": 0,
-    "会计": 5,
-    "表演": 5,
-    "美术": 5,
-    "写作": 5,
-    "书法": 5,
-    "木匠": 5,
-    "厨艺": 5,
-    "舞蹈": 5,
-    "歌剧": 5,
-    "声乐": 5,
-    "摄影": 5,
-    "雕塑": 5,
-    "伪造": 5,
-    "陶艺": 5,
-    "人类学": 1,
-    "估价": 5,
-    "考古学": 1,
-    "魅惑": 15,
-    "攀爬": 20,
-    "计算机": 5,
-    "计算机使用": 5,
-    "电脑": 5,
-    "乔装": 5,
-    "闪避": "DEX/2",
-    "汽车驾驶": 20,
-    "电气维修": 10,
-    "电子学": 1,
-    "话术": 5,
-    "斗殴": 25,
-    "电锯": 10,
-    "斧头": 25,
-    "连枷": 10,
-    "矛": 20,
-    "剑": 20,
-    "鞭子": 5,
-    "弓": 15,
-    "手枪": 20,
-    "重武器": 10,
-    "火焰喷射器": 10,
-    "机枪": 10,
-    "步枪": 25,
-    "霰弹枪": 25,
-    "步枪/霰弹枪": 25,
-    "冲锋枪": 15,
-    "急救": 30,
-    "历史": 5,
-    "恐吓": 15,
-    "跳跃": 20,
-    "拉丁语": 1,
-    "汉语": 1,
-    "日语": 1,
-    "英语": 1,
-    "德语": 1,
-    "法语": 1,
-    "西班牙语": 1,
-    "意大利语": 1,
-    "丹麦语": 1,
-    "土著语": 1,
-    "格陵兰语": 1,
-    "俄语": 1,
-    "母语": "EDU",
-    "法律": 5,
-    "图书馆": 20,
-    "聆听": 20,
-    "锁匠": 1,
-    "机械维修": 10,
-    "医学": 1,
-    "博物学": 10,
-    "天文学": 1,
-    "生物学": 1,
-    "植物学": 1,
-    "化学": 1,
-    "数学": 1,
-    "密码学": 1,
-    "工程学": 1,
-    "法学": 1,
-    "司法科学": 1,
-    "地质学": 1,
-    "气象学": 1,
-    "药学": 1,
-    "物理学": 1,
-    "动物学": 1,
-    "领航": 10,
-    "神秘学": 5,
-    "重型机械": 1,
-    "说服": 10,
-    "精神分析": 1,
-    "驾驶": 1,
-    "飞行器驾驶": 1,
-    "船驾驶": 1,
-    "心理学": 10,
-    "骑术": 5,
-    "科学": 1,
-    "妙手": 10,
-    "侦查": 25,
-    "潜行": 20,
-    "生存": 10,
-    "游泳": 20,
-    "投掷": 20,
-    "追踪": 10,
-    "驯兽": 5,
-    "潜水": 1,
-    "爆破": 1,
-    "读唇": 1,
-    "催眠": 1,
-    "炮术": 1
-}
 
 role_Chart = load_Chart()
 role_Chart_at_name = load_Chart_at_name()
@@ -1226,12 +598,13 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n--features" \
-                       "\n掷骰栏回车发送\n武器伤害Built-in\n输出染色HTML(坑)" \
-                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n\n"
+                       "\n掷骰栏回车发送\n\n输出染色HTML(坑)" \
+                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n\n" \
+                       "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
         # 初始化输出聊天LOG按钮
@@ -1318,6 +691,7 @@ class ChatApp:
                            "\n\n【对抗骰】在角色消息栏@其他对抗人 并点击掷骰" \
                            "\n\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
                            "\n\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色）" \
+                           "\n\n【.st】输入后点击发送按钮或回车（而不是掷骰按钮）" \
                            "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字来触发检定（例如“我使用斗殴击晕敌人”）"
             self.role_entries[role].insert(tk.END, initial_text)
 
@@ -1328,6 +702,7 @@ class ChatApp:
         MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
         MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
         POW = role_Chart_detail.get("POW")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+        DB = role_Chart_detail.get("DB")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
         entry2 = tk.Text(frame, wrap=tk.WORD, width=10, height=6)
         entry2.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
         value_tag = f"{role}_values_tag"
@@ -1335,7 +710,7 @@ class ChatApp:
         entry2.tag_config(value_tag, justify=tk.LEFT)
         self.role_values_tags_text = load_PL_INFO()
         if role not in self.role_values_tags_text:
-            entry2.insert(tk.END, f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV', value_tag)
+            entry2.insert(tk.END, f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB', value_tag)
         else:
             entry2.insert(tk.END, self.role_values_tags_text[role], value_tag)
         self.role_values_entry[role] = entry2
@@ -1416,11 +791,14 @@ class ChatApp:
             log = f"{self.role_entries_name[role]} {timestamp}\n{message}\n\n"  # 不加引号
             if message.startswith(".st") or message.startswith("。st"):
                 message = message[len("st") + 1:].strip()
+
                 parts_skill = re.findall(r'([\u4e00-\u9fa5a-zA-Z\s]+)(\d+)', message)
-                if ("+" or "-" or "*" or "/") in message:
-                    parts = re.findall(r'([\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
-                    role_Chart[role][str(parts[0][0]).upper()] = eval(
-                        str(role_Chart_detail[str(parts[0][0]).upper()]) + parts[0][1] + parts[0][2])
+                if ("+" or "-" or "*" or "/") in message and "#" not in message:
+                    parts = re.findall(r'([#+][\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
+                    #print(str(parts[0][0]).upper())
+                    if parts and len(parts) > 0 and len(parts[0]) > 0:
+                        role_Chart[role][str(parts[0][0]).upper()] = eval(
+                            str(role_Chart_detail[str(parts[0][0]).upper()]) + parts[0][1] + parts[0][2])
                     # print(str(parts[0][0]).upper()+":"+str(role_Chart[role][str(parts[0][0]).upper()]))
                     self.chat_log.insert(tk.END,
                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n\n')
@@ -1437,22 +815,29 @@ class ChatApp:
                 MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 POW = role_Chart_detail.get("POW")
+                DB = role_Chart_detail.get("DB")
+                if "#SAN" in role_Chart_detail:
+                    _SAN = role_Chart_detail.get("#SAN")
+                else:
+                    _SAN = 100
                 self.role_values_entry[role].insert("1.0",
-                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                    f'{SAN}/{POW}/{_SAN}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
-                self.role_entries[role].insert(tk.END, "已录入！")
                 # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
                 # MOV}\n\n\n')
-
-                if "HP" in str(parts_skill[0][0]).upper() or "MP" in str(parts_skill[0][0]).upper() or "SAN" in str(
-                        parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
-                    self.chat_log.insert(tk.END,
-                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-                else:
-                    if len(parts_skill) == 1:
+                if parts_skill and len(parts_skill) > 0 and len(parts_skill[0]) > 0:
+                    self.role_entries[role].insert(tk.END, "已录入！")
+                    if "HP" in str(parts_skill[0][0]).upper() or "MP" in str(parts_skill[0][0]).upper() or "SAN" in str(
+                            parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
                         self.chat_log.insert(tk.END,
-                                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
+                                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                    else:
+                        if len(parts_skill) == 1 and "#" not in message:
+                            self.chat_log.insert(tk.END,
+                                                       f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
+                else:
+                    self.role_entries[role].insert(tk.END, "已刷新！")
             else:
                 self.chat_log.insert(tk.END, log)
                 # 滚动到最底部
@@ -1462,13 +847,23 @@ class ChatApp:
     def parse_input_skill(self, input_string):
         skills = {}
         # 使用正则表达式从输入字符串中提取技能和值的组合
-        pattern = re.compile(r'([\u4e00-\u9fa5a-zA-Z\s]+)(\d+)')
-        matches = pattern.findall(input_string)
-
-        for match in matches:
-            skill_name = match[0].strip()
-            skill_value = int(match[1])
+        if "@" in input_string:
+            input_string = input_string[1:]
+            input_string = input_string.split("@")
+            skill = input_string[0]
+            modifier = input_string[1]
+            print(skill)
+            print(modifier)
+            skill_name = "#" + skill.strip().upper()
+            skill_value = modifier
             skills[skill_name] = skill_value
+        else:
+            pattern = re.compile(r'([\u4e00-\u9fa5a-zA-Z\s]+)(\d+)')
+            matches = pattern.findall(input_string)
+            for match in matches:
+                skill_name = match[0].strip().upper()
+                skill_value = int(match[1])
+                skills[skill_name] = skill_value
         print(skills)
         return skills
 
@@ -1490,7 +885,7 @@ class ChatApp:
             old_dict["POW"] = old_dict["意志"]
             old_dict["SIZ"] = old_dict["体型"]
             old_dict["LUCK"] = old_dict["幸运"]
-        if old_dict["SIZ"] != 0 and old_dict["体型"] == 0:
+        if old_dict["SIZ"] >= 0 and (old_dict["体型"] == "SIZ"):
             old_dict["教育"] = old_dict["EDU"]
             old_dict["外貌"] = old_dict["APP"]
             old_dict["敏捷"] = old_dict["DEX"]
@@ -1521,6 +916,24 @@ class ChatApp:
             old_dict["信用"] = old_dict["信用评级"]
         else:
             old_dict["信用评级"] = old_dict["信用"]
+        if old_dict["MOV"] == 8:
+            if old_dict["敏捷"] < old_dict["体型"]:
+                old_dict["MOV"] = 7
+            else:
+                old_dict["MOV"] = 9
+        if old_dict["力量"] + old_dict["体型"] <= 164:
+            old_dict["DB"] = "1(+1D4)"
+            if old_dict["力量"] + old_dict["体型"] <= 124:
+                old_dict["DB"] = "0(0)"
+            if old_dict["力量"] + old_dict["体型"] <= 84:
+                old_dict["DB"] = "-1(-1)"
+            if old_dict["力量"] + old_dict["体型"] <= 64:
+                old_dict["DB"] = "-2(-2)"
+            if old_dict["力量"] + old_dict["体型"] <= 0:
+                old_dict["DB"] = "0(0)"
+        else:
+            old_dict["DB"] = "2(+1D6)"
+        old_dict["#SAN"] = 100 - old_dict["克苏鲁神话"]
         self.save_role_skill_at_name()
 
     def edit_role_name(self, event, role, label):
@@ -1558,8 +971,9 @@ class ChatApp:
                 MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 POW = role_Chart_detail.get("POW")
+                DB = role_Chart_detail.get("DB")
                 self.role_values_entry[role].insert("1.0",
-                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert(tk.END, "已录入！")
                 # self.chat_log.insert(tk.END,
@@ -1817,11 +1231,22 @@ class ChatApp:
                 string_list = ["不可名状的原因", "懒得写原因", "", "", ""]
                 # 从列表中随机选择一个字符串
                 reason = random.choice(string_list)
-
+            role_Chart_detail = role_Chart.get(role, {})
             expression = self.role_entries_roll[role].get("1.0", tk.END).strip().lower()
+            weapon_list = {}
+            for skill, value in role_Chart_detail.items():
+                if "#" in skill:
+                    weapon_list[skill.replace("#", "")] = value
+            for weapon, value in weapon_list.items():
+                if weapon in expression:
+                    self.role_entries_roll[role].delete("1.0", tk.END)
+                    self.role_entries_roll[role].insert("1.0", f"{value}")
+                    break
+                    # print("sadadd:" + value)
+
             if expression == "":
                 expression = "1d100"
-            if enemy_matches != None:
+            if enemy_matches is not None:
                 for enemy in enemy_matches:
                     for key, nickname in self.role_entries_name.items():
                         if enemy == nickname:
@@ -1832,7 +1257,17 @@ class ChatApp:
                     else:
                         # self.enemy_matches[enemy] = expression + self.role_entries_roll[enemy].get("1.0", tk.END).strip()
                         self.enemy_matches[enemy] = self.role_entries_roll[enemy].get("1.0", tk.END).strip()
-            role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                    weapon_list_ = {}
+                    role_Chart_detail_ = role_Chart.get(role_, {})
+                    for skill, value in role_Chart_detail_.items():
+                        if "#" in skill:
+                            weapon_list_[skill.replace("#", "")] = value
+                    for weapon, value in weapon_list_.items():
+                        if weapon in expression_:
+                            self.role_entries_roll[role_].delete("1.0", tk.END)
+                            self.role_entries_roll[role_].insert("1.0", f"{value}")
+                            break
+                            #print("sadadd2:" + value)
             for skill in role_Chart_detail:
                 if skill in reason:
                     expression = skill
@@ -1842,6 +1277,16 @@ class ChatApp:
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                     reason = skill
+                    weapon_list_ = {}
+                    for skill, value in role_Chart_detail.items():
+                        if "#" in skill:
+                            weapon_list_[skill.replace("#", "")] = value
+                    for weapon, value in weapon_list_.items():
+                        if weapon in expression:
+                            self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"{value}")
+                            break
+                            # print("sadadd2:" + value)
             if enemy_matches is not None:
                 for enemy in self.enemy_matches:
                     role_ = ""
@@ -1885,6 +1330,16 @@ class ChatApp:
                     self.role_entries[role].delete("1.0", tk.END)
                     if len(parts_) > 1:
                         self.role_entries[role].insert(tk.END, parts_[1])
+
+                    weapon_list_ = {}
+                    role_Chart_detail_ = role_Chart.get(role, {})
+                    for skill, value in role_Chart_detail_.items():
+                        if "#" in skill:
+                            weapon_list_[skill.replace("#", "")] = value
+                    for weapon, value in weapon_list_.items():
+                        if weapon in expression:
+                            self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"{value}")
 
         else:
             if role == "DiceBot":
@@ -1968,7 +1423,7 @@ class ChatApp:
             for role, skills in role_Chart.items():
                 txt_file.write(f"【{role}】-{self.role_entries_name[role]}\n.st")
                 for skill, value in skills.items():
-                    if skill == "_AvatarPath":
+                    if skill == "_AvatarPath" or ("#" in skill) or (skill == "DB"):
                         pass
                     else:
                         txt_file.write(f"{skill}{value} ")
@@ -2017,7 +1472,7 @@ class TRPGModule:
         upgrade = ""
         if "None" not in skill_name and "教育" not in skill_name and "魅力" not in skill_name and "力量" not in skill_name and "敏捷" not in skill_name and "外貌" not in skill_name and "智力" not in skill_name and "体质" not in skill_name and "灵感" not in skill_name and "意志" not in skill_name and "体型" not in skill_name and "信用" not in skill_name and "幸运" not in skill_name and "MOV" not in skill_name and "HP" not in skill_name and "MP" not in skill_name and "SAN" not in skill_name and "克苏鲁" not in skill_name and (
                 f".st{skill_name}" not in self.ChatApp.role_values_entry[role].get("1.0",
-                                                                                   tk.END).strip()) and skill_name != "":  # 成长检定
+                                                                                   tk.END).strip()) and skill_name != "" and "DB" not in skill_name:  # 成长检定
             # 执行d100掷骰
             rolls = [random.randint(1, 100) for _ in range(1)]
             result = sum(rolls)
@@ -2343,8 +1798,9 @@ class TRPGModule:
                             MOV = role_Chart[role].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                             POW = role_Chart[role].get("POW")
                             SAN = role_Chart[role].get("SAN")
+                            DB = role_Chart[role].get("DB")
                             self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                        f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                        f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB\n===\n')
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                             return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，扣除{result2}点SAN。"
@@ -2359,8 +1815,9 @@ class TRPGModule:
                             MOV = role_Chart[role].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                             POW = role_Chart[role].get("POW")
                             SAN = role_Chart[role].get("SAN")
+                            DB = role_Chart[role].get("DB")
                             self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                        f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                        f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB\n===\n')
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                             return f"{result}/{info}={result2}：San Check成功，扣除{result2}点SAN。"
@@ -2379,8 +1836,9 @@ class TRPGModule:
                         MOV = role_Chart[role].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                         POW = role_Chart[role].get("POW")
                         SAN = role_Chart[role].get("SAN")
+                        DB = role_Chart[role].get("DB")
                         self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB\n===\n')
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                         return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！扣除{result2}点SAN。"
@@ -2392,8 +1850,9 @@ class TRPGModule:
                         MOV = role_Chart[role].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                         POW = role_Chart[role].get("POW")
                         SAN = role_Chart[role].get("SAN")
+                        DB = role_Chart[role].get("DB")
                         self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n===\n')
+                                                                    f'{SAN}/{POW}:SAN\n10/{HP}:HP\n5/{MP}:MP\n5/{MOV}:MOV\n{DB}:DB\n===\n')
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
                         return f"{result}/{info}={result2}：San Check失败！扣除{result2}点SAN。"
