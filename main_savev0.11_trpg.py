@@ -1310,7 +1310,8 @@ class ChatApp:
 
                 parts_skill = re.findall(r'([\u4e00-\u9fa5a-zA-Z\s]+)(\d+)', message)
                 if ("+" or "-" or "*" or "/") in message and "#" not in message:
-                    parts = re.findall(r'([#+][\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
+                    parts = re.findall(r'([#+]?[\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
+                    print(parts)
                     #print(str(parts[0][0]).upper())
                     if parts and len(parts) > 0 and len(parts[0]) > 0:
                         role_Chart[role][str(parts[0][0]).upper()] = eval(
@@ -1336,8 +1337,33 @@ class ChatApp:
                     _SAN = role_Chart_detail.get("#SAN")
                 else:
                     _SAN = 100
-                self.role_values_entry[role].insert("1.0",
-                                                    f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                if "HP" in message:
+                    HP_ = self.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip()
+                    self.role_values_entry[role].delete("2.0", "3.0")
+                    self.role_values_entry[role].insert("2.0",
+                                                        f'{HP_}/{HP}:HP\n')
+                if "MP" in message:
+                    MP_ = self.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip()
+                    self.role_values_entry[role].delete("3.0", "4.0")
+                    self.role_values_entry[role].insert("3.0",
+                                                        f'{MP_}/{MP}:MP\n')
+                if "SAN" in message:
+                    SAN_ = self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
+                    self.role_values_entry[role].delete("1.0", "2.0")
+                    self.role_values_entry[role].insert("1.0",
+                                                        f'{SAN_}/{POW}/{_SAN}:S')
+                if "MOV" in message:
+                    MOV_ = self.role_values_entry[role].get("4.0", "5.0").split("/")[0].strip()
+                    self.role_values_entry[role].delete("4.0", "5.0")
+                    self.role_values_entry[role].insert("4.0",
+                                                        f'{MOV_}/{MOV}:MOV\n')
+                if "DB" in message:
+                    DB_ = self.role_values_entry[role].get("5.0", "6.0").split("/")[0].strip()
+                    self.role_values_entry[role].delete("5.0", "6.0")
+                    self.role_values_entry[role].insert("5.0",
+                                                        f'{DB_}/{DB}:DB\n')
+                #self.role_values_entry[role].insert("1.0",
+                                                    #f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
@@ -2464,7 +2490,7 @@ class TRPGModule:
                             self.ChatApp.role_values_entry[role].insert("1.0",
                                                                         f'{SAN}/{POW}:SAN\n')
                             self.ChatApp.chat_log.insert(tk.END,
-                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_success)
@@ -2478,7 +2504,7 @@ class TRPGModule:
                             self.ChatApp.role_values_entry[role].insert("1.0",
                                                                         f'{SAN}/{POW}:SAN\n')
                             self.ChatApp.chat_log.insert(tk.END,
-                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             return f"{result}/{info}={result2}：San Check成功，扣除{result2}点SAN。"
                 else:
                     if "d" in sc_fail:
@@ -2496,7 +2522,7 @@ class TRPGModule:
                         self.ChatApp.role_values_entry[role].insert("1.0",
                                                                     f'{SAN}/{POW}:SAN\n')
                         self.ChatApp.chat_log.insert(tk.END,
-                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                         return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_fail)
@@ -2507,7 +2533,7 @@ class TRPGModule:
                         self.ChatApp.role_values_entry[role].insert("1.0",
                                                                     f'{SAN}/{POW}:SAN\n')
                         self.ChatApp.chat_log.insert(tk.END,
-                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：\n{self.ChatApp.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                         return f"{result}/{info}={result2}：San Check失败！扣除{result2}点SAN。"
 
             if ("+" or "-" or "*" or "/") in expression:
