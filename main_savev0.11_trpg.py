@@ -15,10 +15,10 @@ import json
 # logging.basicConfig(level=logging.DEBUG)  # 设置日志级别为 DEBUG
 
 # 便于直接编辑的一系列字符串
-string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。"]
+string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]
 string_list_Extreme_Success = ["（深呼吸）...极难成功！恭喜您！", "极难成功！恭喜您。"]
 string_list_Hard_Success = ["困难成功！"]
-string_list_Success = ["鉴定成功，期待您的表现。"]
+string_list_Success = ["检定成功，期待您的表现。", "检定成功，请多加利用/微笑"]
 string_list_Failure = ["失败了，请您不要灰心..."]
 string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 
@@ -1084,11 +1084,12 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n--features" \
                        "\n输出染色HTML(坑)" \
+                       "\n骰子性格：针对每个技能单独comment(坑)" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n"\
                        "===以上可删除===\n\n"
