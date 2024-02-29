@@ -1,4 +1,5 @@
 import math
+import os
 import re
 from random import random
 import random
@@ -1139,19 +1140,23 @@ class ChatApp:
                        "\n--features" \
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
-                       "\n简易小地图" \
+                       "\n继续优化简易小地图" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n"\
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
+
+        # 创建按钮，点击按钮时调用 open_new_window 函数
+        new_window_button = tk.Button(root, text="打开新窗口", command=self.open_new_window)
+        new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
         # 初始化输出聊天LOG按钮
         output_button = tk.Button(root, text="输出聊天LOG", command=self.output_chat_log)
         output_button.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
 
         # 初始化输出HTML按钮
-        output_html_button = tk.Button(root, text="输出HTML(施工中)", command=self.output_html_log)
-        output_html_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
+        # output_html_button = tk.Button(root, text="输出HTML(施工中)", command=self.output_html_log)
+        # output_html_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
         # 初始化角色对应的文字输入框、发送按钮和角色名编辑
         self.role_entries_frame = {}
@@ -2204,6 +2209,69 @@ class ChatApp:
         result = self.trpg_module.roll(expression, role)
         self.role_entries[role].insert(tk.END, result)
 
+    def set_start_point(self, event):
+        self.start_x = event.x
+        self.start_y = event.y
+
+    def draw(self, event):
+        if self.start_x is not None and self.start_y is not None:
+            x, y = event.x, event.y
+            self.canvas.create_line(self.start_x, self.start_y, x, y, width=2)
+            self.start_x = x
+            self.start_y = y
+
+    def stop_drawing(self, event):
+        # 鼠标松开时的事件处理函数
+        self.start_x = None
+        self.start_y = None
+
+    # 新窗口
+    def open_new_window(self):
+        new_window = tk.Toplevel(root)
+        new_window.title("地图")
+        self.image_references = []  # Add this list attribute to store references to images
+
+        #text = self.time_log.get("1.0", tk.END).strip()
+        label = tk.Label(new_window, text="地图示意窗口")
+        label.pack()
+
+        # 创建 Canvas 组件
+        self.canvas = tk.Canvas(new_window, width=400, height=400, bg="white")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        # 记录鼠标位置
+        self.start_x = None
+        self.start_y = None
+
+        # 绑定鼠标事件
+        self.canvas.bind("<B3-Motion>", self.draw)
+        self.canvas.bind("<Button-3>", self.set_start_point)
+
+        self.draggable_items = {}
+        radius = 0.13
+        x = 100
+        y = 200
+        for _avatar, _avatar_paths in self.role_avatar_paths.items():
+            if os.path.exists(_avatar_paths):
+                with open(_avatar_paths, "rb") as f:
+                    image = Image.open(f)
+                    width, height = image.size
+                    image = image.resize((int(width * radius), int(height * radius)), Image.LANCZOS)
+                    photo = ImageTk.PhotoImage(image)
+                    #circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
+                    #self.canvas.create_image(x, y, image=photo)
+                    # 保持对图像的引用，防止被垃圾回收
+                    # self.canvas.image = photo
+                    # Keep references to all images
+                    self.image_references.append(photo)
+                    # Create draggable image
+                draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo)
+                x += 100
+                self.draggable_items[_avatar] = draggable_image
+        # Create draggable rectangle
+        draggable_rectangle = DraggableItem(self.canvas, 150, 150, 100, 80, fill='white', outline='black')
+
+
     def save_settings(self):
         # 将头像路径保存到JSON文件
         with open('avatar_settings.json', 'w') as file:
@@ -3011,6 +3079,26 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, reply + date)
         print("Adding 7 days")
 
+class DraggableItem:
+    def __init__(self, canvas, x, y, width, height, fill=None, image=None, outline=None):
+        self.canvas = canvas
+        if image:
+            self.item = canvas.create_image(x, y, image=image, tags="draggable")
+        else:
+            self.item = canvas.create_rectangle(x, y, x + width, y + height, fill=fill, outline=outline, tags="draggable")
+        self.canvas.tag_bind(self.item, "<ButtonPress-1>", self.on_press)
+        self.canvas.tag_bind(self.item, "<B1-Motion>", self.on_drag)
+
+    def on_press(self, event):
+        self.start_x = event.x
+        self.start_y = event.y
+
+    def on_drag(self, event):
+        delta_x = event.x - self.start_x
+        delta_y = event.y - self.start_y
+        self.canvas.move(self.item, delta_x, delta_y)
+        self.start_x = event.x
+        self.start_y = event.y
 
 
 if __name__ == "__main__":
