@@ -4,7 +4,7 @@ from random import random
 import random
 import tkinter as tk
 from tkinter import scrolledtext, filedialog
-from datetime import datetime
+from datetime import datetime, timedelta
 import configparser
 
 from PIL import Image, ImageTk
@@ -21,6 +21,27 @@ string_list_Hard_Success = ["困难成功！"]
 string_list_Success = ["检定成功，期待您的表现。", "检定成功，请多加利用/微笑"]
 string_list_Failure = ["失败了，请您不要灰心..."]
 string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
+
+#timer计算
+place = "某地"
+weather = "晴"
+time = datetime.now().strftime("%H:%M")
+date = datetime.now().strftime("%Y/%m/%d %A")
+#自动Timer计算
+time_1min = ["斗殴", "闪避", "链锯", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救", "跳跃", "困难跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷"]
+time_5min = ["困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "重武器", "火焰喷射器", "医学", "困难急救", "锁匠", "领航", "极难跳跃", "极难攀爬", "困难妙手", "潜行", "极难投掷"]
+time_10min = ["表演","美术","写作","书法","舞蹈","歌剧","声乐","摄影","极难侦查", "极难聆听", "极难心理学", "困难恐吓", "困难说服", "困难魅惑", "困难话术", "极难急救", "困难锁匠", "困难领航", "极难妙手", "困难潜行"]
+time_30min = ["极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "图书馆", "计算机", "电脑", "困难会计", "极难潜行","木匠","厨艺","雕塑","伪造","陶艺"]
+time_1h = ["困难表演","困难美术","困难写作","困难书法","困难舞蹈","困难歌剧","困难声乐","困难摄影","困难电气维修", "困难电子学", "困难机械维修", "极难锁匠", "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计"]
+time_3h = ["极难表演","极难书法","极难舞蹈","极难歌剧","极难声乐","极难摄影","极难电子学", "极难电气维修", "极难医学", "极难精神分析", "极难追踪", "极难计算机", "极难电脑","困难雕塑","困难伪造","困难陶艺","困难木匠","困难厨艺"]
+time_12h = ["极难图书馆","极难美术","极难写作","极难木匠","极难厨艺","极难雕塑","极难伪造","极难陶艺"]
+time_1d = []
+time_1w = []
+time_skill = {"time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min, "time_30min": time_30min,
+              "time_1h": time_1h, "time_3h": time_3h, "time_12h": time_12h, "time_1d": time_1d,
+              "time_1w": time_1w}
+
+env = {"Place": place, "Weather": weather, "Time": time, "Date": date}
 
 Fumble_SKill = 20  # 启用96以上大失败的技能水平
 Critical_Success_SKill = 60  # 启用5以下大成功的技能水平
@@ -59,6 +80,16 @@ def load_DiceBot_personality():
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
         return bot_personality_by_name_
+
+def load_env():
+    try:
+        # 尝试从JSON文件加载
+        with open('env_info.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return env
+
 
 
 def load_settings_name():
@@ -1053,7 +1084,7 @@ class ChatApp:
                                      " - 沃姆是不能飞的，所以你一说飞天沃姆，我想到的是被打飞的沃姆你知道吗", " - INTJ可不会被绊倒 —— 会被ENTJ绊倒", " - 我不懂，我没有背叛过陛下", " - 陛下束紧了我的缰绳，让我无法发疯", " - 陛下，您离遍布生物圈又近了一步", " - 突然感受到了人类的可爱，我祝福人类（拿着橄榄枝洒圣水）", " - 我去带陛下做核酸", " - 白宫：警惕蛾族打旧日之光牌", " - 给我一个世设，我能适配整只陛下", " - 死了也是死在陛下怀里", " - 陛下一笑倾城，圣巢虫子都跳虚空自杀了以保陛下周全", " - 太久不上供 就会被踢出白宫", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v0.73" + encouragement)
+        self.root.title("自嗨团 v0.75" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("icon.ico")
@@ -1083,18 +1114,33 @@ class ChatApp:
         toggle_button.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
         self.trpg_toggle = "off"
 
+        global date
+        global time
+        global place
+        global weather
+        # 初始化时间、地点记录栏
+        self.env = load_env()
+        date = self.env["Date"]
+        time = self.env["Time"]
+        place = self.env["Place"]
+        weather = self.env["Weather"]
+        self.time_log = tk.Text(root, wrap=tk.WORD, width=10, height=0)
+        self.time_log.grid(row=3, column=2, padx=10, pady=10, rowspan=3, sticky="nsew")
+        self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" +date)
+
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n#Armor\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..）" \
                        "\n--features" \
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
-                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n\n" \
+                       "\n简易小地图" \
+                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n"\
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
@@ -1489,7 +1535,13 @@ class ChatApp:
                 old_dict["DB"] = "0(0)"
         else:
             old_dict["DB"] = "2(+1D6)"
+        if "图书馆使用" not in old_dict or old_dict["图书馆使用"] == 0:
+            old_dict["图书馆使用"] = old_dict["图书馆"]
+        if "图书馆使用" in old_dict and old_dict["图书馆"] == 0:
+            old_dict["图书馆"] = old_dict["图书馆使用"]
 
+        if "ARMOR" not in old_dict:
+            old_dict["ARMOR"] = 0
         old_dict["#SAN"] = 100 - old_dict["克苏鲁神话"]
         self.save_role_skill_at_name()
 
@@ -1852,17 +1904,6 @@ class ChatApp:
                 reason = random.choice(string_list)
             role_Chart_detail = role_Chart.get(role, {})
             expression = self.role_entries_roll[role].get("1.0", tk.END).strip().lower()
-            weapon_list = {}
-            for skill, value in role_Chart_detail.items():
-                if "#" in skill:
-                    weapon_list[skill.replace("#", "")] = value
-            for weapon, value in weapon_list.items():
-                if weapon in expression:
-                    self.role_entries_roll[role].delete("1.0", tk.END)
-                    self.role_entries_roll[role].insert("1.0", f"{value}")
-                    # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
-                    break
-                    # print("sadadd:" + value)
 
             if expression == "":
                 expression = "1d100"
@@ -1877,18 +1918,7 @@ class ChatApp:
                     else:
                         # self.enemy_matches[enemy] = expression + self.role_entries_roll[enemy].get("1.0", tk.END).strip()
                         self.enemy_matches[enemy] = self.role_entries_roll[enemy].get("1.0", tk.END).strip()
-                    weapon_list_ = {}
-                    role_Chart_detail_ = role_Chart.get(role_, {})
-                    for skill, value in role_Chart_detail_.items():
-                        if "#" in skill:
-                            weapon_list_[skill.replace("#", "")] = value
-                    for weapon, value in weapon_list_.items():
-                        if weapon in expression_:
-                            self.role_entries_roll[role_].delete("1.0", tk.END)
-                            self.role_entries_roll[role_].insert("1.0", f"{value}")
-                            # self.role_entries[role_].insert(tk.END, f"{weapon}伤害")
-                            break
-                            #print("sadadd2:" + value)
+
             for skill in role_Chart_detail:
                 if skill in reason:
                     expression = skill
@@ -1898,17 +1928,7 @@ class ChatApp:
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                     reason = skill
-                    weapon_list_ = {}
-                    for skill, value in role_Chart_detail.items():
-                        if "#" in skill:
-                            weapon_list_[skill.replace("#", "")] = value
-                    for weapon, value in weapon_list_.items():
-                        if weapon in expression:
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"{value}")
-                            # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
-                            break
-                            # print("sadadd2:" + value)
+
             if enemy_matches is not None:
                 for enemy in self.enemy_matches:
                     role_ = ""
@@ -1973,6 +1993,7 @@ class ChatApp:
                         weapon_list_ = {}
                         if parts_ and "成功" in parts_[1]:
                             role_Chart_detail_ = role_Chart.get(role, {})
+                            #DB_ = role_Chart_detail_["DB"]
                             for skill, value in role_Chart_detail_.items():
                                 if "#" in skill:
                                     weapon_list_[skill.replace("#", "")] = value
@@ -1981,8 +2002,16 @@ class ChatApp:
                                     self.role_entries_roll[role].delete("1.0", tk.END)
                                     self.role_entries_roll[role].insert("1.0", f"{value}")
                                     self.role_entries[role].insert("1.0", f"[{weapon}]伤害\n")
-                                    if role == "KP":
-                                        break
+                                    for role_armor in self.roles:
+                                        if role_armor != role and "ARMOR:" in str(self.role_entries_roll[role_armor]):
+                                            role_Chart_detail_armor = role_Chart.get(role, {})
+                                            if "ARMOR" in role_Chart_detail_armor:
+                                                value_armor = role_Chart_detail_armor["ARMOR"]
+                                            else:
+                                                value_armor = 0
+                                            self.role_entries_roll[role_armor].delete("1.0", tk.END)
+                                            self.role_entries_roll[role_armor].insert("1.0",
+                                                                                      f"ARMOR:{value_armor}")
                             if "急救" in expression:
                                 self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
                             if "医学" in expression:
@@ -1998,6 +2027,17 @@ class ChatApp:
                                 self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
                                 self.role_entries_roll[role].delete("1.0", tk.END)
                                 self.role_entries_roll[role].insert("1.0", f"1d6")
+                        if parts_ and "失败" in parts_[1]:
+                            for weapon, value in weapon_list_.items():
+                                #print(weapon_list_)
+                                if weapon in expression:
+                                    role_Chart_detail_armor = role_Chart.get(role, {})
+                                    if "ARMOR" in role_Chart_detail_armor:
+                                        value_armor = role_Chart_detail_armor["ARMOR"]
+                                    else:
+                                        value_armor = 0
+                                    self.role_entries_roll[role].delete("1.0", tk.END)
+                                    self.role_entries_roll[role].insert("1.0", f"ARMOR:{value_armor}")
 
         else:
             if role == "DiceBot":
@@ -2043,6 +2083,65 @@ class ChatApp:
                     message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
                 self.chat_log.insert(tk.END, message)
                 self.chat_log.yview(tk.END)
+
+                weapon_list = {}
+                if parts_ and "成功" in parts_[1]:
+                    role_Chart_detail = role_Chart.get(role, {})
+                    for skill, value in role_Chart_detail.items():
+                        if "#" in skill:
+                            weapon_list[skill.replace("#", "")] = value
+                    for weapon, value in weapon_list.items():
+                        if weapon in expression:
+                            self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"{value}")
+                            # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
+                            for role_armor in self.roles:
+                                if role_armor != role:
+                                    role_Chart_detail_armor = role_Chart.get(role, {})
+                                    if "ARMOR" in role_Chart_detail_armor:
+                                        value_armor = role_Chart_detail_armor["ARMOR"]
+                                    else:
+                                        value_armor = 0
+                                    self.role_entries_roll[role_armor].delete("1.0", tk.END)
+                                    self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
+                            break
+                            # print("sadadd:" + value)
+                        if "急救" in expression:
+                            self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                        if "医学" in expression:
+                            self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
+                            self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"1d3")
+                        if "精神分析" in expression:
+                            self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                            self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"1d3")
+                if parts_ and "大失败" in parts_[1]:
+                    if "精神分析" in expression:
+                        self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
+                        self.role_entries_roll[role].delete("1.0", tk.END)
+                        self.role_entries_roll[role].insert("1.0", f"1d6")
+                    for weapon, value in weapon_list.items():
+                        if weapon in expression:
+                            for role_armor in self.roles:
+                                if role_armor != role:
+                                    role_Chart_detail_armor = role_Chart.get(role, {})
+                                    if "ARMOR" in role_Chart_detail_armor:
+                                        value_armor = role_Chart_detail_armor["ARMOR"]
+                                    else:
+                                        value_armor = 0
+                                    self.role_entries_roll[role_armor].delete("1.0", tk.END)
+                                    self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
+                elif parts_ and "失败" in parts_[1]:
+                    role_Chart_detail_armor = role_Chart.get(role, {})
+                    for weapon, value in weapon_list.items():
+                        if weapon in expression:
+                            if "ARMOR" in role_Chart_detail_armor:
+                                value_armor = role_Chart_detail_armor["ARMOR"]
+                            else:
+                                value_armor = 0
+                            self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"ARMOR:{value_armor}")
 
         # 清空输入框文本
         self.role_entries[role].delete("1.0", tk.END)
@@ -2115,6 +2214,17 @@ class ChatApp:
         # 尝试保存自定义角色数值信息
         with open('pl_info.json', 'w') as file:
             json.dump(self.role_values_tags_text, file)
+        # 尝试保存地点时间天气信息
+        with open('env_info.json', 'w', encoding='utf-8') as file:
+            info = self.time_log.get("1.0", tk.END).strip()
+            info = info.split("【时间】")[1]
+            env["Date"] = info.split("【日期】")[1]
+            env["Time"] = info.split("【地点】")[0]
+            info = info.split("【地点】")[1]
+            env["Place"] = info.split("【天气】")[0]
+            info = info.split("【天气】")[1]
+            env["Weather"] = info.split("【日期】")[0]
+            json.dump(env, file)
         # 保存自定义角色数值信息
         with open('pl_Chart.json', 'w', encoding='utf-8') as file:
             json.dump(role_Chart, file)
@@ -2251,6 +2361,10 @@ class TRPGModule:
         return result, adv_comment
 
     def roll(self, expression, role=None):
+        global date
+        global time
+        global place
+        global weather
         combine_infos = {}
         if self.random_seed is not None:
             random.seed(self.random_seed)
@@ -2378,7 +2492,22 @@ class TRPGModule:
                 infos = []
                 upgrades = []
                 comments = []
+
+                time_info = self.ChatApp.time_log.get("1.0", tk.END).strip()
+                time_info = time_info.split("【时间】")[1]
+                date = time_info.split("【日期】")[1]
+                time = time_info.split("【地点】")[0]
+                time_info = time_info.split("【地点】")[1]
+                place = time_info.split("【天气】")[0]
+                time_info = time_info.split("【天气】")[1]
+                weather = time_info.split("【日期】")[0]
+
+                # 自动计算时间
                 for a in combine_infos:
+                    for timer, timerlist in time_skill.items():
+                        for skillname in timerlist:
+                            if a == skillname:
+                                self.move_time_forward(timer)
                     expression = a
                     info = combine_infos[a]
                     skill_name = a
@@ -2451,6 +2580,22 @@ class TRPGModule:
                     expression = part_eng[0][0]
                     info = int(part_eng[0][1])
                     skill_name = "None"
+
+
+                time_info = self.ChatApp.time_log.get("1.0", tk.END).strip()
+                time_info = time_info.split("【时间】")[1]
+                date = time_info.split("【日期】")[1]
+                time = time_info.split("【地点】")[0]
+                time_info = time_info.split("【地点】")[1]
+                place = time_info.split("【天气】")[0]
+                time_info = time_info.split("【天气】")[1]
+                weather = time_info.split("【日期】")[0]
+
+                # 自动计算时间
+                for timer, timerlist in time_skill.items():
+                    for skillname in timerlist:
+                        if expression == skillname:
+                            self.move_time_forward(timer)
                 role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
                     print("困难极难")
@@ -2665,6 +2810,207 @@ class TRPGModule:
                         return f"{'+'.join(map(str, rolls))}={result}"
         except Exception as e:
             return f"Error: {e}"
+
+    def move_time_forward(self, timer):
+        switch_dict = {
+            "time_1sec": self.add_time_1sec,
+            "time_1min": self.add_time_1min,
+            "time_5min": self.add_time_5min,
+            "time_10min": self.add_time_10min,
+            "time_30min": self.add_time_30min,
+            "time_1h": self.add_time_1h,
+            "time_3h": self.add_time_3h,
+            "time_12h": self.add_time_12h,
+            "time_1d": self.add_time_1d,
+            "time_1w": self.add_time_1w,
+        }
+        # 使用 get 方法获取对应时间列表名的函数，如果不存在则返回一个默认函数
+        time_function = switch_dict.get(timer, lambda: print("Invalid time list name"))
+        # 执行函数
+        time_function()
+
+    def add_time_1sec(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(minutes=1)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 1 minute")
+        if time == "00:00":
+            print("新的一天")
+
+    def add_time_1min(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(minutes=1)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 1 minute")
+        if time == "00:00":
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+
+    def add_time_5min(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(minutes=5)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 5 minutes")
+        if time == "00:00":
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+    def add_time_10min(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(minutes=10)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 10 minutes")
+        if time == "00:00":
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+    def add_time_30min(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(minutes=30)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 30 minutes")
+        if time == "00:00":
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+    def add_time_1h(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(hours=1)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 60 minutes")
+        if int(datetime.strftime(base_time, "%H")) >= 23:
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+    def add_time_3h(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(hours=3)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 180 minutes")
+        if int(datetime.strftime(base_time, "%H")) >= 21:
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+    def add_time_12h(self):
+        # 添加处理 time_1min 的代码
+        global time
+        time_format = "%H:%M"
+        base_time = datetime.strptime(time, time_format)
+        time = base_time + timedelta(hours=12)
+        # 将新时间格式化为字符串
+        time = time.strftime(time_format)
+        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        print("Adding 720 minutes")
+        if int(datetime.strftime(base_time, "%H")) >= 12:
+            self.add_time_1d()
+            print("新的一天")
+            self.ChatApp.chat_log.insert(tk.END,
+                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+            # 滚动到最底部
+            self.ChatApp.chat_log.yview(tk.END)
+
+    def add_time_1d(self):
+        # 添加处理 time_1min 的代码
+        global date
+        time_format = "%Y/%m/%d %A"
+        base_time = datetime.strptime(date, time_format)
+        date = base_time + timedelta(days=1)
+        # 将新时间格式化为字符串
+        date = date.strftime(time_format)
+        reply = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【日期】")[0]) + "【日期】"
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, reply + date)
+        print("Adding 1 day")
+
+    def add_time_1w(self):
+        # 添加处理 time_1min 的代码
+        global date
+        time_format = "%Y/%m/%d %A"
+        base_time = datetime.strptime(date, time_format)
+        date = base_time + timedelta(days=7)
+        # 将新时间格式化为字符串
+        date = date.strftime(time_format)
+        reply = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【日期】")[0]) + "【日期】"
+        self.ChatApp.time_log.delete("1.0", tk.END)
+        self.ChatApp.time_log.insert(tk.END, reply + date)
+        print("Adding 7 days")
+
 
 
 if __name__ == "__main__":
