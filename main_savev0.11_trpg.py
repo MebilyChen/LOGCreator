@@ -111,8 +111,7 @@ def load_PL_INFO():
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
-        return {'KP': '56/100:SAN\n10/10:HP\n5/5:MP\n5/5:MOV', 'DiceBot': '56/100:SAN\n10/10:HP\n5/5:MP\n5/5:MOV',
-                'PL 1': '56/100:SAN\n10/10:HP\n5/5:MP\n5/5:MOV'}
+        return {}
 
 
 def load_role_count():
