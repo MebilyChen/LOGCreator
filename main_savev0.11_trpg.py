@@ -4,7 +4,7 @@ import re
 from random import random
 import random
 import tkinter as tk
-from tkinter import scrolledtext, filedialog
+from tkinter import scrolledtext, filedialog, ttk, simpledialog
 from datetime import datetime, timedelta
 import configparser
 
@@ -23,19 +23,24 @@ string_list_Success = ["检定成功，期待您的表现。", "检定成功，�
 string_list_Failure = ["失败了，请您不要灰心..."]
 string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 
-#timer计算
+# timer计算
 place = "某地"
 weather = "晴"
 time = datetime.now().strftime("%H:%M")
 date = datetime.now().strftime("%Y/%m/%d %A")
-#自动Timer计算
-time_1min = ["斗殴", "闪避", "链锯", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救", "跳跃", "困难跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷"]
-time_5min = ["困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "重武器", "火焰喷射器", "医学", "困难急救", "锁匠", "领航", "极难跳跃", "极难攀爬", "困难妙手", "潜行", "极难投掷"]
-time_10min = ["表演","美术","写作","书法","舞蹈","歌剧","声乐","摄影","极难侦查", "极难聆听", "极难心理学", "困难恐吓", "困难说服", "困难魅惑", "困难话术", "极难急救", "困难锁匠", "困难领航", "极难妙手", "困难潜行"]
-time_30min = ["极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "图书馆", "计算机", "电脑", "困难会计", "极难潜行","木匠","厨艺","雕塑","伪造","陶艺"]
-time_1h = ["困难表演","困难美术","困难写作","困难书法","困难舞蹈","困难歌剧","困难声乐","困难摄影","困难电气维修", "困难电子学", "困难机械维修", "极难锁匠", "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计"]
-time_3h = ["极难表演","极难书法","极难舞蹈","极难歌剧","极难声乐","极难摄影","极难电子学", "极难电气维修", "极难医学", "极难精神分析", "极难追踪", "极难计算机", "极难电脑","困难雕塑","困难伪造","困难陶艺","困难木匠","困难厨艺"]
-time_12h = ["极难图书馆","极难美术","极难写作","极难木匠","极难厨艺","极难雕塑","极难伪造","极难陶艺"]
+# 自动Timer计算
+time_1min = ["斗殴", "闪避", "链锯", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救", "跳跃",
+             "困难跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷"]
+time_5min = ["困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "重武器", "火焰喷射器", "医学", "困难急救", "锁匠", "领航", "极难跳跃", "极难攀爬",
+             "困难妙手", "潜行", "极难投掷"]
+time_10min = ["表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "极难侦查", "极难聆听", "极难心理学", "困难恐吓", "困难说服", "困难魅惑", "困难话术",
+              "极难急救", "困难锁匠", "困难领航", "极难妙手", "困难潜行"]
+time_30min = ["极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "图书馆", "计算机", "电脑", "困难会计", "极难潜行", "木匠", "厨艺", "雕塑", "伪造", "陶艺"]
+time_1h = ["困难表演", "困难美术", "困难写作", "困难书法", "困难舞蹈", "困难歌剧", "困难声乐", "困难摄影", "困难电气维修", "困难电子学", "困难机械维修", "极难锁匠",
+           "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计"]
+time_3h = ["极难表演", "极难书法", "极难舞蹈", "极难歌剧", "极难声乐", "极难摄影", "极难电子学", "极难电气维修", "极难医学", "极难精神分析", "极难追踪", "极难计算机", "极难电脑",
+           "困难雕塑", "困难伪造", "困难陶艺", "困难木匠", "困难厨艺"]
+time_12h = ["极难图书馆", "极难美术", "极难写作", "极难木匠", "极难厨艺", "极难雕塑", "极难伪造", "极难陶艺"]
 time_1d = []
 time_1w = []
 time_skill = {"time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min, "time_30min": time_30min,
@@ -48,9 +53,9 @@ Fumble_SKill = 20  # 启用96以上大失败的技能水平
 Critical_Success_SKill = 60  # 启用5以下大成功的技能水平
 
 bot_personality_ = {"Critical_Success": string_list_Critical_Success, "Extreme_Success": string_list_Extreme_Success,
-                   "Hard_Success": string_list_Hard_Success, "Success": string_list_Success,
-                   "Failure": string_list_Failure, "Fumble": string_list_Fumble,
-                   "Fumble_at_96_SKill_Level": Fumble_SKill, "Critical_at_5_SKill_Level": Critical_Success_SKill}
+                    "Hard_Success": string_list_Hard_Success, "Success": string_list_Success,
+                    "Failure": string_list_Failure, "Fumble": string_list_Fumble,
+                    "Fumble_at_96_SKill_Level": Fumble_SKill, "Critical_at_5_SKill_Level": Critical_Success_SKill}
 
 bot_personality_by_name_ = {"卢骰": bot_personality_, "DiceBot": bot_personality_}
 
@@ -63,6 +68,7 @@ Fumble = random.choice(bot_personality_["Fumble"])
 Fumble_SKill = bot_personality_["Fumble_at_96_SKill_Level"]
 Critical_Success_SKill = bot_personality_["Critical_at_5_SKill_Level"]
 
+
 def load_settings_avatar():
     try:
         # 尝试从JSON文件加载头像路径
@@ -73,6 +79,7 @@ def load_settings_avatar():
         return {'KP': '', 'DiceBot': '',
                 'PL 1': ''}
 
+
 def load_DiceBot_personality():
     try:
         # 尝试从JSON文件加载头像路径
@@ -82,6 +89,7 @@ def load_DiceBot_personality():
         # 如果文件不存在，返回默认设置
         return bot_personality_by_name_
 
+
 def load_env():
     try:
         # 尝试从JSON文件加载
@@ -90,7 +98,6 @@ def load_env():
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
         return env
-
 
 
 def load_settings_name():
@@ -119,6 +126,7 @@ def load_role_count():
     config = configparser.ConfigParser()
     config.read('config.ini')
     return int(config.get('Settings', 'RoleCount', fallback=0))
+
 
 role_Chart_detail_demo = {
     "EDU": 0,
@@ -273,6 +281,7 @@ role_Chart_detail_demo = {
     "#冲锋枪": "1D10穿",
     "#步枪/霰弹枪": "1D6+1穿",
 }
+
 
 def load_Chart():
     try:
@@ -587,158 +596,158 @@ def load_Chart():
                 "#霰弹枪": "4D6/2D6/1D6",
                 "#冲锋枪": "1D10穿",
                 "#步枪/霰弹枪": "1D6+1穿"}
-                , "PL 1": {
-                    "EDU": 0,
-                    "APP": 0,
-                    "DEX": 0,
-                    "STR": 0,
-                    "INT": 0,
-                    "CON": 0,
-                    "POW": 0,
-                    "SIZ": 0,
-                    "LUCK": 0,
-                    "教育": "EDU",
-                    "外貌": "APP",
-                    "敏捷": "DEX",
-                    "力量": "STR",
-                    "智力": "INT",
-                    "体质": "CON",
-                    "灵感": "INT",
-                    "意志": "POW",
-                    "体型": "SIZ",
-                    "幸运": "LUCK",
-                    "MOV": 8,
-                    "HP": "(CON+SIZ)/10",
-                    "MP": "POW/5",
-                    "SAN": "POW",
-                    "克苏鲁神话": 0,
-                    "克苏鲁": 0,
-                    "cm": 0,
-                    "信用": 0,
-                    "信用评级": 0,
-                    "会计": 5,
-                    "表演": 5,
-                    "美术": 5,
-                    "写作": 5,
-                    "书法": 5,
-                    "木匠": 5,
-                    "厨艺": 5,
-                    "舞蹈": 5,
-                    "歌剧": 5,
-                    "声乐": 5,
-                    "摄影": 5,
-                    "雕塑": 5,
-                    "伪造": 5,
-                    "陶艺": 5,
-                    "人类学": 1,
-                    "估价": 5,
-                    "考古学": 1,
-                    "魅惑": 15,
-                    "攀爬": 20,
-                    "计算机": 5,
-                    "计算机使用": 5,
-                    "电脑": 5,
-                    "乔装": 5,
-                    "闪避": "DEX/2",
-                    "汽车驾驶": 20,
-                    "电气维修": 10,
-                    "电子学": 1,
-                    "话术": 5,
-                    "斗殴": 25,
-                    "链锯": 10,
-                    "斧头": 25,
-                    "连枷": 10,
-                    "矛": 20,
-                    "剑": 20,
-                    "鞭子": 5,
-                    "弓": 15,
-                    "手枪": 20,
-                    "重武器": 10,
-                    "火焰喷射器": 10,
-                    "机枪": 10,
-                    "步枪": 25,
-                    "霰弹枪": 25,
-                    "步枪/霰弹枪": 25,
-                    "冲锋枪": 15,
-                    "急救": 30,
-                    "历史": 5,
-                    "恐吓": 15,
-                    "跳跃": 20,
-                    "拉丁语": 1,
-                    "汉语": 1,
-                    "日语": 1,
-                    "英语": 1,
-                    "德语": 1,
-                    "法语": 1,
-                    "西班牙语": 1,
-                    "意大利语": 1,
-                    "丹麦语": 1,
-                    "土著语": 1,
-                    "格陵兰语": 1,
-                    "俄语": 1,
-                    "母语": "EDU",
-                    "法律": 5,
-                    "图书馆": 20,
-                    "聆听": 20,
-                    "锁匠": 1,
-                    "机械维修": 10,
-                    "医学": 1,
-                    "博物学": 10,
-                    "天文学": 1,
-                    "生物学": 1,
-                    "植物学": 1,
-                    "化学": 1,
-                    "数学": 1,
-                    "密码学": 1,
-                    "工程学": 1,
-                    "法学": 1,
-                    "司法科学": 1,
-                    "地质学": 1,
-                    "气象学": 1,
-                    "药学": 1,
-                    "物理学": 1,
-                    "动物学": 1,
-                    "领航": 10,
-                    "神秘学": 5,
-                    "重型机械": 1,
-                    "说服": 10,
-                    "精神分析": 1,
-                    "驾驶": 1,
-                    "飞行器驾驶": 1,
-                    "船驾驶": 1,
-                    "心理学": 10,
-                    "骑术": 5,
-                    "科学": 1,
-                    "妙手": 10,
-                    "侦查": 25,
-                    "潜行": 20,
-                    "生存": 10,
-                    "游泳": 20,
-                    "投掷": 20,
-                    "追踪": 10,
-                    "驯兽": 5,
-                    "潜水": 1,
-                    "爆破": 1,
-                    "读唇": 1,
-                    "催眠": 1,
-                    "炮术": 1,
-                    "DB": 1,
-                    "#斗殴": "1D3+DB",
-                    "#链锯": "2D8穿",
-                    "#斧头": "1D8+2+DB穿",
-                    "#连枷": "1D8+DB",
-                    "#矛": "1D8+1穿",
-                    "#剑": "1D6+DB穿",
-                    "#鞭子": "1D3+DB/2",
-                    "#弓": "1D6+DB/2",
-                    "#手枪": "1D8穿",
-                    "#重武器": "5D10穿",
-                    "#火焰喷射器": "2D6+烧穿",
-                    "#机枪": "2D6+4穿",
-                    "#步枪": "1D6+1穿",
-                    "#霰弹枪": "4D6/2D6/1D6",
-                    "#冲锋枪": "1D10穿",
-                    "#步枪/霰弹枪": "1D6+1穿"
+            , "PL 1": {
+                "EDU": 0,
+                "APP": 0,
+                "DEX": 0,
+                "STR": 0,
+                "INT": 0,
+                "CON": 0,
+                "POW": 0,
+                "SIZ": 0,
+                "LUCK": 0,
+                "教育": "EDU",
+                "外貌": "APP",
+                "敏捷": "DEX",
+                "力量": "STR",
+                "智力": "INT",
+                "体质": "CON",
+                "灵感": "INT",
+                "意志": "POW",
+                "体型": "SIZ",
+                "幸运": "LUCK",
+                "MOV": 8,
+                "HP": "(CON+SIZ)/10",
+                "MP": "POW/5",
+                "SAN": "POW",
+                "克苏鲁神话": 0,
+                "克苏鲁": 0,
+                "cm": 0,
+                "信用": 0,
+                "信用评级": 0,
+                "会计": 5,
+                "表演": 5,
+                "美术": 5,
+                "写作": 5,
+                "书法": 5,
+                "木匠": 5,
+                "厨艺": 5,
+                "舞蹈": 5,
+                "歌剧": 5,
+                "声乐": 5,
+                "摄影": 5,
+                "雕塑": 5,
+                "伪造": 5,
+                "陶艺": 5,
+                "人类学": 1,
+                "估价": 5,
+                "考古学": 1,
+                "魅惑": 15,
+                "攀爬": 20,
+                "计算机": 5,
+                "计算机使用": 5,
+                "电脑": 5,
+                "乔装": 5,
+                "闪避": "DEX/2",
+                "汽车驾驶": 20,
+                "电气维修": 10,
+                "电子学": 1,
+                "话术": 5,
+                "斗殴": 25,
+                "链锯": 10,
+                "斧头": 25,
+                "连枷": 10,
+                "矛": 20,
+                "剑": 20,
+                "鞭子": 5,
+                "弓": 15,
+                "手枪": 20,
+                "重武器": 10,
+                "火焰喷射器": 10,
+                "机枪": 10,
+                "步枪": 25,
+                "霰弹枪": 25,
+                "步枪/霰弹枪": 25,
+                "冲锋枪": 15,
+                "急救": 30,
+                "历史": 5,
+                "恐吓": 15,
+                "跳跃": 20,
+                "拉丁语": 1,
+                "汉语": 1,
+                "日语": 1,
+                "英语": 1,
+                "德语": 1,
+                "法语": 1,
+                "西班牙语": 1,
+                "意大利语": 1,
+                "丹麦语": 1,
+                "土著语": 1,
+                "格陵兰语": 1,
+                "俄语": 1,
+                "母语": "EDU",
+                "法律": 5,
+                "图书馆": 20,
+                "聆听": 20,
+                "锁匠": 1,
+                "机械维修": 10,
+                "医学": 1,
+                "博物学": 10,
+                "天文学": 1,
+                "生物学": 1,
+                "植物学": 1,
+                "化学": 1,
+                "数学": 1,
+                "密码学": 1,
+                "工程学": 1,
+                "法学": 1,
+                "司法科学": 1,
+                "地质学": 1,
+                "气象学": 1,
+                "药学": 1,
+                "物理学": 1,
+                "动物学": 1,
+                "领航": 10,
+                "神秘学": 5,
+                "重型机械": 1,
+                "说服": 10,
+                "精神分析": 1,
+                "驾驶": 1,
+                "飞行器驾驶": 1,
+                "船驾驶": 1,
+                "心理学": 10,
+                "骑术": 5,
+                "科学": 1,
+                "妙手": 10,
+                "侦查": 25,
+                "潜行": 20,
+                "生存": 10,
+                "游泳": 20,
+                "投掷": 20,
+                "追踪": 10,
+                "驯兽": 5,
+                "潜水": 1,
+                "爆破": 1,
+                "读唇": 1,
+                "催眠": 1,
+                "炮术": 1,
+                "DB": 1,
+                "#斗殴": "1D3+DB",
+                "#链锯": "2D8穿",
+                "#斧头": "1D8+2+DB穿",
+                "#连枷": "1D8+DB",
+                "#矛": "1D8+1穿",
+                "#剑": "1D6+DB穿",
+                "#鞭子": "1D3+DB/2",
+                "#弓": "1D6+DB/2",
+                "#手枪": "1D8穿",
+                "#重武器": "5D10穿",
+                "#火焰喷射器": "2D6+烧穿",
+                "#机枪": "2D6+4穿",
+                "#步枪": "1D6+1穿",
+                "#霰弹枪": "4D6/2D6/1D6",
+                "#冲锋枪": "1D10穿",
+                "#步枪/霰弹枪": "1D6+1穿"
             }}
     except json.JSONDecodeError as e:
         print(f"Error in JSON decoding: {e}")
@@ -1066,10 +1075,12 @@ def load_Chart_at_name():
         print(f"Error in JSON decoding: {e}")
         print(f"Problematic data: {file.read()}")
 
+
 role_Chart = load_Chart()
 role_Chart_at_name = load_Chart_at_name()
 bot_personality_by_name = load_DiceBot_personality()
 adv_comment = ""
+
 
 # logging.debug("Variable value: %s", role_Chart_at_name)
 
@@ -1079,9 +1090,30 @@ class ChatApp:
         self.root = root
         # 一系列字符串
         string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！这就是全部的陛下庇护！", " - 陛下所言甚是/陶醉", " - "
-                                                                                                               "你生而有翼，为何竟愿一生匍匐前进，形如虫蚁？", " - 好的国王千篇一律 坏的国王万里挑一", " - 变成卢学家后能看自己的头衔互相贴贴吗", " - 导演因染新冠七天没到片场发现剧组被新来的演员带去溜冰", " - 你的Bug我的Bug好像都一样", " - 新约是不是就像陛下一样可爱", " - 傻卢，罚你一天不见陛下", " - 送你向着它告白就能获得陛下的勇气流星", " - 陛下正在搭建他的绝对帝国", " - 一半的陛下庇护", " - 陛下那么肥干什么，没有陛下的气质", " - 陛下很便宜的", " - 情人眼里出陛下", " - 只能说没有陛下漂亮", ' - "你们都没有我懂陛下！"', " - 就像陛下", ' - "我是真的对陛下没感觉"',
-                                     " - 曾经有一只超可爱的陛下在我面前，我却没有珍惜", " - 感觉陛下有危险！", " - 这个陛下救不了我", " - 成为陛下", ' - "有毛的都被我干掉了"', " - 陛下，本命链顶端的男人", " - 王学家和卢卢跳舞被陛下追着打", " - 陛下笑着吃了这个蛋糕，他久违的微笑也让我开心了起来", " - 下午好，今天的小骑士是要油炸呢还是要清蒸呢", " - 我需要陛下来平息我胸中怒火/翻进白宫", " - 噢可爱的生灵，请告诉我陛下为什么这么美好", " - 咩碳睡了！咩碳希望能梦到陛下！/ 大声", " - 有时候，只需一个代名词就能拯救别人一天的好心情。—— 王学家咩碳",
-                                     " - 沃姆是不能飞的，所以你一说飞天沃姆，我想到的是被打飞的沃姆你知道吗", " - INTJ可不会被绊倒 —— 会被ENTJ绊倒", " - 我不懂，我没有背叛过陛下", " - 陛下束紧了我的缰绳，让我无法发疯", " - 陛下，您离遍布生物圈又近了一步", " - 突然感受到了人类的可爱，我祝福人类（拿着橄榄枝洒圣水）", " - 我去带陛下做核酸", " - 白宫：警惕蛾族打旧日之光牌", " - 给我一个世设，我能适配整只陛下", " - 死了也是死在陛下怀里", " - 陛下一笑倾城，圣巢虫子都跳虚空自杀了以保陛下周全", " - 太久不上供 就会被踢出白宫", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+                                                                                                               "你生而有翼，为何竟愿一生匍匐前进，形如虫蚁？",
+                                     " - 好的国王千篇一律 坏的国王万里挑一", " - 变成卢学家后能看自己的头衔互相贴贴吗", " - 导演因染新冠七天没到片场发现剧组被新来的演员带去溜冰",
+                                     " - 你的Bug我的Bug好像都一样", " - 新约是不是就像陛下一样可爱", " - 傻卢，罚你一天不见陛下",
+                                     " - 送你默默饮泪的泪城纪念雨景球", " - 送你向着它告白就能获得陛下碎片的勇气流星", " - 陛下正在搭建他的绝对帝国", " - 一半的陛下庇护",
+                                     " - 陛下那么肥干什么，没有陛下的气质",
+                                     " - 陛下很便宜的", " - 情人眼里出陛下", " - 只能说没有陛下漂亮", ' - "你们都没有我懂陛下！"', " - 就像陛下",
+                                     ' - "我是真的对陛下没感觉"',
+                                     " - 曾经有一只超可爱的陛下在我面前，我却没有珍惜", " - 感觉陛下有危险！", " - 这个陛下救不了我", " - 成为陛下",
+                                     ' - "有毛的都被我干掉了"', " - 陛下，本命链顶端的男人", " - 王学家和卢卢跳舞被陛下追着打",
+                                     " - 陛下笑着吃了这个蛋糕，他久违的微笑也让我开心了起来", " - 下午好，今天的小骑士是要油炸呢还是要清蒸呢",
+                                     " - 我需要陛下来平息我胸中怒火/翻进白宫", " - 噢可爱的生灵，请告诉我陛下为什么这么美好", " - 咩碳睡了！咩碳希望能梦到陛下！/大声",
+                                     " - 有时候，只需一个代名词就能拯救别人一天的好心情。—— 王学家咩碳",
+                                     " - 沃姆是不能飞的，所以你一说飞天沃姆，我想到的是被打飞的沃姆你知道吗", " - INTJ可不会被绊倒 —— 会被ENTJ绊倒",
+                                     " - 我不懂，我没有背叛过陛下", " - 陛下束紧了我的缰绳，让我无法发疯", " - 陛下，您离遍布生物圈又近了一步",
+                                     " - 突然感受到了人类的可爱，我祝福人类（拿着橄榄枝洒圣水）", " - 我去带陛下做核酸", " - 白宫：警惕蛾族打旧日之光牌",
+                                     " - 给我一个世设，我能适配整只陛下", " - 死了也是死在陛下怀里", " - 陛下一笑倾城，圣巢虫子都跳虚空自杀以保陛下周全",
+                                     " - 太久不上供 就会被踢出白宫", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                                     "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
         self.root.title("自嗨团 v0.75" + encouragement)
@@ -1126,7 +1158,7 @@ class ChatApp:
         weather = self.env["Weather"]
         self.time_log = tk.Text(root, wrap=tk.WORD, width=10, height=0)
         self.time_log.grid(row=3, column=2, padx=10, pady=10, rowspan=3, sticky="nsew")
-        self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" +date)
+        self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" + date)
 
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
@@ -1142,7 +1174,7 @@ class ChatApp:
                        "\n骰子性格：针对每个技能单独comment(坑)" \
                        "\n继续优化简易小地图" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\nArmor显示优化\n\n" \
-                       "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n"\
+                       "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n" \
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
@@ -1258,7 +1290,7 @@ class ChatApp:
                            "\n\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
                            "\n\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色）" \
                            "\n\n【.st】输入后点击发送按钮或回车（而不是掷骰按钮）" \
-                           "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用斗殴击晕敌人”）"\
+                           "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用斗殴击晕敌人”）" \
                            "\n\n===以上可删除===\n\n"
             self.role_entries[role].insert(tk.END, initial_text)
 
@@ -1281,7 +1313,8 @@ class ChatApp:
         entry2.tag_config(value_tag, justify=tk.LEFT)
         self.role_values_tags_text = load_PL_INFO()
         if role not in self.role_values_tags_text:
-            entry2.insert(tk.END, f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB', value_tag)
+            entry2.insert(tk.END, f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB',
+                          value_tag)
         else:
             entry2.insert(tk.END, self.role_values_tags_text[role], value_tag)
         self.role_values_entry[role] = entry2
@@ -1367,7 +1400,7 @@ class ChatApp:
                 if ("+" or "-" or "*" or "/") in message and "#" not in message:
                     parts = re.findall(r'([#+]?[\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
                     print(parts)
-                    #print(str(parts[0][0]).upper())
+                    # print(str(parts[0][0]).upper())
                     if parts and len(parts) > 0 and len(parts[0]) > 0:
                         role_Chart[role][str(parts[0][0]).upper()] = eval(
                             str(role_Chart_detail[str(parts[0][0]).upper()]) + parts[0][1] + parts[0][2])
@@ -1416,8 +1449,8 @@ class ChatApp:
                     self.role_values_entry[role].delete("5.0", "6.0")
                     self.role_values_entry[role].insert("5.0",
                                                         f'\n{DB}:DB\n')
-                #self.role_values_entry[role].insert("1.0",
-                                                    #f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                # self.role_values_entry[role].insert("1.0",
+                # f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
@@ -1431,7 +1464,7 @@ class ChatApp:
                     else:
                         if len(parts_skill) == 1 and "#" not in message:
                             self.chat_log.insert(tk.END,
-                                                       f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
                 else:
                     self.role_entries[role].insert(tk.END, "已刷新！")
             else:
@@ -1998,7 +2031,7 @@ class ChatApp:
                         weapon_list_ = {}
                         if parts_ and "成功" in parts_[1]:
                             role_Chart_detail_ = role_Chart.get(role, {})
-                            #DB_ = role_Chart_detail_["DB"]
+                            # DB_ = role_Chart_detail_["DB"]
                             for skill, value in role_Chart_detail_.items():
                                 if "#" in skill:
                                     weapon_list_[skill.replace("#", "")] = value
@@ -2034,7 +2067,7 @@ class ChatApp:
                                 self.role_entries_roll[role].insert("1.0", f"1d6")
                         if parts_ and "失败" in parts_[1]:
                             for weapon, value in weapon_list_.items():
-                                #print(weapon_list_)
+                                # print(weapon_list_)
                                 if weapon in expression:
                                     role_Chart_detail_armor = role_Chart.get(role, {})
                                     if "ARMOR" in role_Chart_detail_armor:
@@ -2225,13 +2258,257 @@ class ChatApp:
         self.start_x = None
         self.start_y = None
 
+    def forget_information(self):
+        # 实现遗忘信息的逻辑
+        pass
+
+    def delete_information(self, role):
+        # 获取选中的条目
+        selected_item = self.tree_list[role].selection()
+        # 如果有选中的条目
+        if selected_item:
+            # 更改选中条目的背景色为红色
+            self.tree_list[role].item(selected_item, tags=('red_background',))
+
+
+    def on_double_click(self, event):
+        pass
+
+    def edit_callback(self, new_value, item, col_id):
+        self.tree.set(item, col_id, new_value)
+        return True
+
+    def add_information(self, role=None):
+        self.information_sources = ["来源A", "来源B", "来源C"]  # 你的信息来源列表
+
+        dialog = MemoryInfoDialog(self.new_window, f"为【{self.role_entries_name[role]}】添加信息", self.information_sources,
+                                  role)
+        result = dialog.result
+        if result["评分"] == "遗忘":
+            self.add_inference2self2(result["信息来源"], "[该信息已遗忘 - Ignorance is a bliss.]  "+result["信息内容"], result["记忆指数"], "×", role)
+        else:
+            self.add_inference2self(result["信息来源"], result["信息内容"], result["记忆指数"], role)
+
+
+    def upload_information(self, role=None):
+        list = self.tree_list[role].get_children()
+        for l in list:
+            self.tree_main.insert("", "end", values=(self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1], self.role_entries_name[role], self.thoughts[role].get("1.0", tk.END)))
+            print(self.tree_list[role].item(l, "values"))
+            self.tree2_list[role].insert("", "end", values=(self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1], self.tree_list[role].item(l, "values")[2],  "√"))
+            self.tree_list[role].delete(l)
+            #self.add_inference2public(l["信息来源"], "关于X的信息", "想法", role)
+            #self.add_inference2self2("玩家1", "关于X的信息", -4, "√", role)
+        items = self.tree2_list[role].get_children()
+        key = int(self.tree2_list[role].item(self.tree2_list[role], "values")[2])
+        # 使用 sort 方法进行排序
+        items.sort(key=key, reverse=True)
+        # 重新插入排序后的条目
+        for index, item in enumerate(items):
+            self.tree2_list[role].move(item, "", index)
+
+    def clear_information(self, role=None):
+        self.tree_list[role].delete(*self.tree_list[role].get_children())
+        self.tree2_list[role].delete(*self.tree_list[role].get_children())
+        pass
+
+    def expand_information(self, role=None):
+        if self.info_toggle[role] == "off":
+            if role == "KP":
+                self.tree_main.grid_forget()
+                self.info_toggle[role] = "on"
+            else:
+                self.tree_list[role].grid_forget()  # 缩进
+                self.tree2_list[role].grid_forget()
+                self.info_toggle[role] = "on"
+        else:
+            if role == "KP":
+                self.tree_main.grid(row=1, column=3, sticky="nsew")
+                self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
+            else:
+                self.tree_list[role].grid(row=0, column=4, sticky="nsew")
+                self.tree2_list[role].grid(row=2, column=4, sticky="nsew")
+                self.info_toggle[role] = "off"
+
+    def add_inference2self(self, name, info, memory_index, role=None):
+        # 在Treeview中添加一行数据
+        if role == None:
+            return
+        self.tree_list[role].insert("", "end", values=(name, info, memory_index))
+        items = self.tree_list[role].get_children()
+        key = int(self.tree_list[role].item(self.tree_list[role], "values")[2])
+        # 使用 sort 方法进行排序
+        items.sort(key=key, reverse=True)
+        # 重新插入排序后的条目
+        for index, item in enumerate(items):
+            self.tree_list[role].move(item, "", index)
+
+    def add_inference2self2(self, name, info, memory_index, status, role=None):
+        # 在Treeview中添加一行数据
+        if role == None:
+            return
+        self.tree2_list[role].insert("", "end", values=(name, info, memory_index, status))
+        items = self.tree2_list[role].get_children()
+        key = int(self.tree2_list[role].item(self.tree2_list[role], "values")[2])
+        # 使用 sort 方法进行排序
+        items.sort(key=key, reverse=True)
+        # 重新插入排序后的条目
+        for index, item in enumerate(items):
+            self.tree2_list[role].move(item, "", index)
+
+    def add_inference2public(self, name, info, statement, role=None):
+        # 在Treeview中添加一行数据
+        if role == None:
+            self.tree_main.insert("", "end", values=(name, info, "未知", statement))
+        else:
+            self.tree_main.insert("", "end", values=(name, info, self.role_entries_name[role], statement))
+
     # 新窗口
     def open_new_window(self):
-        new_window = tk.Toplevel(root)
+        self.new_window = tk.Toplevel(root)
+        self.new_window.title("调查模块")
+        #self.new_window.grid_rowconfigure(0, weight=1)
+        #self.new_window.grid_columnconfigure(0, weight=1)
+        self.info_add_button = {}
+        self.thoughts = {}
+        self.tree_list = {}
+        self.tree2_list = {}
+        self.info_upload_button = {}
+        self.info_delete_button = {}
+        self.info_expand_button = {}
+        self.info_toggle = {}
+
+        num_cols = 2
+        for idx, role in enumerate(self.roles):
+            self.info_toggle[role] = "off"
+            row = idx % num_cols
+            col = idx // num_cols
+            # 自动调整列宽
+            for i in range(num_cols + 2):
+                self.new_window.columnconfigure(i, weight=1)
+            if role == "DiceBot":
+                frame = tk.LabelFrame(self.new_window, text="NPC", relief=tk.GROOVE)
+                frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
+                #frame.grid_rowconfigure(0, weight=1)
+                #frame.grid_columnconfigure(0, weight=1)
+            elif role == "KP":
+                frame = tk.LabelFrame(self.new_window, text="共享库", relief=tk.GROOVE)
+                frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
+                save_button = tk.Button(frame, text="清\n空", command=lambda: self.delete_information)
+                save_button.grid(row=0, column=1, pady=5, sticky="nsew")
+                save_button = tk.Button(frame, text="地\n图", command=self.open_new_window_map)
+                save_button.grid(row=1, column=0, pady=5, sticky="nsew")
+                #frame.grid_rowconfigure(0, weight=1)
+                #frame.grid_columnconfigure(0, weight=1)
+            else:
+                frame = tk.LabelFrame(self.new_window, text=f"{role} - {self.role_entries_name[role]}",
+                                      relief=tk.GROOVE)
+                frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
+                #frame.grid_rowconfigure(0, weight=1)
+                #frame.grid_columnconfigure(0, weight=1)
+
+                forget_button = tk.Button(frame, text="遗\n忘\n信\n息", command=lambda: self.forget_information)
+                forget_button.grid(row=0, column=1, pady=5, sticky="nsew")
+                save_button = tk.Button(frame, text="上\n传\n信\n息", command=lambda role=role: self.upload_information(role))
+                save_button.grid(row=0, column=2, pady=5, sticky="nsew")
+                add_button = tk.Button(frame, text="添\n加\n信\n息", command=lambda role=role: self.add_information(role))
+                add_button.grid(row=2, column=2, pady=5, sticky="nsew")
+                self.info_add_button[role] = add_button
+                save_button = tk.Button(frame, text="删\n除\n信\n息", command=lambda: self.delete_information)
+                save_button.grid(row=2, column=1, pady=5, sticky="nsew")
+                clear_button = tk.Button(frame, text="清\n空\n信\n息", bg="red", fg="black",
+                                         command=lambda role=role: self.clear_information(role))
+                clear_button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+
+            expand_button = tk.Button(frame, text="展\n开\n信\n息", command=lambda role=role: self.expand_information(role))
+            expand_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+            self.info_expand_button[role] = expand_button
+            # 使用style修改Treeview的样式
+            style = ttk.Style()
+            style.configure("Treeview", font=(None, 10), rowheight=12, height=5, sticky="nsew",
+                            maxheight=5)  # 设置表头的字体大小
+
+            if role == "KP":
+                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=10)
+                self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
+                # 创建Treeview
+                self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
+                                              style="Treeview")
+                self.tree_main.heading("信息来源", text="信息来源")
+                self.tree_main.heading("信息内容", text="信息内容")
+                self.tree_main.heading("共享人", text="共享人")
+                self.tree_main.heading("共享想法", text="共享想法")
+                self.tree_main.column("信息来源", width=100)
+                self.tree_main.column("信息内容", width=200)
+                self.tree_main.column("共享人", width=50)
+                self.tree_main.column("共享想法", width=100)
+                self.tree_main.grid(row=1, column=3, sticky="nsew")
+                # 设置行和列的权重，使得Treeview可以随窗口的大小变化而调整
+                self.tree_main.grid_rowconfigure(0, weight=1)
+            else:
+                entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1)
+                entry2.grid(row=1, column=4, padx=0, pady=0, sticky="nsew")
+                self.thoughts[role] =  entry2
+                # 创建Treeview
+                self.tree = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数"), show="headings",
+                                         style="Treeview")
+                self.tree_list[role] = self.tree
+                # 创建Treeview
+                self.tree2 = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数", "记忆状态"), show="headings",
+                                          style="Treeview")
+                self.tree2_list[role] = self.tree2
+                # 添加标签以供后续使用
+                self.tree2.tag_configure('red_background', background='red')
+
+                # 创建Scrollbar
+                # scrollbar = ttk.Scrollbar(self.new_window, orient="vertical", command=self.tree.yview)
+                # 配置Treeview的yview和Scrollbar的command
+                #self.tree.configure(yscrollcommand=scrollbar.set)
+                #scrollbar.grid(row=0, column=1, sticky="ns")
+                # self.tree.bind("<Double-1>", self.on_double_click())
+
+                # 设置表头
+                self.tree.heading("信息来源", text="来源")
+                self.tree.heading("信息内容", text="内容")
+                self.tree.heading("记忆指数", text="指数")
+                self.tree2.heading("信息来源", text="来源")
+                self.tree2.heading("信息内容", text="内容")
+                self.tree2.heading("记忆指数", text="指数")
+                self.tree2.heading("记忆状态", text="状态")
+
+                # 设置列宽
+                self.tree.column("信息来源", width=130)
+                self.tree.column("信息内容", width=310)
+                self.tree.column("记忆指数", width=10)
+                self.tree2.column("信息来源", width=130)
+                self.tree2.column("信息内容", width=300)
+                self.tree2.column("记忆指数", width=10)
+                self.tree2.column("记忆状态", width=10)
+
+                # 将Treeview放置在窗口中，使用grid布局
+                self.tree.grid(row=0, column=4, sticky="nsew")
+                # 将Treeview放置在窗口中，使用grid布局
+                self.tree2.grid(row=2, column=4, sticky="nsew")
+
+                # 设置行和列的权重，使得Treeview可以随窗口的大小变化而调整
+                self.tree.grid_rowconfigure(0, weight=1)
+                self.tree.grid_columnconfigure(0, weight=1)
+                self.tree2.grid_rowconfigure(0, weight=1)
+                self.tree2.grid_columnconfigure(0, weight=1)
+
+                # 添加示例数据
+                # self.add_inference2public("玩家1", "关于X的信息", "关于X的信息")
+
+                # self.add_inference("玩家2", "关于Y的信息", 5, "√")
+            # 配置可调整大小的框架
+
+    # 新窗口
+    def open_new_window_map(self):
+        new_window = tk.Toplevel(self.new_window)
         new_window.title("地图")
         self.image_references = []  # Add this list attribute to store references to images
 
-        #text = self.time_log.get("1.0", tk.END).strip()
+        # text = self.time_log.get("1.0", tk.END).strip()
         label = tk.Label(new_window, text="地图示意窗口")
         label.pack()
 
@@ -2258,8 +2535,8 @@ class ChatApp:
                     width, height = image.size
                     image = image.resize((int(width * radius), int(height * radius)), Image.LANCZOS)
                     photo = ImageTk.PhotoImage(image)
-                    #circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
-                    #self.canvas.create_image(x, y, image=photo)
+                    # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
+                    # self.canvas.create_image(x, y, image=photo)
                     # 保持对图像的引用，防止被垃圾回收
                     # self.canvas.image = photo
                     # Keep references to all images
@@ -2270,7 +2547,6 @@ class ChatApp:
                 self.draggable_items[_avatar] = draggable_image
         # Create draggable rectangle
         draggable_rectangle = DraggableItem(self.canvas, 150, 150, 100, 80, fill='white', outline='black')
-
 
     def save_settings(self):
         # 将头像路径保存到JSON文件
@@ -2424,8 +2700,8 @@ class TRPGModule:
                 adv_comment_2 = f"造成劣势:{list}={max(list)}"
                 result = ones_place + max(list) * 10
             adv_comment = adv_comment_1 + adv_comment_2
-        #if result > 100:
-            #result = 100
+        # if result > 100:
+        # result = 100
         return result, adv_comment
 
     def roll(self, expression, role=None):
@@ -2648,7 +2924,6 @@ class TRPGModule:
                     expression = part_eng[0][0]
                     info = int(part_eng[0][1])
                     skill_name = "None"
-
 
                 time_info = self.ChatApp.time_log.get("1.0", tk.END).strip()
                 time_info = time_info.split("【时间】")[1]
@@ -2928,10 +3203,9 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
-
 
     def add_time_5min(self):
         # 添加处理 time_1min 的代码
@@ -2949,7 +3223,7 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
 
@@ -2969,7 +3243,7 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
 
@@ -2989,7 +3263,7 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
 
@@ -3009,7 +3283,7 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
 
@@ -3029,7 +3303,7 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
 
@@ -3049,7 +3323,7 @@ class TRPGModule:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
-                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
             # 滚动到最底部
             self.ChatApp.chat_log.yview(tk.END)
 
@@ -3079,13 +3353,15 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, reply + date)
         print("Adding 7 days")
 
+
 class DraggableItem:
     def __init__(self, canvas, x, y, width, height, fill=None, image=None, outline=None):
         self.canvas = canvas
         if image:
             self.item = canvas.create_image(x, y, image=image, tags="draggable")
         else:
-            self.item = canvas.create_rectangle(x, y, x + width, y + height, fill=fill, outline=outline, tags="draggable")
+            self.item = canvas.create_rectangle(x, y, x + width, y + height, fill=fill, outline=outline,
+                                                tags="draggable")
         self.canvas.tag_bind(self.item, "<ButtonPress-1>", self.on_press)
         self.canvas.tag_bind(self.item, "<B1-Motion>", self.on_drag)
 
@@ -3099,6 +3375,71 @@ class DraggableItem:
         self.canvas.move(self.item, delta_x, delta_y)
         self.start_x = event.x
         self.start_y = event.y
+
+
+class MemoryInfoDialog(simpledialog.Dialog):
+    def __init__(self, parent, title, information_sources, role):
+        self.information_sources = information_sources
+        super().__init__(parent, title)
+
+    def body(self, master):
+        tk.Label(master, text="信息来源：").grid(row=0, sticky="e")
+        tk.Label(master, text="信息内容：").grid(row=1, sticky="e")
+        tk.Label(master, text="信任度：").grid(row=2, sticky="e")
+        tk.Label(master, text="重要度：").grid(row=3, sticky="e")
+
+        self.source_var = tk.StringVar()
+        self.content_var = tk.StringVar()
+        self.trust_var = tk.StringVar()
+        self.importance_var = tk.StringVar()
+
+        self.source_entry = tk.Entry(master, textvariable=self.source_var)
+        self.content_entry = tk.Entry(master, textvariable=self.content_var)
+
+        trust_values = ["完全信任（0）", "基本信任（-1）", "有疑虑（-2）", "不信任（-3）", "质疑矛盾（-4）", "疑神疑鬼（-5）", "过度解读（+4）"]
+        self.trust_combobox = ttk.Combobox(master, textvariable=self.trust_var, values=trust_values)
+
+        importance_values = ["关键信息（5）", "相关信息（4）", "边缘信息（3）", "模糊信息（2）", "无用信息（1）"]
+        self.importance_combobox = ttk.Combobox(master, textvariable=self.importance_var, values=importance_values)
+
+        self.source_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.content_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.trust_combobox.grid(row=2, column=1, padx=5, pady=5)
+        self.importance_combobox.grid(row=3, column=1, padx=5, pady=5)
+
+        return self.source_entry
+
+    def apply(self):
+        self.result = {}
+        source = self.source_var.get()
+        content = self.content_var.get()
+        trust = int(self.trust_combobox.get().split("（")[1][:-1])  # 提取括号中的数字
+        importance = int(self.importance_combobox.get().split("（")[1][:-1])  # 提取括号中的数字
+
+        # 计算记忆指数
+        memory_index = trust + importance
+
+        # 给出评分
+        if memory_index <= 0:
+            rating = "遗忘"
+        elif memory_index == 1:
+            rating = "无用信息"
+        elif memory_index == 2:
+            rating = "模糊信息"
+        elif memory_index == 3:
+            rating = "边缘信息"
+        elif memory_index == 4:
+            rating = "相关信息"
+        else:
+            rating = "关键信息"
+
+        self.result["信息来源"] = source
+        self.result["信息内容"] = content
+        self.result["记忆指数"] = memory_index
+        self.result["评分"] = rating
+        print(f"信息来源: {source}, 信息内容: {content}, 信任度: {trust}, 重要度: {importance}, 记忆指数: {memory_index}, 评分: {rating}")
+        return self.result
+
 
 
 if __name__ == "__main__":
