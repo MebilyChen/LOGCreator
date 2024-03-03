@@ -4,7 +4,7 @@ import re
 from random import random
 import random
 import tkinter as tk
-from tkinter import scrolledtext, filedialog, ttk, simpledialog
+from tkinter import scrolledtext, filedialog, ttk, simpledialog, messagebox
 from datetime import datetime, timedelta
 import configparser
 
@@ -2258,24 +2258,67 @@ class ChatApp:
         self.start_x = None
         self.start_y = None
 
-    def forget_information(self):
-        # 实现遗忘信息的逻辑
-        pass
-
     def delete_information(self, role):
         # 获取选中的条目
-        selected_item = self.tree_list[role].selection()
-        # 如果有选中的条目
+        selected_item = self.tree2_list[role].selection()
+        if selected_item is None:
+            selected_item = self.tree_list[role].selection()
+            # 如果有选中的条目
+            if selected_item:
+                # 更改选中条目的背景色为红色
+                # self.tree2_list[role].item(selected_item, tags=('red_background'))
+                self.tree_list[role].delete(selected_item)
         if selected_item:
             # 更改选中条目的背景色为红色
-            self.tree_list[role].item(selected_item, tags=('red_background',))
+            # self.tree_list[role].item(selected_item, tags=('red_background'))
+            self.tree2_list[role].delete(selected_item)
 
+    def on_double_click(self, event, role=None):
+        # 获取双击的条目
+        item = self.tree_list[role].selection()
+        if item:
+            # 获取条目的值
+            values = self.tree_list[role].item(item, "values")
+            # 创建一个弹出对话框，让用户输入新的记忆指数
+            new_memory_index = simpledialog.askinteger("修改记忆指数", f"当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
+                                                       maxvalue=100)
+            if new_memory_index is not None:
+                # 更新Treeview中的值
+                self.tree_list[role].item(item, values=(values[0], values[1], new_memory_index))
+        sorted_ids = sorted(self.tree_list[role].get_children(), key=lambda x: self.tree_list[role].set(x, "记忆指数"),
+                            reverse=True)
+        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+        for item_id in sorted_ids:
+            values = self.tree_list[role].item(item_id, "values")
+            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+            self.tree_list[role].insert("", "end", values=values)
+            self.tree_list[role].delete(item_id)
+            self.tree_list[role].update()
 
-    def on_double_click(self, event):
-        pass
+    def on_double_click2(self, event, role=None):
+        # 获取双击的条目
+        item = self.tree2_list[role].selection()
+        if item:
+            # 获取条目的值
+            values = self.tree2_list[role].item(item, "values")
+            # 创建一个弹出对话框，让用户输入新的记忆指数
+            new_memory_index = simpledialog.askinteger("修改记忆指数", f"当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
+                                                       maxvalue=100)
+            if new_memory_index is not None:
+                # 更新Treeview中的值
+                self.tree2_list[role].item(item, values=(values[0], values[1], new_memory_index, values[3]))
+        sorted_ids = sorted(self.tree2_list[role].get_children(), key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
+                            reverse=True)
+        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+        for item_id in sorted_ids:
+            values = self.tree2_list[role].item(item_id, "values")
+            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+            self.tree2_list[role].insert("", "end", values=values)
+            self.tree2_list[role].delete(item_id)
+            self.tree2_list[role].update()
 
-    def edit_callback(self, new_value, item, col_id):
-        self.tree.set(item, col_id, new_value)
+    def edit_callback(self, new_value, item, col_id, role):
+        self.tree2_list[role].set(item, col_id, new_value)
         return True
 
     def add_information(self, role=None):
@@ -2285,76 +2328,117 @@ class ChatApp:
                                   role)
         result = dialog.result
         if result["评分"] == "遗忘":
-            self.add_inference2self2(result["信息来源"], "[该信息已遗忘 - Ignorance is a bliss.]  "+result["信息内容"], result["记忆指数"], "×", role)
+            self.add_inference2self2(result["信息来源"], "[该信息已遗忘 - Ignorance is a bliss.]  " + result["信息内容"],
+                                     result["记忆指数"], "×", role)
         else:
             self.add_inference2self(result["信息来源"], result["信息内容"], result["记忆指数"], role)
 
+    def forget_information(self, role):
+        # 实现遗忘信息的逻辑
+        # 获取所有条目的ID
+        all_items = self.tree_list[role].get_children()
+        # 检查是否有条目
+        if all_items:
+            # 获取最后一个条目的ID
+            last_item = all_items[-1]
+            # 使用delete方法删除最后一个条目
+            self.add_inference2self2(self.tree_list[role].item(last_item, "values")[0],
+                                     self.tree_list[role].item(last_item, "values")[1],
+                                     self.tree_list[role].item(last_item, "values")[2], "×", role)
+            self.tree_list[role].delete(last_item)
 
     def upload_information(self, role=None):
         list = self.tree_list[role].get_children()
         for l in list:
-            self.tree_main.insert("", "end", values=(self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1], self.role_entries_name[role], self.thoughts[role].get("1.0", tk.END)))
+            self.tree_main.insert("", "end", values=(
+                self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
+                self.role_entries_name[role], self.thoughts[role].get("1.0", tk.END)))
             print(self.tree_list[role].item(l, "values"))
-            self.tree2_list[role].insert("", "end", values=(self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1], self.tree_list[role].item(l, "values")[2],  "√"))
+            self.tree2_list[role].insert("", "end", values=(
+                self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
+                self.tree_list[role].item(l, "values")[2], "√"))
             self.tree_list[role].delete(l)
-            #self.add_inference2public(l["信息来源"], "关于X的信息", "想法", role)
-            #self.add_inference2self2("玩家1", "关于X的信息", -4, "√", role)
-        items = self.tree2_list[role].get_children()
-        key = int(self.tree2_list[role].item(self.tree2_list[role], "values")[2])
-        # 使用 sort 方法进行排序
-        items.sort(key=key, reverse=True)
-        # 重新插入排序后的条目
-        for index, item in enumerate(items):
-            self.tree2_list[role].move(item, "", index)
+            # self.add_inference2public(l["信息来源"], "关于X的信息", "想法", role)
+            # self.add_inference2self2("玩家1", "关于X的信息", -4, "√", role)
+        sorted_ids = sorted(self.tree2_list[role].get_children(), key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
+                            reverse=True)
+        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+        for item_id in sorted_ids:
+            values = self.tree2_list[role].item(item_id, "values")
+            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+            self.tree2_list[role].insert("", "end", values=values)
+            self.tree2_list[role].delete(item_id)
+            self.tree2_list[role].update()
 
     def clear_information(self, role=None):
-        self.tree_list[role].delete(*self.tree_list[role].get_children())
-        self.tree2_list[role].delete(*self.tree_list[role].get_children())
-        pass
+        if role == "KP":
+            self.tree_main.delete(*self.tree_main.get_children())
+        else:
+            self.tree_list[role].delete(*self.tree_list[role].get_children())
+            self.tree2_list[role].delete(*self.tree2_list[role].get_children())
+
+    def calculator(self):
+        dialog = DiceRollDialog(self.new_window, f"调查进度计算器")
+        result = dialog.result
 
     def expand_information(self, role=None):
-        if self.info_toggle[role] == "off":
-            if role == "KP":
-                self.tree_main.grid_forget()
-                self.info_toggle[role] = "on"
+        _number = 0
+        for role in self.roles:
+            _number += 1
+            _string = "PL " + str(_number + 2)
+            if role == "PL 1" or role == "PL 4" or role == "PL 7":  # 最大支持到7个PL，后续可以用算式取代
+                pass
             else:
-                self.tree_list[role].grid_forget()  # 缩进
-                self.tree2_list[role].grid_forget()
-                self.info_toggle[role] = "on"
-        else:
-            if role == "KP":
-                self.tree_main.grid(row=1, column=3, sticky="nsew")
-                self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
-            else:
-                self.tree_list[role].grid(row=0, column=4, sticky="nsew")
-                self.tree2_list[role].grid(row=2, column=4, sticky="nsew")
-                self.info_toggle[role] = "off"
+                if self.info_toggle[role] == "off":
+                    if role == "KP":
+                        self.tree_main.grid_forget()
+                        self.info_toggle[role] = "on"
+                        #self.frames["KP"].grid_forget()
+                    else:
+                        self.tree_list[role].grid_forget()  # 缩进
+                        self.tree2_list[role].grid_forget()
+                        self.info_toggle[role] = "on"
+                else:
+                    if role == "KP":
+                        #self.frames["KP"].grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+                        self.tree_main.grid(row=1, column=3, sticky="nsew")
+                        self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
+                        self.info_toggle[role] = "off"
+                    else:
+                        self.tree_list[role].grid(row=0, column=4, sticky="nsew")
+                        self.tree2_list[role].grid(row=2, column=4, sticky="nsew")
+                        self.info_toggle[role] = "off"
 
     def add_inference2self(self, name, info, memory_index, role=None):
         # 在Treeview中添加一行数据
         if role == None:
             return
         self.tree_list[role].insert("", "end", values=(name, info, memory_index))
-        items = self.tree_list[role].get_children()
-        key = int(self.tree_list[role].item(self.tree_list[role], "values")[2])
-        # 使用 sort 方法进行排序
-        items.sort(key=key, reverse=True)
-        # 重新插入排序后的条目
-        for index, item in enumerate(items):
-            self.tree_list[role].move(item, "", index)
+        # 获取 Treeview 中所有条目的ID，并按记忆指数从大到小排序
+        sorted_ids = sorted(self.tree_list[role].get_children(), key=lambda x: self.tree_list[role].set(x, "记忆指数"),
+                            reverse=True)
+        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+        for item_id in sorted_ids:
+            values = self.tree_list[role].item(item_id, "values")
+            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+            self.tree_list[role].insert("", "end", values=values)
+            self.tree_list[role].delete(item_id)
+            self.tree_list[role].update()
 
     def add_inference2self2(self, name, info, memory_index, status, role=None):
         # 在Treeview中添加一行数据
         if role == None:
             return
         self.tree2_list[role].insert("", "end", values=(name, info, memory_index, status))
-        items = self.tree2_list[role].get_children()
-        key = int(self.tree2_list[role].item(self.tree2_list[role], "values")[2])
-        # 使用 sort 方法进行排序
-        items.sort(key=key, reverse=True)
-        # 重新插入排序后的条目
-        for index, item in enumerate(items):
-            self.tree2_list[role].move(item, "", index)
+        sorted_ids = sorted(self.tree2_list[role].get_children(), key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
+                            reverse=True)
+        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+        for item_id in sorted_ids:
+            values = self.tree2_list[role].item(item_id, "values")
+            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+            self.tree2_list[role].insert("", "end", values=values)
+            self.tree2_list[role].delete(item_id)
+            self.tree2_list[role].update()
 
     def add_inference2public(self, name, info, statement, role=None):
         # 在Treeview中添加一行数据
@@ -2367,8 +2451,8 @@ class ChatApp:
     def open_new_window(self):
         self.new_window = tk.Toplevel(root)
         self.new_window.title("调查模块")
-        #self.new_window.grid_rowconfigure(0, weight=1)
-        #self.new_window.grid_columnconfigure(0, weight=1)
+        # self.new_window.grid_rowconfigure(0, weight=1)
+        # self.new_window.grid_columnconfigure(0, weight=1)
         self.info_add_button = {}
         self.thoughts = {}
         self.tree_list = {}
@@ -2377,8 +2461,9 @@ class ChatApp:
         self.info_delete_button = {}
         self.info_expand_button = {}
         self.info_toggle = {}
+        self.frames = {}
 
-        num_cols = 2
+        num_cols = 3
         for idx, role in enumerate(self.roles):
             self.info_toggle[role] = "off"
             row = idx % num_cols
@@ -2386,36 +2471,44 @@ class ChatApp:
             # 自动调整列宽
             for i in range(num_cols + 2):
                 self.new_window.columnconfigure(i, weight=1)
-            if role == "DiceBot":
-                frame = tk.LabelFrame(self.new_window, text="NPC", relief=tk.GROOVE)
-                frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
-                #frame.grid_rowconfigure(0, weight=1)
-                #frame.grid_columnconfigure(0, weight=1)
-            elif role == "KP":
+            if role == "KP":
                 frame = tk.LabelFrame(self.new_window, text="共享库", relief=tk.GROOVE)
                 frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
-                save_button = tk.Button(frame, text="清\n空", command=lambda: self.delete_information)
-                save_button.grid(row=0, column=1, pady=5, sticky="nsew")
-                save_button = tk.Button(frame, text="地\n图", command=self.open_new_window_map)
-                save_button.grid(row=1, column=0, pady=5, sticky="nsew")
-                #frame.grid_rowconfigure(0, weight=1)
-                #frame.grid_columnconfigure(0, weight=1)
+                self.frames["KP"] = frame
+                clearKP_button = tk.Button(frame, text="清\n空", command=lambda role=role: self.clear_information(role))
+                clearKP_button.grid(row=0, column=1, pady=5, sticky="nsew")
+                map_button = tk.Button(frame, text="地\n图", command=self.open_new_window_map)
+                map_button.grid(row=1, column=0, pady=5, sticky="nsew")
+                cal_button = tk.Button(frame, text="计\n算\n器", command=self.calculator)
+                cal_button.grid(row=1, column=1, pady=5, sticky="nsew")
+                # frame.grid_rowconfigure(0, weight=1)
+                # frame.grid_columnconfigure(0, weight=1)
             else:
-                frame = tk.LabelFrame(self.new_window, text=f"{role} - {self.role_entries_name[role]}",
-                                      relief=tk.GROOVE)
-                frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
-                #frame.grid_rowconfigure(0, weight=1)
-                #frame.grid_columnconfigure(0, weight=1)
+                if role == "DiceBot":
+                    frame = tk.LabelFrame(self.new_window, text="NPC", relief=tk.GROOVE)
+                    frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
+                    # frame.grid_rowconfigure(0, weight=1)
+                    # frame.grid_columnconfigure(0, weight=1)
+                else:
+                    frame = tk.LabelFrame(self.new_window, text=f"{role} - {self.role_entries_name[role]}",
+                                          relief=tk.GROOVE)
+                    frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
+                self.frames[role] = frame
+                # frame.grid_rowconfigure(0, weight=1)
+                # frame.grid_columnconfigure(0, weight=1)
 
-                forget_button = tk.Button(frame, text="遗\n忘\n信\n息", command=lambda: self.forget_information)
+                forget_button = tk.Button(frame, text="遗\n忘\n信\n息",
+                                          command=lambda role=role: self.forget_information(role))
                 forget_button.grid(row=0, column=1, pady=5, sticky="nsew")
-                save_button = tk.Button(frame, text="上\n传\n信\n息", command=lambda role=role: self.upload_information(role))
-                save_button.grid(row=0, column=2, pady=5, sticky="nsew")
+                upload_button = tk.Button(frame, text="上\n传\n信\n息",
+                                          command=lambda role=role: self.upload_information(role))
+                upload_button.grid(row=0, column=2, pady=5, sticky="nsew")
                 add_button = tk.Button(frame, text="添\n加\n信\n息", command=lambda role=role: self.add_information(role))
                 add_button.grid(row=2, column=2, pady=5, sticky="nsew")
                 self.info_add_button[role] = add_button
-                save_button = tk.Button(frame, text="删\n除\n信\n息", command=lambda: self.delete_information)
-                save_button.grid(row=2, column=1, pady=5, sticky="nsew")
+                delete_button = tk.Button(frame, text="删\n除\n信\n息",
+                                          command=lambda role=role: self.delete_information(role))
+                delete_button.grid(row=2, column=1, pady=5, sticky="nsew")
                 clear_button = tk.Button(frame, text="清\n空\n信\n息", bg="red", fg="black",
                                          command=lambda role=role: self.clear_information(role))
                 clear_button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
@@ -2448,7 +2541,7 @@ class ChatApp:
             else:
                 entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1)
                 entry2.grid(row=1, column=4, padx=0, pady=0, sticky="nsew")
-                self.thoughts[role] =  entry2
+                self.thoughts[role] = entry2
                 # 创建Treeview
                 self.tree = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数"), show="headings",
                                          style="Treeview")
@@ -2459,12 +2552,14 @@ class ChatApp:
                 self.tree2_list[role] = self.tree2
                 # 添加标签以供后续使用
                 self.tree2.tag_configure('red_background', background='red')
+                self.tree2.bind("<Double-1>", lambda event, role=role: self.on_double_click2(event, role))
+                self.tree.bind("<Double-1>", lambda event, role=role: self.on_double_click(event, role))
 
                 # 创建Scrollbar
                 # scrollbar = ttk.Scrollbar(self.new_window, orient="vertical", command=self.tree.yview)
                 # 配置Treeview的yview和Scrollbar的command
-                #self.tree.configure(yscrollcommand=scrollbar.set)
-                #scrollbar.grid(row=0, column=1, sticky="ns")
+                # self.tree.configure(yscrollcommand=scrollbar.set)
+                # scrollbar.grid(row=0, column=1, sticky="ns")
                 # self.tree.bind("<Double-1>", self.on_double_click())
 
                 # 设置表头
@@ -2498,7 +2593,8 @@ class ChatApp:
 
                 # 添加示例数据
                 # self.add_inference2public("玩家1", "关于X的信息", "关于X的信息")
-
+                if role == "DiceBot":
+                    self.add_inference2self("xxx", "xxx的可能性", 0, role)
                 # self.add_inference("玩家2", "关于Y的信息", 5, "√")
             # 配置可调整大小的框架
 
@@ -3420,9 +3516,9 @@ class MemoryInfoDialog(simpledialog.Dialog):
         memory_index = trust + importance
 
         # 给出评分
-        if memory_index <= 0:
+        if memory_index <= -1:
             rating = "遗忘"
-        elif memory_index == 1:
+        elif memory_index <= 0:
             rating = "无用信息"
         elif memory_index == 2:
             rating = "模糊信息"
@@ -3440,6 +3536,89 @@ class MemoryInfoDialog(simpledialog.Dialog):
         print(f"信息来源: {source}, 信息内容: {content}, 信任度: {trust}, 重要度: {importance}, 记忆指数: {memory_index}, 评分: {rating}")
         return self.result
 
+
+class DiceRollDialog(simpledialog.Dialog):
+    def body(self, master):
+        tk.Label(master, text="第一次掷骰结果：").grid(row=0, column=0, sticky="e")
+        tk.Label(master, text="第二次掷骰结果：").grid(row=1, column=0, sticky="e")
+        self.trust_var = tk.StringVar()
+        self.importance_var = tk.StringVar()
+
+        first_roll_values = ["大失败（-20%）", "失败（10%）", "成功（100%）"]
+        self.first_roll_entry = ttk.Combobox(master, textvariable=self.trust_var, values=first_roll_values)
+
+        second_roll_values = ["大失败（-80%）", "失败（-20%）", "成功（+20%）", "困难成功（+40%）", "极难成功（+60%）", "大成功（+100%）"]
+        self.second_roll_entry = ttk.Combobox(master, textvariable=self.importance_var, values=second_roll_values)
+
+        self.first_roll_entry.grid(row=0, column=1)
+        self.second_roll_entry.grid(row=1, column=1)
+
+        return self.first_roll_entry
+
+    def apply(self):
+        first_roll = self.trust_var.get()
+        second_roll = self.importance_var.get()
+
+        # 根据规则计算最后的处理方案
+        result_percentage = calculate_result_percentage(first_roll, second_roll)
+        final_result = calculate_final_result(result_percentage)
+
+        # 显示最终结果
+        result_text = f"结果百分比：{result_percentage}\n处理方案：{final_result}\n\n根据原模组信息总结至多五个关键词，按重要度排序，发放时按重要度低到高发放。\n" \
+                      f"注意给出的关键词要是可探索、结合模组剧情的关键地点、物品、事件、人物等（一般重要度较低），或者是传达一种态度和推理思路（一般重要度最高）。\n" \
+                      f"如果数量不够，则不提供任何关键词（比如只有一个关键地点，则在80%以上给出）如果信息过于简短，可以提前给出全部段落，负值同理；\n如果段落总结不出关键词，可以将关键词替换为句子。\n" \
+                      f"注意虚假信息和无效信息是不一样的。无效信息在0%给出，虚假信息需要起到误导PC的作用（比如新增了一个地点，新增了一个人物，关键信息错误等） "
+        messagebox.showinfo("处理方案", result_text)
+        print(result_text)
+
+
+def calculate_result_percentage(first_roll, second_roll):
+    # 根据规则计算可能的结果百分比
+    # 请根据实际规则进行修改
+    result_percentage = 0
+    match = re.search(r'（(-?\+?\d+)%）', first_roll)
+    if match:
+        print(match.group(1))
+        first_roll = int(match.group(1))
+    match2 = re.search(r'（(-?\+?\d+)%）', second_roll)
+    if match2:
+        second_roll = int(match2.group(1))
+    result_percentage = int(first_roll) + int(second_roll)
+    return result_percentage
+
+
+def calculate_final_result(result_percentage):
+    # 根据可能的结果百分比计算最终处理方案
+    # 请根据实际规则进行修改
+    if result_percentage == -100:
+        final_result = "虚假全部/5假词"
+    elif result_percentage == -70:
+        final_result = "虚假全部，留1真词"
+    elif result_percentage == -40:
+        final_result = "2真词1假词"
+    elif result_percentage == -20:
+        final_result = "2假词/1真2假"
+    elif result_percentage == -10:
+        final_result = "1假词/1真1假"
+    elif result_percentage == 0:
+        final_result = "0关键词"
+    elif result_percentage == 10:
+        final_result = "1关键词"
+    elif result_percentage == 20:
+        final_result = "2关键词"
+    elif result_percentage == 30:
+        final_result = "3关键词"
+    elif result_percentage == 40:
+        final_result = "4关键词"
+    elif result_percentage == 50:
+        final_result = "5关键词"
+    elif result_percentage == 70:
+        final_result = "完整信息隐藏2关键词"
+    elif result_percentage == 80:
+        final_result = "完整信息隐藏1关键词"
+    else:
+        final_result = "完整信息"
+    return final_result
 
 
 if __name__ == "__main__":
