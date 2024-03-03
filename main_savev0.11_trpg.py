@@ -23,6 +23,7 @@ def create_folder(folder_path):
     except FileExistsError:
         print(f"文件夹 '{folder_path}' 已经存在")
 
+babel_on = False
 
 # 例子：创建名为 'my_folder' 的文件夹在当前工作目录下
 create_folder('AppSettings')
@@ -43,13 +44,15 @@ weather = "晴"
 time = datetime.now().strftime("%H:%M")
 date = datetime.now().strftime("%Y/%m/%d %A")
 # 自动Timer计算
-time_1min = ["斗殴", "闪避", "链锯", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救", "跳跃",
-             "困难跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷"]
-time_5min = ["困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "重武器", "火焰喷射器", "医学", "困难急救", "锁匠", "领航", "极难跳跃", "极难攀爬",
-             "困难妙手", "潜行", "极难投掷"]
-time_10min = ["表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "极难侦查", "极难聆听", "极难心理学", "困难恐吓", "困难说服", "困难魅惑", "困难话术",
-              "极难急救", "困难锁匠", "困难领航", "极难妙手", "困难潜行"]
-time_30min = ["极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "图书馆", "计算机", "电脑", "困难会计", "极难潜行", "木匠", "厨艺", "雕塑", "伪造", "陶艺"]
+_secondsTime = 0
+time_3s = ["斗殴", "闪避", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救",
+           "困难跳跃", "跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷"]
+time_1min = ["链锯", "困难急救", "极难跳跃", "极难攀爬", "困难妙手", "极难投掷", "困难潜行", "重武器", "火焰喷射器", "锁匠"]
+time_5min = ["困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "医学", "极难急救", "困难锁匠", "领航",
+             "极难妙手", "极难潜行"]
+time_10min = ["表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "极难聆听", "极难心理学", "困难恐吓", "困难说服", "困难魅惑", "困难话术",
+              "极难急救", "困难锁匠", "困难领航"]
+time_30min = ["极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "图书馆", "计算机", "电脑", "困难会计", "木匠", "厨艺", "雕塑", "伪造", "陶艺", "极难侦查"]
 time_1h = ["困难表演", "困难美术", "困难写作", "困难书法", "困难舞蹈", "困难歌剧", "困难声乐", "困难摄影", "困难电气维修", "困难电子学", "困难机械维修", "极难锁匠",
            "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计"]
 time_3h = ["极难表演", "极难书法", "极难舞蹈", "极难歌剧", "极难声乐", "极难摄影", "极难电子学", "极难电气维修", "极难医学", "极难精神分析", "极难追踪", "极难计算机", "极难电脑",
@@ -57,7 +60,8 @@ time_3h = ["极难表演", "极难书法", "极难舞蹈", "极难歌剧", "极�
 time_12h = ["极难图书馆", "极难美术", "极难写作", "极难木匠", "极难厨艺", "极难雕塑", "极难伪造", "极难陶艺"]
 time_1d = []
 time_1w = []
-time_skill = {"time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min, "time_30min": time_30min,
+time_skill = {"time_3s": time_3s, "time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min,
+              "time_30min": time_30min,
               "time_1h": time_1h, "time_3h": time_3h, "time_12h": time_12h, "time_1d": time_1d,
               "time_1w": time_1w}
 
@@ -140,6 +144,7 @@ def load_role_count():
     config = configparser.ConfigParser()
     config.read('AppSettings/config.ini')
     return int(config.get('Settings', 'RoleCount', fallback=0))
+
 
 role_Chart_detail_demo = {
     "EDU": 0,
@@ -294,6 +299,7 @@ role_Chart_detail_demo = {
     "#冲锋枪": "1D10穿",
     "#步枪/霰弹枪": "1D6+1穿",
 }
+
 
 def load_Chart():
     try:
@@ -1106,7 +1112,8 @@ class ChatApp:
                                      " - 你的Bug我的Bug好像都一样", " - 新约是不是就像陛下一样可爱", " - 傻卢，罚你一天不见陛下",
                                      " - 送你默默饮泪的泪城纪念雨景球", " - 送你向着它告白就能获得陛下碎片的勇气流星", " - 陛下正在搭建他的绝对帝国", " - 一半的陛下庇护",
                                      " - 陛下那么肥干什么，没有陛下的气质",
-                                     " - 陛下很便宜的", " - 情人眼里出陛下", " - 只能说没有陛下漂亮", ' - "你们都没有我懂陛下！"', " - 就像陛下",
+                                     " - 陛下很便宜的", " - 情人眼里出陛下", " - 陛下很好养活的", " - 有王吗？", " - 只能说没有陛下漂亮",
+                                     ' - "你们都没有我懂陛下！"', " - 就像陛下",
                                      ' - "我是真的对陛下没感觉"',
                                      " - 曾经有一只超可爱的陛下在我面前，我却没有珍惜", " - 感觉陛下有危险！", " - 这个陛下救不了我", " - 成为陛下",
                                      ' - "有毛的都被我干掉了"', " - 陛下，本命链顶端的男人", " - 王学家和卢卢跳舞被陛下追着打",
@@ -1127,7 +1134,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v0.75" + encouragement)
+        self.root.title("自嗨团 v0.82" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
@@ -1139,6 +1146,8 @@ class ChatApp:
         root.bind("<Return>", lambda event: self.send_message(self.current_role.get()))
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", self.newline_on_ctrl_enter)
+
+        self.babel_data = {}
 
         # 初始化角色列表
         self.role_count = load_role_count()
@@ -1175,7 +1184,7 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n#Armor\n推理信息库\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n时间模块\n#Armor\n推理信息库\n巴别塔（看控制台）\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..）" \
@@ -1215,6 +1224,7 @@ class ChatApp:
             self.role_entries_name[role] = role
             if load_settings_name() != "":
                 self.role_entries_name = load_settings_name()  # 从文件加载设置
+        babel(self)
 
         self.create_role_frames()
         for i in range(self.role_count):
@@ -1386,6 +1396,7 @@ class ChatApp:
             self.trpg_toggle = "off"
 
     def send_message(self, role):
+        fire_babel(self, role)
         role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
@@ -1610,6 +1621,7 @@ class ChatApp:
             index = self.roles.index(role)
             # self.roles[index] = new_name
             self.role_entries_name[role] = new_name
+            babel(self)
             # 更新当前角色名
             # if self.current_role.get() == role:
             # self.current_role.set(new_name)
@@ -1958,6 +1970,7 @@ class ChatApp:
                 expression = "1d100"
             if enemy_matches is not None:
                 for enemy in enemy_matches:
+                    role_ = ""
                     for key, nickname in self.role_entries_name.items():
                         if enemy == nickname:
                             role_ = key
@@ -1969,14 +1982,17 @@ class ChatApp:
                         self.enemy_matches[enemy] = self.role_entries_roll[enemy].get("1.0", tk.END).strip()
 
             for skill in role_Chart_detail:
-                if skill in reason:
+                if ("r" + skill in reason) or ("ra" + skill in reason) and ("[" not in reason):
+                    reason = reason.replace("." + skill, skill)
+                    reason = reason.replace("r" + skill, skill)
+                    reason = reason.replace("ra" + skill, skill)
                     expression = skill
                     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                     log = f"{self.role_entries_name[role]} {timestamp}\n{reason}\n\n"  # 不加引号
                     self.chat_log.insert(tk.END, log)
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
-                    reason = skill
+                    reason = "尝试" + skill
 
             if enemy_matches is not None:
                 for enemy in self.enemy_matches:
@@ -2473,7 +2489,7 @@ class ChatApp:
         else:
             self.tree_main.insert("", "end", values=(name, info, self.role_entries_name[role], statement))
 
-    def load_treeview_data(self, treeview, filename, role = None):
+    def load_treeview_data(self, treeview, filename, role=None):
         try:
             with open(filename, 'r') as file:
                 data_ = json.load(file)
@@ -2545,15 +2561,17 @@ class ChatApp:
                 frame = tk.LabelFrame(self.new_window, text="共享库", relief=tk.GROOVE)
                 frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
                 self.frames["KP"] = frame
-                clearKP_button = tk.Button(frame, text="清\n空\n信\n息", bg="red", fg="black", command=lambda role=role: self.clear_information(role))
+                clearKP_button = tk.Button(frame, text="清\n空\n信\n息", bg="red", fg="black",
+                                           command=lambda role=role: self.clear_information(role))
                 clearKP_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
-                saveKP_button = tk.Button(frame, text="保\n存\n所\n有", bg="black", fg="white", command=self.on_closing_new_window)
+                saveKP_button = tk.Button(frame, text="保\n存\n所\n有", bg="black", fg="white",
+                                          command=self.on_closing_new_window)
                 saveKP_button.grid(row=0, column=2, pady=5, sticky="nsew")
                 deleteKP_button = tk.Button(frame, text="删\n除\n信\n息",
-                                          command=lambda role=role: self.delete_information(role))
+                                            command=lambda role=role: self.delete_information(role))
                 deleteKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
-                #loadKP_button = tk.Button(frame, text="读\n取", command=self.load_treeview_data)
-                #loadKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
+                # loadKP_button = tk.Button(frame, text="读\n取", command=self.load_treeview_data)
+                # loadKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
                 map_button = tk.Button(frame, text="绘\n制\n地\n图", command=self.open_new_window_map)
                 map_button.grid(row=0, column=1, pady=5, sticky="nsew")
                 cal_button = tk.Button(frame, text="计\n算\n器", command=self.calculator)
@@ -3333,7 +3351,7 @@ class TRPGModule:
 
     def move_time_forward(self, timer):
         switch_dict = {
-            "time_1sec": self.add_time_1sec,
+            "time_3s": self.add_time_3sec,
             "time_1min": self.add_time_1min,
             "time_5min": self.add_time_5min,
             "time_10min": self.add_time_10min,
@@ -3349,20 +3367,31 @@ class TRPGModule:
         # 执行函数
         time_function()
 
-    def add_time_1sec(self):
-        # 添加处理 time_1min 的代码
-        global time
-        time_format = "%H:%M"
-        base_time = datetime.strptime(time, time_format)
-        time = base_time + timedelta(minutes=1)
+    def add_time_3sec(self):
+        # 添加处理 time_3s 的代码
+        global _secondsTime
+        if _secondsTime >= 60:
+            self.add_time_1min()
+            _secondsTime -= 60
+        else:
+            _secondsTime += random.randint(1, 3)
+            print(f"秒表：{_secondsTime}秒")
+        # global time
+        # time_format = "%H:%M"
+        # base_time = datetime.strptime(time, time_format)
+        # time = base_time + timedelta(seconds=3)
         # 将新时间格式化为字符串
-        time = time.strftime(time_format)
-        reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
-        self.ChatApp.time_log.delete("1.0", tk.END)
-        self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
-        print("Adding 1 minute")
-        if time == "00:00":
-            print("新的一天")
+        # time = time.strftime(time_format)
+        # reply = "【地点】" + str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[1])
+        # self.ChatApp.time_log.delete("1.0", tk.END)
+        # self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
+        # print("Adding 1 minute")
+        # if time == "23:59:57":
+        # print("新的一天")
+        # self.ChatApp.chat_log.insert(tk.END,
+        # f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
+        # 滚动到最底部
+        # self.ChatApp.chat_log.yview(tk.END)
 
     def add_time_1min(self):
         # 添加处理 time_1min 的代码
@@ -3714,9 +3743,106 @@ def calculate_final_result(result_percentage):
     return final_result
 
 
+# 从文件中读取 JSON 数据
+
+def babel(self):
+    global babel_on
+    try:
+        # 尝试加载自定义角色数值信息
+        with open('GameSaves/巴别塔.json', 'r', encoding='utf-8') as file:
+            self.babel_data = json.load(file)
+        babel_on = True
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        self.babel_data = {}
+        babel_on = False
+        print("未启用“巴别塔”模块, 配置好角色后，在GameSaves下新建以“{}”为内容的 巴别塔.json 以初始化")
+
+    # 如果数据非空，则启用“巴别塔”模块
+    if self.babel_data:
+        babel_on = True
+        print("启用“巴别塔”模块")
+    elif babel_on == False:
+        print("未启用“巴别塔”模块, 配置好角色后，在GameSaves下新建巴别塔.json以初始化")
+    else:
+        babel_on = False
+        print("准备启用“巴别塔”模块，正在初始化，请核对 GameSaves/巴别塔.json，修改角色“母语”（{'母语':60}）为母语（{'英语':60, '母语':'英语'}），确认国籍并重启")
+        self.babel_data = {}
+        for role, info in role_Chart.items():
+            data_ = {}
+            home = -1
+            for skill, percent in info.items():
+                if "语" in skill:
+                    if percent == "EDU":
+                        data_[skill] = 0
+                        data_["国籍"] = "地球"
+                    else:
+                        data_[skill] = percent
+                        if home < int(percent):
+                            data_["国籍"] = skill.replace("语", "") + "国"
+            self.babel_data[self.role_entries_name[role]] = data_
+        with open('GameSaves/巴别塔.json', 'w', encoding='utf-8') as file:
+            json.dump(self.babel_data, file)
+
+def fire_babel(self, role):
+    # 在 data 中获取角色信息
+    print(f"===")
+    global babel_on
+    role = self.role_entries_name[role]
+    if babel_on:
+        lan_list = {}
+        dic = self.babel_data[role]
+        lan_main = str(dic["母语"]).replace("0", "英语")
+        for language, skill in self.babel_data[role].items():
+            if language != "母语" and language != "国籍":
+                if skill >= 20:
+                    lan_list[language] = skill
+        for role2 in self.roles:
+            role2 = self.role_entries_name[role2]
+            if role2 != role:
+                dic2 = self.babel_data[role2]
+                best_lan = "None"
+                best_lan_skill = 0
+                if lan_main in dic2:
+                    if dic2[lan_main] + dic[lan_main] >= 100:
+                        print(f"[巴别塔] {role2} 和 {role} 用 {lan_main} 聊得很开心！")
+                    else:
+                        for language, skill in self.babel_data[role2].items():
+                            if language != "母语" and language != "国籍":
+                                if language in lan_list:
+                                    if skill + lan_list[language] >= 100:
+                                        print(f"[巴别塔] {role2} 和 {role} 用 {language} 聊得很开心！")
+                                        break
+                                    elif skill >= 10:
+                                        if best_lan_skill < skill:
+                                            best_lan = language
+                                            best_lan_skill = skill
+                                    if best_lan != "None":
+                                        if best_lan_skill + lan_list[best_lan] >= 80:
+                                            print(f"[巴别塔] 啊哦！{role2} 好像听不懂 {role} 在说什么！请掷骰 {best_lan} 或 母语 ！")
+                                            break
+                                        elif best_lan_skill + lan_list[best_lan] >= 50:
+                                            print(f"[巴别塔] 啊哦！{role2} 好像听不懂 {role} 在说什么！请掷骰 {best_lan} 或 困难母语 ！")
+                                            break
+                                        elif best_lan_skill + lan_list[best_lan] >= 20:
+                                            print(f"[巴别塔] 啊哦！{role2} 好像听不懂 {role} 在说什么！请掷骰 {best_lan} 或 极难母语 ！")
+                                            break
+                                        elif best_lan_skill >= 10:
+                                            print(f"[巴别塔] 啊哦！{role2} 好像怎么都听不懂 {role} 在说什么，但知道那可能是 {language}，可以去请教一下别人！")
+                                            break
+                                        else:
+                                            print(f"[巴别塔] 啊哦！{role2} 好像怎么都听不懂 {role} 在说什么！")
+                                            break
+                                    else:
+                                        print(f"[巴别塔] 啊哦！{role2} 好像怎么都听不懂 {role} 在说什么！")
+                                        break
+
+
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = ChatApp(root)
     root.protocol("WM_DELETE_WINDOW", app.on_closing)  # 捕获窗口关闭事件
-    #root.protocol("WM_DELETE_WINDOW", self.new_window.on_closing)  # 捕获窗口关闭事件
+    # root.protocol("WM_DELETE_WINDOW", self.new_window.on_closing)  # 捕获窗口关闭事件
     root.mainloop()
