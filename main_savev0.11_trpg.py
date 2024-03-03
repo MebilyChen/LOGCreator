@@ -11,9 +11,23 @@ import configparser
 from PIL import Image, ImageTk
 import json
 
+
 # import logging
 
 # logging.basicConfig(level=logging.DEBUG)  # 设置日志级别为 DEBUG
+
+def create_folder(folder_path):
+    try:
+        os.makedirs(folder_path)
+        print(f"文件夹 '{folder_path}' 创建成功")
+    except FileExistsError:
+        print(f"文件夹 '{folder_path}' 已经存在")
+
+
+# 例子：创建名为 'my_folder' 的文件夹在当前工作目录下
+create_folder('AppSettings')
+create_folder('Bots')
+create_folder('GameSaves')
 
 # 便于直接编辑的一系列字符串
 string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]
@@ -72,7 +86,7 @@ Critical_Success_SKill = bot_personality_["Critical_at_5_SKill_Level"]
 def load_settings_avatar():
     try:
         # 尝试从JSON文件加载头像路径
-        with open('avatar_settings.json', 'r') as file:
+        with open('AppSettings/avatar_settings.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -82,8 +96,8 @@ def load_settings_avatar():
 
 def load_DiceBot_personality():
     try:
-        # 尝试从JSON文件加载头像路径
-        with open('bot_personality_by_name.json', 'r', encoding='utf-8') as file:
+        # 尝试从JSON文件加载骰子性格路径
+        with open('Bots/bot_personality_by_name.json', 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -93,7 +107,7 @@ def load_DiceBot_personality():
 def load_env():
     try:
         # 尝试从JSON文件加载
-        with open('env_info.json', 'r', encoding='utf-8') as file:
+        with open('GameSaves/env_info.json', 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -103,7 +117,7 @@ def load_env():
 def load_settings_name():
     try:
         # 尝试加载姓名牌路径
-        with open('name_settings.json', 'r') as file:
+        with open('AppSettings/name_settings.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -114,7 +128,7 @@ def load_settings_name():
 def load_PL_INFO():
     try:
         # 尝试加载自定义角色数值信息
-        with open('pl_info.json', 'r') as file:
+        with open('GameSaves/pl_info.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -124,9 +138,8 @@ def load_PL_INFO():
 def load_role_count():
     # 从配置文件加载角色数量，默认为0
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('AppSettings/config.ini')
     return int(config.get('Settings', 'RoleCount', fallback=0))
-
 
 role_Chart_detail_demo = {
     "EDU": 0,
@@ -282,11 +295,10 @@ role_Chart_detail_demo = {
     "#步枪/霰弹枪": "1D6+1穿",
 }
 
-
 def load_Chart():
     try:
         # 尝试加载自定义角色数值信息
-        with open('pl_Chart.json', 'r', encoding='utf-8') as file:
+        with open('GameSaves/pl_Chart.json', 'r', encoding='utf-8') as file:
             # print(f"Problematic data: {file.read()}")
             return json.load(file)
     except FileNotFoundError:
@@ -757,7 +769,7 @@ def load_Chart():
 def load_Chart_at_name():
     try:
         # 按姓名牌加载自定义角色数值信息
-        with open('pl_Chart_at_name.json', 'r', encoding='utf-8') as file:
+        with open('GameSaves/pl_Chart_at_name.json', 'r', encoding='utf-8') as file:
             # print(f"Problematic data: {file.read()}")
             return json.load(file)
     except FileNotFoundError:
@@ -1086,7 +1098,6 @@ adv_comment = ""
 
 class ChatApp:
     def __init__(self, root):
-
         self.root = root
         # 一系列字符串
         string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！这就是全部的陛下庇护！", " - 陛下所言甚是/陶醉", " - "
@@ -1119,7 +1130,7 @@ class ChatApp:
         self.root.title("自嗨团 v0.75" + encouragement)
 
         # 设置图标
-        self.root.iconbitmap("icon.ico")
+        self.root.iconbitmap("AppSettings/icon.ico")
 
         # 其他窗口内容
         # self.label = tk.Label(root, text="Hello, Tkinter!")
@@ -1164,12 +1175,12 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n#Armor\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n#Armor\n推理信息库\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..）" \
                        "\n--features" \
-                       "\n推理信息库（个人/共用）及信息重要度相关计算【参考自嗨团规则】" \
+                       "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame）" \
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
                        "\n继续优化简易小地图" \
@@ -1179,7 +1190,7 @@ class ChatApp:
         self.chat_log.insert(tk.END, initial_text)
 
         # 创建按钮，点击按钮时调用 open_new_window 函数
-        new_window_button = tk.Button(root, text="打开新窗口", command=self.open_new_window)
+        new_window_button = tk.Button(root, text="推理信息", command=self.open_new_window)
         new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
         # 初始化输出聊天LOG按钮
@@ -2260,18 +2271,32 @@ class ChatApp:
 
     def delete_information(self, role):
         # 获取选中的条目
-        selected_item = self.tree2_list[role].selection()
-        if selected_item is None:
-            selected_item = self.tree_list[role].selection()
-            # 如果有选中的条目
+        if role == "KP":
+            selected_item = self.tree_main.selection()
+            if selected_item is None:
+                selected_item = self.tree_main.selection()
+                # 如果有选中的条目
+                if selected_item:
+                    # 更改选中条目的背景色为红色
+                    # self.tree2_list[role].item(selected_item, tags=('red_background'))
+                    self.tree_main.delete(selected_item)
             if selected_item:
                 # 更改选中条目的背景色为红色
-                # self.tree2_list[role].item(selected_item, tags=('red_background'))
-                self.tree_list[role].delete(selected_item)
-        if selected_item:
-            # 更改选中条目的背景色为红色
-            # self.tree_list[role].item(selected_item, tags=('red_background'))
-            self.tree2_list[role].delete(selected_item)
+                # self.tree_list[role].item(selected_item, tags=('red_background'))
+                self.tree_main.delete(selected_item)
+        else:
+            selected_item = self.tree2_list[role].selection()
+            if selected_item is None:
+                selected_item = self.tree_list[role].selection()
+                # 如果有选中的条目
+                if selected_item:
+                    # 更改选中条目的背景色为红色
+                    # self.tree2_list[role].item(selected_item, tags=('red_background'))
+                    self.tree_list[role].delete(selected_item)
+            if selected_item:
+                # 更改选中条目的背景色为红色
+                # self.tree_list[role].item(selected_item, tags=('red_background'))
+                self.tree2_list[role].delete(selected_item)
 
     def on_double_click(self, event, role=None):
         # 获取双击的条目
@@ -2324,9 +2349,10 @@ class ChatApp:
     def add_information(self, role=None):
         self.information_sources = ["来源A", "来源B", "来源C"]  # 你的信息来源列表
 
-        dialog = MemoryInfoDialog(self.new_window, f"为【{self.role_entries_name[role]}】添加信息", self.information_sources,
-                                  role)
-        result = dialog.result
+        self.dialog = MemoryInfoDialog(self.new_window, f"为【{self.role_entries_name[role]}】添加信息",
+                                       self.information_sources,
+                                       role)
+        result = self.dialog.result
         if result["评分"] == "遗忘":
             self.add_inference2self2(result["信息来源"], "[该信息已遗忘 - Ignorance is a bliss.]  " + result["信息内容"],
                                      result["记忆指数"], "×", role)
@@ -2378,8 +2404,8 @@ class ChatApp:
             self.tree2_list[role].delete(*self.tree2_list[role].get_children())
 
     def calculator(self):
-        dialog = DiceRollDialog(self.new_window, f"调查进度计算器")
-        result = dialog.result
+        self.dialog = DiceRollDialog(self.new_window, f"调查进度计算器")
+        result = self.dialog.result
 
     def expand_information(self, role=None):
         _number = 0
@@ -2393,14 +2419,14 @@ class ChatApp:
                     if role == "KP":
                         self.tree_main.grid_forget()
                         self.info_toggle[role] = "on"
-                        #self.frames["KP"].grid_forget()
+                        # self.frames["KP"].grid_forget()
                     else:
                         self.tree_list[role].grid_forget()  # 缩进
                         self.tree2_list[role].grid_forget()
                         self.info_toggle[role] = "on"
                 else:
                     if role == "KP":
-                        #self.frames["KP"].grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+                        # self.frames["KP"].grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
                         self.tree_main.grid(row=1, column=3, sticky="nsew")
                         self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                         self.info_toggle[role] = "off"
@@ -2447,10 +2473,54 @@ class ChatApp:
         else:
             self.tree_main.insert("", "end", values=(name, info, self.role_entries_name[role], statement))
 
+    def load_treeview_data(self, treeview, filename, role = None):
+        try:
+            with open(filename, 'r') as file:
+                data_ = json.load(file)
+                if data_:
+                    if role == "KP":
+                        data = data_[role]
+                        for item_data in data:
+                            treeview.insert('', 'end', values=item_data)
+                    else:
+                        data = data_[role]
+                        for item_data in data:
+                            treeview.insert('', 'end', values=item_data)
+        except FileNotFoundError:
+            print(f"文件 '{filename}' 不存在")
+
+    def on_closing_new_window(self):
+        with open('GameSaves/Deduction_infos_base.json', 'w') as file:
+            data = {}
+            for role in self.roles:
+                value_list = []
+                if role != "KP":
+                    for item in self.tree2_list[role].get_children():
+                        values = self.tree2_list[role].item(item, 'values')
+                        value_list.append(values)
+                else:
+                    for item in self.tree_main.get_children():
+                        values = self.tree_main.item(item, 'values')
+                        value_list.append(values)
+                data[role] = value_list
+            json.dump(data, file)
+        with open('GameSaves/Deduction_infos_new.json', 'w') as file:
+            data = {}
+            for role in self.roles:
+                value_list = []
+                if role != "KP":
+                    for item in self.tree_list[role].get_children():
+                        values = self.tree_list[role].item(item, 'values')
+                        value_list.append(values)
+                    data[role] = value_list
+            json.dump(data, file)
+        # self.new_window.destroy()
+
     # 新窗口
     def open_new_window(self):
         self.new_window = tk.Toplevel(root)
         self.new_window.title("调查模块")
+
         # self.new_window.grid_rowconfigure(0, weight=1)
         # self.new_window.grid_columnconfigure(0, weight=1)
         self.info_add_button = {}
@@ -2475,10 +2545,17 @@ class ChatApp:
                 frame = tk.LabelFrame(self.new_window, text="共享库", relief=tk.GROOVE)
                 frame.grid(row=row, column=col + 2, padx=5, pady=5, sticky="nsew")
                 self.frames["KP"] = frame
-                clearKP_button = tk.Button(frame, text="清\n空", command=lambda role=role: self.clear_information(role))
-                clearKP_button.grid(row=0, column=1, pady=5, sticky="nsew")
-                map_button = tk.Button(frame, text="地\n图", command=self.open_new_window_map)
-                map_button.grid(row=1, column=0, pady=5, sticky="nsew")
+                clearKP_button = tk.Button(frame, text="清\n空\n信\n息", bg="red", fg="black", command=lambda role=role: self.clear_information(role))
+                clearKP_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+                saveKP_button = tk.Button(frame, text="保\n存\n所\n有", bg="black", fg="white", command=self.on_closing_new_window)
+                saveKP_button.grid(row=0, column=2, pady=5, sticky="nsew")
+                deleteKP_button = tk.Button(frame, text="删\n除\n信\n息",
+                                          command=lambda role=role: self.delete_information(role))
+                deleteKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
+                #loadKP_button = tk.Button(frame, text="读\n取", command=self.load_treeview_data)
+                #loadKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
+                map_button = tk.Button(frame, text="绘\n制\n地\n图", command=self.open_new_window_map)
+                map_button.grid(row=0, column=1, pady=5, sticky="nsew")
                 cal_button = tk.Button(frame, text="计\n算\n器", command=self.calculator)
                 cal_button.grid(row=1, column=1, pady=5, sticky="nsew")
                 # frame.grid_rowconfigure(0, weight=1)
@@ -2499,12 +2576,12 @@ class ChatApp:
 
                 forget_button = tk.Button(frame, text="遗\n忘\n信\n息",
                                           command=lambda role=role: self.forget_information(role))
-                forget_button.grid(row=0, column=1, pady=5, sticky="nsew")
-                upload_button = tk.Button(frame, text="上\n传\n信\n息",
+                forget_button.grid(row=2, column=2, pady=5, sticky="nsew")
+                upload_button = tk.Button(frame, text="分\n享\n信\n息",
                                           command=lambda role=role: self.upload_information(role))
-                upload_button.grid(row=0, column=2, pady=5, sticky="nsew")
+                upload_button.grid(row=0, column=1, pady=5, sticky="nsew")
                 add_button = tk.Button(frame, text="添\n加\n信\n息", command=lambda role=role: self.add_information(role))
-                add_button.grid(row=2, column=2, pady=5, sticky="nsew")
+                add_button.grid(row=0, column=2, pady=5, sticky="nsew")
                 self.info_add_button[role] = add_button
                 delete_button = tk.Button(frame, text="删\n除\n信\n息",
                                           command=lambda role=role: self.delete_information(role))
@@ -2513,7 +2590,7 @@ class ChatApp:
                                          command=lambda role=role: self.clear_information(role))
                 clear_button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
 
-            expand_button = tk.Button(frame, text="展\n开\n信\n息", command=lambda role=role: self.expand_information(role))
+            expand_button = tk.Button(frame, text="展\n开\n收\n起", command=lambda role=role: self.expand_information(role))
             expand_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
             self.info_expand_button[role] = expand_button
             # 使用style修改Treeview的样式
@@ -2522,7 +2599,7 @@ class ChatApp:
                             maxheight=5)  # 设置表头的字体大小
 
             if role == "KP":
-                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=10)
+                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=12)
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
                 self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
@@ -2538,6 +2615,7 @@ class ChatApp:
                 self.tree_main.grid(row=1, column=3, sticky="nsew")
                 # 设置行和列的权重，使得Treeview可以随窗口的大小变化而调整
                 self.tree_main.grid_rowconfigure(0, weight=1)
+                self.load_treeview_data(self.tree_main, "GameSaves/Deduction_infos_base.json", role)
             else:
                 entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1)
                 entry2.grid(row=1, column=4, padx=0, pady=0, sticky="nsew")
@@ -2590,6 +2668,9 @@ class ChatApp:
                 self.tree.grid_columnconfigure(0, weight=1)
                 self.tree2.grid_rowconfigure(0, weight=1)
                 self.tree2.grid_columnconfigure(0, weight=1)
+
+                self.load_treeview_data(self.tree2_list[role], "GameSaves/Deduction_infos_base.json", role)
+                self.load_treeview_data(self.tree_list[role], "GameSaves/Deduction_infos_new.json", role)
 
                 # 添加示例数据
                 # self.add_inference2public("玩家1", "关于X的信息", "关于X的信息")
@@ -2646,16 +2727,16 @@ class ChatApp:
 
     def save_settings(self):
         # 将头像路径保存到JSON文件
-        with open('avatar_settings.json', 'w') as file:
+        with open('AppSettings/avatar_settings.json', 'w') as file:
             json.dump(self.role_avatar_paths, file)
         # 将姓名牌路径保存到JSON文件
-        with open('name_settings.json', 'w') as file:
+        with open('AppSettings/name_settings.json', 'w') as file:
             json.dump(self.role_entries_name, file)
         # 尝试保存自定义角色数值信息
-        with open('pl_info.json', 'w') as file:
+        with open('GameSaves/pl_info.json', 'w') as file:
             json.dump(self.role_values_tags_text, file)
         # 尝试保存地点时间天气信息
-        with open('env_info.json', 'w', encoding='utf-8') as file:
+        with open('GameSaves/env_info.json', 'w', encoding='utf-8') as file:
             info = self.time_log.get("1.0", tk.END).strip()
             info = info.split("【时间】")[1]
             env["Date"] = info.split("【日期】")[1]
@@ -2666,12 +2747,12 @@ class ChatApp:
             env["Weather"] = info.split("【日期】")[0]
             json.dump(env, file)
         # 保存自定义角色数值信息
-        with open('pl_Chart.json', 'w', encoding='utf-8') as file:
+        with open('GameSaves/pl_Chart.json', 'w', encoding='utf-8') as file:
             json.dump(role_Chart, file)
-        with open('bot_personality_by_name.json', 'w', encoding='utf-8') as file:
+        with open('Bots/bot_personality_by_name.json', 'w', encoding='utf-8') as file:
             json.dump(bot_personality_by_name, file)
         # 保存自定义角色数值信息
-        with open('PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
+        with open('GameSaves/PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
             for role, skills in role_Chart.items():
                 txt_file.write(f"【{role}】-{self.role_entries_name[role]}\n.st")
                 for skill, value in skills.items():
@@ -2684,7 +2765,7 @@ class ChatApp:
         self.save_role_skill_at_name()
 
     def save_role_skill_at_name(self):
-        with open('pl_Chart_at_name.json', 'w', encoding='utf-8') as file:
+        with open('GameSaves/pl_Chart_at_name.json', 'w', encoding='utf-8') as file:
             dicSkill = {}
             dic = role_Chart_at_name
             for role, skills in role_Chart.items():
@@ -2702,7 +2783,7 @@ class ChatApp:
         # 保存角色数量到配置文件
         config = configparser.ConfigParser()
         config['Settings'] = {'RoleCount': str(self.role_count)}
-        with open('config.ini', 'w') as configfile:
+        with open('AppSettings/config.ini', 'w') as configfile:
             config.write(configfile)
 
     def on_closing(self):
@@ -3475,6 +3556,7 @@ class DraggableItem:
 
 class MemoryInfoDialog(simpledialog.Dialog):
     def __init__(self, parent, title, information_sources, role):
+        # self.ChatApp = chat_app_instance
         self.information_sources = information_sources
         super().__init__(parent, title)
 
@@ -3538,11 +3620,18 @@ class MemoryInfoDialog(simpledialog.Dialog):
 
 
 class DiceRollDialog(simpledialog.Dialog):
+    def __init__(self, parent, title=None):
+        super().__init__(parent, title)
+        # self.ChatApp = chat_app_instance
+
     def body(self, master):
         tk.Label(master, text="第一次掷骰结果：").grid(row=0, column=0, sticky="e")
         tk.Label(master, text="第二次掷骰结果：").grid(row=1, column=0, sticky="e")
+        tk.Label(master, text="线索名：").grid(row=2, column=0, sticky="e")
         self.trust_var = tk.StringVar()
         self.importance_var = tk.StringVar()
+        self.source_var = tk.StringVar()
+        self.source_entry = tk.Entry(master, textvariable=self.source_var)
 
         first_roll_values = ["大失败（-20%）", "失败（10%）", "成功（100%）"]
         self.first_roll_entry = ttk.Combobox(master, textvariable=self.trust_var, values=first_roll_values)
@@ -3552,12 +3641,14 @@ class DiceRollDialog(simpledialog.Dialog):
 
         self.first_roll_entry.grid(row=0, column=1)
         self.second_roll_entry.grid(row=1, column=1)
+        self.source_entry.grid(row=2, column=1, padx=5, pady=5)
 
         return self.first_roll_entry
 
     def apply(self):
         first_roll = self.trust_var.get()
         second_roll = self.importance_var.get()
+        source = self.source_var.get()
 
         # 根据规则计算最后的处理方案
         result_percentage = calculate_result_percentage(first_roll, second_roll)
@@ -3569,6 +3660,8 @@ class DiceRollDialog(simpledialog.Dialog):
                       f"如果数量不够，则不提供任何关键词（比如只有一个关键地点，则在80%以上给出）如果信息过于简短，可以提前给出全部段落，负值同理；\n如果段落总结不出关键词，可以将关键词替换为句子。\n" \
                       f"注意虚假信息和无效信息是不一样的。无效信息在0%给出，虚假信息需要起到误导PC的作用（比如新增了一个地点，新增了一个人物，关键信息错误等） "
         messagebox.showinfo("处理方案", result_text)
+        # self.ChatApp.add_inference2self(source, source + "的搜查进度", result_percentage, "DiceBot")
+
         print(result_text)
 
 
@@ -3625,4 +3718,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = ChatApp(root)
     root.protocol("WM_DELETE_WINDOW", app.on_closing)  # 捕获窗口关闭事件
+    #root.protocol("WM_DELETE_WINDOW", self.new_window.on_closing)  # 捕获窗口关闭事件
     root.mainloop()
