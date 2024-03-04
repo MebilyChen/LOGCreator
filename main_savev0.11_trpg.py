@@ -3801,7 +3801,9 @@ def fire_babel(self, role):
             role2 = self.role_entries_name[role2]
             if role2 != role:
                 dic2 = self.babel_data[role2]
+                self.list_skills = []
                 if lan_main in dic2:
+                    self.list_skills.append(lan_main)
                     if (dic2[lan_main] + dic[lan_main] >= 60) and dic2[lan_main] >= 10:
                         print(f"[巴别塔] 【{role2}】 和 【{role}】 用 [{lan_main}] 聊得很开心！")
                     else:
@@ -3838,6 +3840,8 @@ def fire_babel(self, role):
                             self.best_lan_skill = 0
                         else:
                             print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
+                if self.list_skills is None:
+                    print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
 
 
 
