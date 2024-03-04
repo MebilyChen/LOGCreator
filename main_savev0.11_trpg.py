@@ -3813,7 +3813,7 @@ def fire_babel(self, role):
                                     if skill + lan_list[language] >= 100:
                                         print(f"[巴别塔] 【{role2}】 和 【{role}】 用 [{language}] 聊得很开心！")
                                         break
-                                    elif skill >= 10:
+                                    elif skill >= 5:
                                         if best_lan_skill < skill:
                                             best_lan = language
                                             best_lan_skill = skill
@@ -3827,7 +3827,7 @@ def fire_babel(self, role):
                                         elif best_lan_skill + lan_list[best_lan] >= 20:
                                             print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{best_lan}] 或 [极难母语] ！")
                                             break
-                                        elif best_lan_skill >= 10:
+                                        elif best_lan_skill >= 5:
                                             print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么，但知道那可能是 [{language}]，可以去请教一下别人！")
                                             break
                                         else:
