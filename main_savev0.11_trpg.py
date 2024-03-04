@@ -3801,41 +3801,44 @@ def fire_babel(self, role):
             role2 = self.role_entries_name[role2]
             if role2 != role:
                 dic2 = self.babel_data[role2]
-                best_lan = "None"
-                best_lan_skill = 0
                 if lan_main in dic2:
                     if dic2[lan_main] + dic[lan_main] >= 100:
                         print(f"[巴别塔] 【{role2}】 和 【{role}】 用 [{lan_main}] 聊得很开心！")
                     else:
+                        self.best_lan = "None"
+                        self.best_lan_skill = 0
                         for language, skill in self.babel_data[role2].items():
                             if language != "母语" and language != "国籍":
                                 if language in lan_list:
                                     if skill + lan_list[language] >= 100:
                                         print(f"[巴别塔] 【{role2}】 和 【{role}】 用 [{language}] 聊得很开心！")
-                                        break
+                                        self.best_lan = "GOOD"
+
                                     elif skill >= 5:
-                                        if best_lan_skill < skill:
-                                            best_lan = language
-                                            best_lan_skill = skill
-                                    if best_lan != "None":
-                                        if best_lan_skill + lan_list[best_lan] >= 80:
-                                            print(f"[巴别塔] 啊哦！【【{role2}】】 好像听不懂 【{role}】 在说什么！请掷骰 [{best_lan}] 或 [母语] ！")
-                                            break
-                                        elif best_lan_skill + lan_list[best_lan] >= 50:
-                                            print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{best_lan}] 或 [困难母语] ！")
-                                            break
-                                        elif best_lan_skill + lan_list[best_lan] >= 20:
-                                            print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{best_lan}] 或 [极难母语] ！")
-                                            break
-                                        elif best_lan_skill >= 5:
-                                            print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么，但知道那可能是 [{language}]，可以去请教一下别人！")
-                                            break
-                                        else:
-                                            print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
-                                            break
-                                    else:
-                                        print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
-                                        break
+                                        if self.best_lan_skill < skill:
+                                            self.best_lan = language
+                                            self.best_lan_skill = skill
+                        if self.best_lan != "None":
+                            if self.best_lan == "GOOD":
+                                pass
+                            elif self.best_lan_skill + lan_list[self.best_lan] >= 80:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}] 或 [母语: {dic2['母语']}] ！")
+
+                            elif self.best_lan_skill + lan_list[self.best_lan] >= 50:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}] 或 [困难母语: {dic2['母语']}] ！")
+
+                            elif self.best_lan_skill + lan_list[self.best_lan] >= 20:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}] 或 [极难母语: {dic2['母语']}] ！")
+
+                            elif self.best_lan_skill >= 5:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么，但知道那可能是 [{self.best_lan}]，可以去请教一下别人！")
+                            else:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
+                            self.best_lan = "None"
+                            self.best_lan_skill = 0
+                        else:
+                            print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
+
 
 
 
