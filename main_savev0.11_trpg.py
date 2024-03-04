@@ -90,7 +90,7 @@ Critical_Success_SKill = bot_personality_["Critical_at_5_SKill_Level"]
 def load_settings_avatar():
     try:
         # 尝试从JSON文件加载头像路径
-        with open('AppSettings/avatar_settings.json', 'r') as file:
+        with open('AppSettings/avatar_settings.json', 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -121,7 +121,7 @@ def load_env():
 def load_settings_name():
     try:
         # 尝试加载姓名牌路径
-        with open('AppSettings/name_settings.json', 'r') as file:
+        with open('AppSettings/name_settings.json', 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -132,7 +132,7 @@ def load_settings_name():
 def load_PL_INFO():
     try:
         # 尝试加载自定义角色数值信息
-        with open('GameSaves/pl_info.json', 'r') as file:
+        with open('GameSaves/pl_info.json', 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -2491,7 +2491,7 @@ class ChatApp:
 
     def load_treeview_data(self, treeview, filename, role=None):
         try:
-            with open(filename, 'r') as file:
+            with open(filename, 'r', encoding='utf-8') as file:
                 data_ = json.load(file)
                 if data_:
                     if role == "KP":
@@ -2506,7 +2506,7 @@ class ChatApp:
             print(f"文件 '{filename}' 不存在")
 
     def on_closing_new_window(self):
-        with open('GameSaves/Deduction_infos_base.json', 'w') as file:
+        with open('GameSaves/Deduction_infos_base.json', 'w', encoding='utf-8') as file:
             data = {}
             for role in self.roles:
                 value_list = []
@@ -2519,8 +2519,8 @@ class ChatApp:
                         values = self.tree_main.item(item, 'values')
                         value_list.append(values)
                 data[role] = value_list
-            json.dump(data, file)
-        with open('GameSaves/Deduction_infos_new.json', 'w') as file:
+            json.dump(data, file, ensure_ascii = False)
+        with open('GameSaves/Deduction_infos_new.json', 'w', encoding='utf-8') as file:
             data = {}
             for role in self.roles:
                 value_list = []
@@ -2529,7 +2529,7 @@ class ChatApp:
                         values = self.tree_list[role].item(item, 'values')
                         value_list.append(values)
                     data[role] = value_list
-            json.dump(data, file)
+            json.dump(data, file, ensure_ascii = False)
         # self.new_window.destroy()
 
     # 新窗口
@@ -2745,14 +2745,14 @@ class ChatApp:
 
     def save_settings(self):
         # 将头像路径保存到JSON文件
-        with open('AppSettings/avatar_settings.json', 'w') as file:
-            json.dump(self.role_avatar_paths, file)
+        with open('AppSettings/avatar_settings.json', 'w', encoding='utf-8') as file:
+            json.dump(self.role_avatar_paths, file, ensure_ascii = False)
         # 将姓名牌路径保存到JSON文件
-        with open('AppSettings/name_settings.json', 'w') as file:
-            json.dump(self.role_entries_name, file)
+        with open('AppSettings/name_settings.json', 'w', encoding='utf-8') as file:
+            json.dump(self.role_entries_name, file, ensure_ascii = False)
         # 尝试保存自定义角色数值信息
-        with open('GameSaves/pl_info.json', 'w') as file:
-            json.dump(self.role_values_tags_text, file)
+        with open('GameSaves/pl_info.json', 'w', encoding='utf-8') as file:
+            json.dump(self.role_values_tags_text, file, ensure_ascii = False)
         # 尝试保存地点时间天气信息
         with open('GameSaves/env_info.json', 'w', encoding='utf-8') as file:
             info = self.time_log.get("1.0", tk.END).strip()
@@ -2763,12 +2763,12 @@ class ChatApp:
             env["Place"] = info.split("【天气】")[0]
             info = info.split("【天气】")[1]
             env["Weather"] = info.split("【日期】")[0]
-            json.dump(env, file)
+            json.dump(env, file, ensure_ascii = False)
         # 保存自定义角色数值信息
         with open('GameSaves/pl_Chart.json', 'w', encoding='utf-8') as file:
-            json.dump(role_Chart, file)
+            json.dump(role_Chart, file, ensure_ascii = False)
         with open('Bots/bot_personality_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(bot_personality_by_name, file)
+            json.dump(bot_personality_by_name, file, ensure_ascii = False)
         # 保存自定义角色数值信息
         with open('GameSaves/PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
             for role, skills in role_Chart.items():
@@ -2795,7 +2795,7 @@ class ChatApp:
                     dicSkill["_AvatarPath"] = self.role_avatar_paths[role]
                 if (self.role_entries_name[role] != role) and ("PL " not in self.role_entries_name[role]):
                     dic[self.role_entries_name[role]] = dicSkill
-            json.dump(dic, file)
+            json.dump(dic, file, ensure_ascii = False)
 
     def save_role_count(self):
         # 保存角色数量到配置文件
@@ -3782,7 +3782,7 @@ def babel(self):
                             data_["国籍"] = skill.replace("语", "") + "国"
             self.babel_data[self.role_entries_name[role]] = data_
         with open('GameSaves/巴别塔.json', 'w', encoding='utf-8') as file:
-            json.dump(self.babel_data, file)
+            json.dump(self.babel_data, file, ensure_ascii = False)
 
 def fire_babel(self, role):
     # 在 data 中获取角色信息
@@ -3795,14 +3795,14 @@ def fire_babel(self, role):
         lan_main = str(dic["母语"]).replace("0", "英语")
         for language, skill in self.babel_data[role].items():
             if language != "母语" and language != "国籍":
-                if skill >= 20:
+                if skill >= 10:
                     lan_list[language] = skill
         for role2 in self.roles:
             role2 = self.role_entries_name[role2]
             if role2 != role:
                 dic2 = self.babel_data[role2]
                 if lan_main in dic2:
-                    if dic2[lan_main] + dic[lan_main] >= 100:
+                    if (dic2[lan_main] + dic[lan_main] >= 60) and dic2[lan_main] >= 10:
                         print(f"[巴别塔] 【{role2}】 和 【{role}】 用 [{lan_main}] 聊得很开心！")
                     else:
                         self.best_lan = "None"
@@ -3810,10 +3810,10 @@ def fire_babel(self, role):
                         for language, skill in self.babel_data[role2].items():
                             if language != "母语" and language != "国籍":
                                 if language in lan_list:
-                                    if skill + lan_list[language] >= 100:
+                                    if skill + lan_list[language] >= 80 and skill >= 20:
                                         print(f"[巴别塔] 【{role2}】 和 【{role}】 用 [{language}] 聊得很开心！")
                                         self.best_lan = "GOOD"
-
+                                        break
                                     elif skill >= 5:
                                         if self.best_lan_skill < skill:
                                             self.best_lan = language
@@ -3821,17 +3821,17 @@ def fire_babel(self, role):
                         if self.best_lan != "None":
                             if self.best_lan == "GOOD":
                                 pass
-                            elif self.best_lan_skill + lan_list[self.best_lan] >= 80:
-                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}] 或 [母语: {dic2['母语']}] ！")
-
-                            elif self.best_lan_skill + lan_list[self.best_lan] >= 50:
-                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}] 或 [困难母语: {dic2['母语']}] ！")
-
-                            elif self.best_lan_skill + lan_list[self.best_lan] >= 20:
-                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}] 或 [极难母语: {dic2['母语']}] ！")
-
-                            elif self.best_lan_skill >= 5:
+                            elif self.best_lan_skill <= 5:
                                 print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么，但知道那可能是 [{self.best_lan}]，可以去请教一下别人！")
+
+                            elif self.best_lan_skill + lan_list[self.best_lan] >= 60 and self.best_lan_skill >= 50:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [母语({dic2[dic2['母语']]}): {dic2['母语']}] ！")
+
+                            elif self.best_lan_skill + lan_list[self.best_lan] >= 40 and self.best_lan_skill >= 30:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [困难母语({int(dic2[dic2['母语']]/2)}): {dic2['母语']}] ！")
+
+                            elif self.best_lan_skill + lan_list[self.best_lan] >= 10 and self.best_lan_skill > 5:
+                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [极难母语({int(dic2[dic2['母语']]/5)}): {dic2['母语']}] ！")
                             else:
                                 print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
                             self.best_lan = "None"
