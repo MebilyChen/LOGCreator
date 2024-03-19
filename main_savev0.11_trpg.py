@@ -1196,7 +1196,7 @@ class ChatApp:
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
                        "\n继续优化简易小地图" \
-                       "\nKP侧快捷NPC调用+NPC列表。现在暂时用程序多开+复制粘贴解决，但如此就无法无缝RP（而且战斗时无法触发PC的Armor显示），建议KP装载至少一个常用NPC" \
+                       "\nKP侧快捷NPC调用+NPC列表。现在暂时用程序多开+复制粘贴解决，但如此就无法无缝RP（而且战斗时无法触发PC的Armor显示、无法同步计算时间），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n" \
                        "===以上可删除===\n\n"
@@ -2587,9 +2587,9 @@ class ChatApp:
                 deleteKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
                 # loadKP_button = tk.Button(frame, text="读\n取", command=self.load_treeview_data)
                 # loadKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
-                map_button = tk.Button(frame, text="绘\n制\n地\n图", command=self.open_new_window_map)
+                map_button = tk.Button(frame, text="绘\n制\n地\n图", bg="green", fg="white", command=self.open_new_window_map)
                 map_button.grid(row=0, column=1, pady=5, sticky="nsew")
-                cal_button = tk.Button(frame, text="计\n算\n器", command=self.calculator)
+                cal_button = tk.Button(frame, text="计\n算\n器", bg="blue", fg="white", command=self.calculator)
                 cal_button.grid(row=1, column=1, pady=5, sticky="nsew")
                 # frame.grid_rowconfigure(0, weight=1)
                 # frame.grid_columnconfigure(0, weight=1)
@@ -2633,6 +2633,7 @@ class ChatApp:
 
             if role == "KP":
                 self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=12)
+                self.KP_entry.insert(tk.END, "← 重要：关闭此窗口不会自动保存，请手动点击此按钮保存！")
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
                 self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
