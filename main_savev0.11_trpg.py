@@ -1095,8 +1095,8 @@ def load_Chart_at_name():
         print(f"Problematic data: {file.read()}")
 
 
-role_Chart = load_Chart()
-role_Chart_at_name = load_Chart_at_name()
+role_Chart = load_Chart().copy()
+role_Chart_at_name = load_Chart_at_name().copy()
 bot_personality_by_name = load_DiceBot_personality()
 adv_comment = ""
 
@@ -1135,7 +1135,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v0.82" + encouragement)
+        self.root.title("自嗨团 v0.88" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
@@ -1185,18 +1185,19 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n时间模块\n#Armor\n推理信息库\n巴别塔（看控制台）\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n时间模块\n#Armor\n推理信息库\n巴别塔（看控制台）\n装载NPC模板，该功能能够保留当前栏位的名称并读取某一模板\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..）" \
                        "\n--features" \
+                       "\n优化：KP侧快捷NPC调用+NPC列表。现在暂时用程序多开+复制粘贴解决，但如此就无法无缝RP（而且战斗时无法触发PC的Armor显示、无法同步计算时间），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。" \
+ \
                        "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，也能避免无法发布到另一个窗口的问题）。此外精简框架，不要占满屏" \
                        "\n牌堆(基本坑，暂时先去用正经骰娘Bot吧)" \
                        "\n实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
                        "\n继续优化简易小地图" \
-                       "\nKP侧快捷NPC调用+NPC列表。现在暂时用程序多开+复制粘贴解决，但如此就无法无缝RP（而且战斗时无法触发PC的Armor显示、无法同步计算时间），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n" \
                        "===以上可删除===\n\n"
@@ -1205,6 +1206,10 @@ class ChatApp:
         # 创建按钮，点击按钮时调用 open_new_window 函数
         new_window_button = tk.Button(root, text="推理信息", command=self.open_new_window)
         new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
+
+        # 创建按钮，点击按钮时调用 add_NPC 函数
+        load_NPC_button = tk.Button(root, text="装载NPC至栏位", command=self.Add_NPC)
+        load_NPC_button.grid(row=3, column=3, padx=10, pady=10, sticky="nsew")
 
         # 初始化输出聊天LOG按钮
         output_button = tk.Button(root, text="输出聊天LOG", command=self.output_chat_log)
@@ -1286,7 +1291,7 @@ class ChatApp:
     def create_role_frame(self, role, row, col):
 
         if role not in role_Chart:
-            role_Chart[role] = role_Chart_detail_demo
+            role_Chart[role] = role_Chart_detail_demo.copy()
 
         frame = tk.LabelFrame(self.root, text=role, relief=tk.GROOVE)
         frame.grid(row=row, column=col + 2, padx=10, pady=10, sticky="nsew")
@@ -1320,7 +1325,7 @@ class ChatApp:
             self.role_entries[role].insert(tk.END, initial_text)
         if role == "KP":
             initial_text = "如何创建NPC模板：" \
-                           "\n0.如果启用了巴别塔，先关闭（把文件名改一下就行）" \
+                           "\n0.如果巴别塔报错，先关闭巴别塔（把文件名改一下就行）" \
                            "\n1.创建新角色，更名为模板名（比如“基本怪物”、“基本人类”、“基本邪教徒”、“Muffin Stinger”（姓名也可以在创建 / 导入模板后再改））" \
                            "\n2. 。st录入数值" \
                            "\n3.重启程序（关闭程序时会自动保存）" \
@@ -1331,7 +1336,7 @@ class ChatApp:
             self.role_entries[role].insert(tk.END, initial_text)
 
             # 创建数值tag，显示数值
-        role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+        role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
         SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
         HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
         MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
@@ -1411,8 +1416,9 @@ class ChatApp:
             self.trpg_toggle = "off"
 
     def send_message(self, role):
-        fire_babel(self, role)
-        role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+        global role_Chart_at_name
+
+        role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
         while True:
@@ -1447,11 +1453,14 @@ class ChatApp:
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                 else:
-                    new_chart = self.parse_input_skill(message)
+                    new_chart = self.parse_input_skill(message).copy()
+                    print(new_chart)
                     self.update_skills(role_Chart[role], new_chart)
                     # if self.role_entries_name[role] in role_Chart_at_name:
-                    role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role]
+                    role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role].copy()
                     role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
+                    self.save_role_skill_at_name()
+                    #print(role_Chart_at_name[self.role_entries_name[role]])
                 SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
@@ -1486,8 +1495,9 @@ class ChatApp:
                     self.role_values_entry[role].delete("5.0", "6.0")
                     self.role_values_entry[role].insert("5.0",
                                                         f'\n{DB}:DB\n')
-                # self.role_values_entry[role].insert("1.0",
-                # f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                else:
+                    self.role_values_entry[role].insert("1.0",
+                    f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
@@ -1505,6 +1515,7 @@ class ChatApp:
                 else:
                     self.role_entries[role].insert(tk.END, "已刷新！")
             else:
+                fire_babel(self, role)
                 self.chat_log.insert(tk.END, log)
                 # 滚动到最底部
                 self.chat_log.yview(tk.END)
@@ -1530,7 +1541,7 @@ class ChatApp:
                 skill_name = match[0].strip().upper()
                 skill_value = int(match[1])
                 skills[skill_name] = skill_value
-        print(skills)
+        #print(skills)
         return skills
 
     def update_skills(self, old_dict, new_dict):
@@ -1583,10 +1594,12 @@ class ChatApp:
         else:
             old_dict["信用评级"] = old_dict["信用"]
         if old_dict["MOV"] == 8:
-            if old_dict["敏捷"] < old_dict["体型"]:
+            if old_dict["敏捷"] < old_dict["体型"] and old_dict["力量"] < old_dict["体型"]:
                 old_dict["MOV"] = 7
-            else:
+            elif old_dict["敏捷"] > old_dict["体型"] and old_dict["力量"] > old_dict["体型"]:
                 old_dict["MOV"] = 9
+            else:
+                old_dict["MOV"] = 8
         if old_dict["DB"] == 1:
             old_dict["DB"] = "1(+1D4)"
         if old_dict["DB"] == 2:
@@ -1618,7 +1631,7 @@ class ChatApp:
         if "ARMOR" not in old_dict:
             old_dict["ARMOR"] = 0
         old_dict["#SAN"] = 100 - old_dict["克苏鲁神话"]
-        self.save_role_skill_at_name()
+
 
     def edit_role_name(self, event, role, label):
         label.config(relief=tk.GROOVE)
@@ -1670,8 +1683,8 @@ class ChatApp:
 
             # 按名牌加载设置
             if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
-                role_Chart[role] = role_Chart_at_name[new_name]
-                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                role_Chart[role] = role_Chart_at_name[new_name].copy()
+                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 # self.role_entries[role].delete("1.0", tk.END)
                 self.role_avatar_paths[role] = role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"]
                 self.load_and_display_avatar(role, self.role_entries[role].master)
@@ -1693,7 +1706,7 @@ class ChatApp:
 
                 self.role_entries[role].insert("1.0", "已加载名牌为[" + new_name + "]的角色卡！\n")
             else:
-                role_Chart[role] = role_Chart_detail_demo
+                role_Chart[role] = role_Chart_detail_demo.copy()
 
             # 重新创建角色框架
             # for widget in self.root.grid_slaves(column=2):
@@ -1978,7 +1991,7 @@ class ChatApp:
                 string_list = ["不可名状的原因", "懒得写原因", "", "", ""]
                 # 从列表中随机选择一个字符串
                 reason = random.choice(string_list)
-            role_Chart_detail = role_Chart.get(role, {})
+            role_Chart_detail = role_Chart.get(role, {}).copy()
             expression = self.role_entries_roll[role].get("1.0", tk.END).strip().lower()
 
             if expression == "":
@@ -2072,7 +2085,7 @@ class ChatApp:
 
                         weapon_list_ = {}
                         if parts_ and "成功" in parts_[1]:
-                            role_Chart_detail_ = role_Chart.get(role, {})
+                            role_Chart_detail_ = role_Chart.get(role, {}).copy()
                             # DB_ = role_Chart_detail_["DB"]
                             for skill, value in role_Chart_detail_.items():
                                 if "#" in skill:
@@ -2084,7 +2097,7 @@ class ChatApp:
                                     self.role_entries[role].insert("1.0", f"[{weapon}]伤害\n")
                                     for role_armor in self.roles:
                                         if role_armor != role and "ARMOR:" in str(self.role_entries_roll[role_armor]):
-                                            role_Chart_detail_armor = role_Chart.get(role, {})
+                                            role_Chart_detail_armor = role_Chart.get(role, {}).copy()
                                             if "ARMOR" in role_Chart_detail_armor:
                                                 value_armor = role_Chart_detail_armor["ARMOR"]
                                             else:
@@ -2111,7 +2124,7 @@ class ChatApp:
                             for weapon, value in weapon_list_.items():
                                 # print(weapon_list_)
                                 if weapon in expression:
-                                    role_Chart_detail_armor = role_Chart.get(role, {})
+                                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
                                     if "ARMOR" in role_Chart_detail_armor:
                                         value_armor = role_Chart_detail_armor["ARMOR"]
                                     else:
@@ -2166,7 +2179,7 @@ class ChatApp:
 
                 weapon_list = {}
                 if parts_ and "成功" in parts_[1]:
-                    role_Chart_detail = role_Chart.get(role, {})
+                    role_Chart_detail = role_Chart.get(role, {}).copy()
                     for skill, value in role_Chart_detail.items():
                         if "#" in skill:
                             weapon_list[skill.replace("#", "")] = value
@@ -2177,7 +2190,7 @@ class ChatApp:
                             # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
                             for role_armor in self.roles:
                                 if role_armor != role:
-                                    role_Chart_detail_armor = role_Chart.get(role, {})
+                                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
                                     if "ARMOR" in role_Chart_detail_armor:
                                         value_armor = role_Chart_detail_armor["ARMOR"]
                                     else:
@@ -2205,7 +2218,7 @@ class ChatApp:
                         if weapon in expression:
                             for role_armor in self.roles:
                                 if role_armor != role:
-                                    role_Chart_detail_armor = role_Chart.get(role, {})
+                                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
                                     if "ARMOR" in role_Chart_detail_armor:
                                         value_armor = role_Chart_detail_armor["ARMOR"]
                                     else:
@@ -2213,7 +2226,7 @@ class ChatApp:
                                     self.role_entries_roll[role_armor].delete("1.0", tk.END)
                                     self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
                 elif parts_ and "失败" in parts_[1]:
-                    role_Chart_detail_armor = role_Chart.get(role, {})
+                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
                     for weapon, value in weapon_list.items():
                         if weapon in expression:
                             if "ARMOR" in role_Chart_detail_armor:
@@ -2230,7 +2243,7 @@ class ChatApp:
 
             weapon_list__ = {}
             if parts_ and "成功" in parts_[1]:
-                role_Chart_detail__ = role_Chart.get(role, {})
+                role_Chart_detail__ = role_Chart.get(role, {}).copy()
                 for skill, value in role_Chart_detail__.items():
                     if "#" in skill:
                         weapon_list__[skill.replace("#", "")] = value
@@ -2283,6 +2296,34 @@ class ChatApp:
         self.chat_log.yview(tk.END)
         result = self.trpg_module.roll(expression, role)
         self.role_entries[role].insert(tk.END, result)
+
+    def Add_NPC(self):
+        self.dialog2 = LoadNPCDialog(self.root, f"选择要加载的NPC")
+        result = self.dialog2.result
+        #print(result)
+        slot = result["slot"]
+        for name, value in result.items():
+            if name == "slot":
+                pass
+            else:
+                if value == "":
+                    value = name
+                self.role_values_entry[slot].insert("1.0", f"正在使用[{name}]的属性扮演【{value}】\n===\n")
+                # 按名牌加载设置
+                #print(slot)
+                role_Chart[slot] = role_Chart_at_name[name].copy()
+                SAN = role_Chart_at_name[name].get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                HP = role_Chart_at_name[name].get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                MP = role_Chart_at_name[name].get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                MOV = role_Chart_at_name[name].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                POW = role_Chart_at_name[name].get("POW")
+                DB = role_Chart_at_name[name].get("DB")
+                SAN_ = role_Chart_at_name[name].get("#SAN")
+                self.role_values_entry[slot].insert("3.0",
+                                                        f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                self.chat_log.insert(tk.END,
+                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("3.0", "8.0").strip()}\n\n')
+            #print(result)
 
     def set_start_point(self, event):
         self.start_x = event.x
@@ -2587,7 +2628,8 @@ class ChatApp:
                 deleteKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
                 # loadKP_button = tk.Button(frame, text="读\n取", command=self.load_treeview_data)
                 # loadKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
-                map_button = tk.Button(frame, text="绘\n制\n地\n图", bg="green", fg="white", command=self.open_new_window_map)
+                map_button = tk.Button(frame, text="绘\n制\n地\n图", bg="green", fg="white",
+                                       command=self.open_new_window_map)
                 map_button.grid(row=0, column=1, pady=5, sticky="nsew")
                 cal_button = tk.Button(frame, text="计\n算\n器", bg="blue", fg="white", command=self.calculator)
                 cal_button.grid(row=1, column=1, pady=5, sticky="nsew")
@@ -2799,18 +2841,19 @@ class ChatApp:
         self.save_role_skill_at_name()
 
     def save_role_skill_at_name(self):
+        global role_Chart_at_name
         with open('GameSaves/pl_Chart_at_name.json', 'w', encoding='utf-8') as file:
-            dicSkill = {}
-            dic = role_Chart_at_name
+            dic = role_Chart_at_name.copy()
             for role, skills in role_Chart.items():
+                dicSkill = {}
                 for skill, value in skills.items():
                     dicSkill[skill] = value
                 dicSkill["_AvatarPath"] = ""
                 if role in self.role_avatar_paths:
                     # 保存头像路径
                     dicSkill["_AvatarPath"] = self.role_avatar_paths[role]
-                if (self.role_entries_name[role] != role) and ("PL " not in self.role_entries_name[role]):
-                    dic[self.role_entries_name[role]] = dicSkill
+                if "PL " not in self.role_entries_name[role]:
+                    dic[self.role_entries_name[role]] = dicSkill.copy()
             json.dump(dic, file, ensure_ascii=False)
 
     def save_role_count(self):
@@ -2937,7 +2980,7 @@ class TRPGModule:
             part_combine = pattern_combine.findall(expression)
             # print(part_eng)
             if pattern_combine.match(expression) and len(part_combine) > 1:
-                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 print("联合掷骰")  # 意志+斗殴+潜行
                 # print(part_combine)
                 for a in part_combine:
@@ -2967,7 +3010,7 @@ class TRPGModule:
 
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
                 print("SAN CHECK")  # sc1/1d5
-                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 info = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 if info == 0:
                     info = role_Chart_detail.get("POW")
@@ -2982,7 +3025,7 @@ class TRPGModule:
                     expression = "SAN CHECK"
 
             elif ("san" or "San" or "SAN") in expression:
-                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 info = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 if info == 0:
                     info = role_Chart_detail.get("POW")
@@ -3150,7 +3193,7 @@ class TRPGModule:
                     for skillname in timerlist:
                         if expression == skillname:
                             self.move_time_forward(timer)
-                role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
                     print("困难极难")
                     print(expression)
@@ -3598,6 +3641,57 @@ class DraggableItem:
         self.start_x = event.x
         self.start_y = event.y
 
+
+class LoadNPCDialog(simpledialog.Dialog):
+    def __init__(self, parent, title):
+        super().__init__(parent, title)
+        # self.NPC_information = NPC_information
+        # self.ChatApp = None
+        # self.ChatApp = chat_app_instance
+        # print(NPC_information)
+
+    def body(self, master):
+        role_Chart_at_name_ = load_Chart_at_name().copy()
+        role_Chart_ = load_Chart().copy()
+        self.npcNames = []
+        self.slots = []
+        for role, chart in role_Chart_at_name_.items():
+            if "PL " not in role:
+                self.npcNames.append(role)
+        for role, chart in role_Chart_.items():
+                self.slots.append(role)
+
+        tk.Label(master, text="选择NPC：").grid(row=0, column=0, sticky="e")
+        tk.Label(master, text="使用名：").grid(row=1, column=0, sticky="e")
+        tk.Label(master, text="装载到：").grid(row=2, column=0, sticky="e")
+        self.trust_var = tk.StringVar()
+        self.importance_var = tk.StringVar()
+        self.source_var = tk.StringVar()
+        self.source_entry = tk.Entry(master, textvariable=self.source_var)
+
+        first_roll_values = self.npcNames
+        second_roll_values = self.slots
+        self.first_roll_entry = ttk.Combobox(master, textvariable=self.trust_var, values=first_roll_values)
+        self.second_roll_entry = ttk.Combobox(master, textvariable=self.importance_var, values=second_roll_values)
+
+        self.first_roll_entry.grid(row=0, column=1)
+        self.second_roll_entry.grid(row=2, column=1)
+        self.source_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        return self.first_roll_entry
+
+    def apply(self):
+        first_roll = self.trust_var.get()
+        second_roll = self.importance_var.get()
+        source = self.source_var.get()
+        self.result = {}
+        self.result[first_roll] = source
+        if second_roll == "":
+            self.result["slot"] = "KP"
+        else:
+            self.result["slot"] = second_roll
+        #print(self.result)
+        return self.result
 
 class MemoryInfoDialog(simpledialog.Dialog):
     def __init__(self, parent, title, information_sources, role):
