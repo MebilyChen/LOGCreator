@@ -23,6 +23,7 @@ def create_folder(folder_path):
     except FileExistsError:
         print(f"文件夹 '{folder_path}' 已经存在")
 
+
 babel_on = False
 
 # 例子：创建名为 'my_folder' 的文件夹在当前工作目录下
@@ -1189,11 +1190,14 @@ class ChatApp:
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..）" \
                        "\n--features" \
-                       "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame）" \
+                       "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，也能避免无法发布到另一个窗口的问题）。此外精简框架，不要占满屏" \
+                       "\n牌堆(基本坑，暂时先去用正经骰娘Bot吧)" \
+                       "\n实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
                        "\n继续优化简易小地图" \
-                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\nArmor显示优化\n\n" \
+                       "\nKP侧快捷NPC调用+NPC列表。现在暂时用程序多开+复制粘贴解决，但如此就无法无缝RP（而且战斗时无法触发PC的Armor显示），建议KP装载至少一个常用NPC" \
+                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n\n" \
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
@@ -1314,8 +1318,19 @@ class ChatApp:
                            "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用斗殴击晕敌人”）" \
                            "\n\n===以上可删除===\n\n"
             self.role_entries[role].insert(tk.END, initial_text)
+        if role == "KP":
+            initial_text = "如何创建NPC模板：" \
+                           "\n0.如果启用了巴别塔，先关闭（把文件名改一下就行）" \
+                           "\n1.创建新角色，更名为模板名（比如“基本怪物”、“基本人类”、“基本邪教徒”、“Muffin Stinger”（姓名也可以在创建 / 导入模板后再改））" \
+                           "\n2. 。st录入数值" \
+                           "\n3.重启程序（关闭程序时会自动保存）" \
+                           "\n4.在KP栏把自己的名字改成模板名，会自动录入数值(即时数值例如HP、MP变化不会录入)。如果不想更改KP，新建一个NPC栏来用也行，最好不用骰子栏，会出奇怪BUG" \
+                           "。或者多开程序也行，但注意一定要分开保存程序数据文件，被覆盖就会哭哭。" \
+                           "\n5.如果要重新启用巴别塔，删除新创建的角色，改回第0步的文件名（除非把新添加的角色也加入巴别塔）" \
+                           "\n\n===以上可删除===\n\n"
+            self.role_entries[role].insert(tk.END, initial_text)
 
-        # 创建数值tag，显示数值
+            # 创建数值tag，显示数值
         role_Chart_detail = role_Chart.get(role, {})  # 获取 "KP" 对应的字典，如果没有则返回空字典
         SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
         HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
@@ -2519,7 +2534,7 @@ class ChatApp:
                         values = self.tree_main.item(item, 'values')
                         value_list.append(values)
                 data[role] = value_list
-            json.dump(data, file, ensure_ascii = False)
+            json.dump(data, file, ensure_ascii=False)
         with open('GameSaves/Deduction_infos_new.json', 'w', encoding='utf-8') as file:
             data = {}
             for role in self.roles:
@@ -2529,7 +2544,7 @@ class ChatApp:
                         values = self.tree_list[role].item(item, 'values')
                         value_list.append(values)
                     data[role] = value_list
-            json.dump(data, file, ensure_ascii = False)
+            json.dump(data, file, ensure_ascii=False)
         # self.new_window.destroy()
 
     # 新窗口
@@ -2746,13 +2761,13 @@ class ChatApp:
     def save_settings(self):
         # 将头像路径保存到JSON文件
         with open('AppSettings/avatar_settings.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_avatar_paths, file, ensure_ascii = False)
+            json.dump(self.role_avatar_paths, file, ensure_ascii=False)
         # 将姓名牌路径保存到JSON文件
         with open('AppSettings/name_settings.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_entries_name, file, ensure_ascii = False)
+            json.dump(self.role_entries_name, file, ensure_ascii=False)
         # 尝试保存自定义角色数值信息
         with open('GameSaves/pl_info.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_values_tags_text, file, ensure_ascii = False)
+            json.dump(self.role_values_tags_text, file, ensure_ascii=False)
         # 尝试保存地点时间天气信息
         with open('GameSaves/env_info.json', 'w', encoding='utf-8') as file:
             info = self.time_log.get("1.0", tk.END).strip()
@@ -2763,12 +2778,12 @@ class ChatApp:
             env["Place"] = info.split("【天气】")[0]
             info = info.split("【天气】")[1]
             env["Weather"] = info.split("【日期】")[0]
-            json.dump(env, file, ensure_ascii = False)
+            json.dump(env, file, ensure_ascii=False)
         # 保存自定义角色数值信息
         with open('GameSaves/pl_Chart.json', 'w', encoding='utf-8') as file:
-            json.dump(role_Chart, file, ensure_ascii = False)
+            json.dump(role_Chart, file, ensure_ascii=False)
         with open('Bots/bot_personality_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(bot_personality_by_name, file, ensure_ascii = False)
+            json.dump(bot_personality_by_name, file, ensure_ascii=False)
         # 保存自定义角色数值信息
         with open('GameSaves/PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
             for role, skills in role_Chart.items():
@@ -2795,7 +2810,7 @@ class ChatApp:
                     dicSkill["_AvatarPath"] = self.role_avatar_paths[role]
                 if (self.role_entries_name[role] != role) and ("PL " not in self.role_entries_name[role]):
                     dic[self.role_entries_name[role]] = dicSkill
-            json.dump(dic, file, ensure_ascii = False)
+            json.dump(dic, file, ensure_ascii=False)
 
     def save_role_count(self):
         # 保存角色数量到配置文件
@@ -3651,12 +3666,13 @@ class MemoryInfoDialog(simpledialog.Dialog):
 class DiceRollDialog(simpledialog.Dialog):
     def __init__(self, parent, title=None):
         super().__init__(parent, title)
+        self.ChatApp = None
         # self.ChatApp = chat_app_instance
 
     def body(self, master):
         tk.Label(master, text="第一次掷骰结果：").grid(row=0, column=0, sticky="e")
         tk.Label(master, text="第二次掷骰结果：").grid(row=1, column=0, sticky="e")
-        tk.Label(master, text="线索名：").grid(row=2, column=0, sticky="e")
+        tk.Label(master, text="线索名（当前无效）：").grid(row=2, column=0, sticky="e")
         self.trust_var = tk.StringVar()
         self.importance_var = tk.StringVar()
         self.source_var = tk.StringVar()
@@ -3665,7 +3681,7 @@ class DiceRollDialog(simpledialog.Dialog):
         first_roll_values = ["大失败（-20%）", "失败（10%）", "成功（100%）"]
         self.first_roll_entry = ttk.Combobox(master, textvariable=self.trust_var, values=first_roll_values)
 
-        second_roll_values = ["大失败（-80%）", "失败（-20%）", "成功（+20%）", "困难成功（+40%）", "极难成功（+60%）", "大成功（+100%）"]
+        second_roll_values = ["放弃（0%）", "大失败（-80%）", "失败（-20%）", "成功（+20%）", "困难成功（+40%）", "极难成功（+60%）", "大成功（+100%）"]
         self.second_roll_entry = ttk.Combobox(master, textvariable=self.importance_var, values=second_roll_values)
 
         self.first_roll_entry.grid(row=0, column=1)
@@ -3684,7 +3700,7 @@ class DiceRollDialog(simpledialog.Dialog):
         final_result = calculate_final_result(result_percentage)
 
         # 显示最终结果
-        result_text = f"结果百分比：{result_percentage}\n处理方案：{final_result}\n\n根据原模组信息总结至多五个关键词，按重要度排序，发放时按重要度低到高发放。\n" \
+        result_text = f"结果百分比：{result_percentage}\n处理方案：{final_result}\n\n===\n根据原模组信息总结至多五个关键词，按重要度排序，发放时按重要度低到高发放。\n" \
                       f"注意给出的关键词要是可探索、结合模组剧情的关键地点、物品、事件、人物等（一般重要度较低），或者是传达一种态度和推理思路（一般重要度最高）。\n" \
                       f"如果数量不够，则不提供任何关键词（比如只有一个关键地点，则在80%以上给出）如果信息过于简短，可以提前给出全部段落，负值同理；\n如果段落总结不出关键词，可以将关键词替换为句子。\n" \
                       f"注意虚假信息和无效信息是不一样的。无效信息在0%给出，虚假信息需要起到误导PC的作用（比如新增了一个地点，新增了一个人物，关键信息错误等） "
@@ -3782,7 +3798,8 @@ def babel(self):
                             data_["国籍"] = skill.replace("语", "") + "国"
             self.babel_data[self.role_entries_name[role]] = data_
         with open('GameSaves/巴别塔.json', 'w', encoding='utf-8') as file:
-            json.dump(self.babel_data, file, ensure_ascii = False)
+            json.dump(self.babel_data, file, ensure_ascii=False)
+
 
 def fire_babel(self, role):
     # 在 data 中获取角色信息
@@ -3827,13 +3844,16 @@ def fire_babel(self, role):
                                 print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么，但知道那可能是 [{self.best_lan}]，可以去请教一下别人！")
 
                             elif self.best_lan_skill + lan_list[self.best_lan] >= 60 and self.best_lan_skill >= 50:
-                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [母语({dic2[dic2['母语']]}): {dic2['母语']}] ！")
+                                print(
+                                    f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [母语({dic2[dic2['母语']]}): {dic2['母语']}] ！")
 
                             elif self.best_lan_skill + lan_list[self.best_lan] >= 40 and self.best_lan_skill >= 30:
-                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [困难母语({int(dic2[dic2['母语']]/2)}): {dic2['母语']}] ！")
+                                print(
+                                    f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [困难母语({int(dic2[dic2['母语']] / 2)}): {dic2['母语']}] ！")
 
                             elif self.best_lan_skill + lan_list[self.best_lan] >= 10 and self.best_lan_skill > 5:
-                                print(f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [极难母语({int(dic2[dic2['母语']]/5)}): {dic2['母语']}] ！")
+                                print(
+                                    f"[巴别塔] 啊哦！【{role2}】 好像听不懂 【{role}】 在说什么！请掷骰 [{self.best_lan}({self.best_lan_skill})] 或 [极难母语({int(dic2[dic2['母语']] / 5)}): {dic2['母语']}] ！")
                             else:
                                 print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
                             self.best_lan = "None"
@@ -3877,9 +3897,6 @@ def fire_babel(self, role):
                         self.best_lan_skill = 0
                     else:
                         print(f"[巴别塔] 啊哦！【{role2}】 好像怎么都听不懂 【{role}】 在说什么！")
-
-
-
 
 
 if __name__ == "__main__":
