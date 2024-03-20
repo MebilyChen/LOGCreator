@@ -2038,7 +2038,7 @@ class ChatApp:
         if role == "全员":
             for role in self.roles:
                 if role != "DiceBot":
-                    result_ = self.trpg_module.roll(expression, role)
+                    result_ = self.trpg_module.roll(expression, role, allin=True)
                     parts_ = result_.split('：')
                     SANC = ""
                     expressionUPP = expression.upper()
@@ -3028,7 +3028,7 @@ class TRPGModule:
         # result = 100
         return result, adv_comment
 
-    def roll(self, expression, role=None):
+    def roll(self, expression, role=None, allin=False):
         global date
         global time
         global place
@@ -3175,7 +3175,29 @@ class TRPGModule:
                     for timer, timerlist in time_skill.items():
                         for skillname in timerlist:
                             if a == skillname:
-                                self.move_time_forward(timer)
+                                if allin:
+                                    if (timer == "time_3s") or (timer == "time_1min"):
+                                        self.move_time_forward(timer)
+                                    elif timer == "time_5min":
+                                        self.move_time_forward("time_1min")
+                                    elif timer == "time_10min":
+                                        self.move_time_forward("time_5min")
+                                    elif timer == "time_30min":
+                                        self.move_time_forward("time_10min")
+                                    elif timer == "time_1h":
+                                        self.move_time_forward("time_30min")
+                                    elif timer == "time_3h":
+                                        self.move_time_forward("time_1h")
+                                    elif timer == "time_12h":
+                                        self.move_time_forward("time_3h")
+                                    elif timer == "time_1d":
+                                        self.move_time_forward("time_12h")
+                                    elif timer == "time_1w":
+                                        self.move_time_forward("time_1d")
+                                    else:
+                                        self.move_time_forward("time_5min")
+                                else:
+                                    self.move_time_forward(timer)
                     expression = a
                     info = combine_infos[a]
                     skill_name = a
@@ -3259,10 +3281,34 @@ class TRPGModule:
                 weather = time_info.split("【日期】")[0]
 
                 # 自动计算时间
+
                 for timer, timerlist in time_skill.items():
                     for skillname in timerlist:
                         if expression == skillname:
-                            self.move_time_forward(timer)
+                            if allin:
+                                if (timer == "time_3s") or (timer == "time_1min"):
+                                    self.move_time_forward(timer)
+                                elif timer == "time_5min":
+                                    self.move_time_forward("time_1min")
+                                elif timer == "time_10min":
+                                    self.move_time_forward("time_5min")
+                                elif timer == "time_30min":
+                                    self.move_time_forward("time_10min")
+                                elif timer == "time_1h":
+                                    self.move_time_forward("time_30min")
+                                elif timer == "time_3h":
+                                    self.move_time_forward("time_1h")
+                                elif timer == "time_12h":
+                                    self.move_time_forward("time_3h")
+                                elif timer == "time_1d":
+                                    self.move_time_forward("time_12h")
+                                elif timer == "time_1w":
+                                    self.move_time_forward("time_1d")
+                                else:
+                                    self.move_time_forward("time_5min")
+                            else:
+                                self.move_time_forward(timer)
+
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
                     print("困难极难")
@@ -3534,7 +3580,7 @@ class TRPGModule:
         self.ChatApp.time_log.delete("1.0", tk.END)
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 1 minute")
-        if time == "00:00":
+        if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 59:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
@@ -3554,7 +3600,7 @@ class TRPGModule:
         self.ChatApp.time_log.delete("1.0", tk.END)
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 5 minutes")
-        if time == "00:00":
+        if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 55:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
@@ -3574,7 +3620,7 @@ class TRPGModule:
         self.ChatApp.time_log.delete("1.0", tk.END)
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 10 minutes")
-        if time == "00:00":
+        if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 50:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
@@ -3594,7 +3640,7 @@ class TRPGModule:
         self.ChatApp.time_log.delete("1.0", tk.END)
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 30 minutes")
-        if time == "00:00":
+        if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 30:
             self.add_time_1d()
             print("新的一天")
             self.ChatApp.chat_log.insert(tk.END,
