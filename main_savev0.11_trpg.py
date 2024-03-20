@@ -1625,7 +1625,7 @@ class ChatApp:
             old_dict["DB"] = "2(+1D6)"
         if "图书馆使用" not in old_dict or old_dict["图书馆使用"] == 0:
             old_dict["图书馆使用"] = old_dict["图书馆"]
-        if "图书馆使用" in old_dict and old_dict["图书馆"] == 0:
+        if "图书馆使用" in old_dict and old_dict["图书馆"] == 20:
             old_dict["图书馆"] = old_dict["图书馆使用"]
 
         if "ARMOR" not in old_dict:
