@@ -1197,7 +1197,7 @@ class ChatApp:
                        "\n实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
                        "\n输出染色HTML(坑)" \
                        "\n骰子性格：针对每个技能单独comment(坑)" \
-                       "\n继续优化简易小地图" \
+                       "\n继续优化简易小地图, Canvas保存" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\n\n" \
                        "===以上可删除===\n\n"
@@ -1320,7 +1320,7 @@ class ChatApp:
                            "\n\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
                            "\n\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色）" \
                            "\n\n【.st】输入后点击发送按钮或回车（而不是掷骰按钮）" \
-                           "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用斗殴击晕敌人”）" \
+                           "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用r斗殴击晕敌人”）" \
                            "\n\n===以上可删除===\n\n"
             self.role_entries[role].insert(tk.END, initial_text)
         if role == "KP":
@@ -2769,6 +2769,7 @@ class ChatApp:
     def open_new_window_map(self):
         new_window = tk.Toplevel(self.new_window)
         new_window.title("简易地图")
+
         self.image_references = []  # Add this list attribute to store references to images
 
         # text = self.time_log.get("1.0", tk.END).strip()
@@ -2779,76 +2780,96 @@ class ChatApp:
         self.canvas = tk.Canvas(new_window, width=400, height=400, bg="white")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        # 记录鼠标位置
-        self.start_x = None
-        self.start_y = None
+        if os.path.exists('GameSaves/canvas_state.json'):
+            #saver = CanvasSaver(self.canvas)
+            #saver.load_canvas_state('GameSaves/canvas_state.json')
+            #print("发现了保存State，读取旧地图...")
+            pass
+        else:
+            print("无保存State，创建新地图...")
 
-        # 绑定鼠标事件
-        self.canvas.bind("<B3-Motion>", self.draw)
-        self.canvas.bind("<Button-3>", self.set_start_point)
+            # 记录鼠标位置
+            self.start_x = None
+            self.start_y = None
 
-        #self.canvas.bind("<B1-Motion>", self.erase)
-        #self.canvas.bind("<Button-1>", self.set_erase_point)
+            # 绑定鼠标事件
+            self.canvas.bind("<B3-Motion>", self.draw)
+            self.canvas.bind("<Button-3>", self.set_start_point)
 
-        self.draggable_items = {}
-        radius = 0.08
-        x = 100
-        y = 50
-        for _avatar in self.roles:
-            if os.path.exists(self.role_avatar_paths[_avatar]):
-                with open(self.role_avatar_paths[_avatar], "rb") as f:
-                    image = Image.open(f)
-                    width, height = image.size
-                    image = image.resize((int(width * radius), int(height * radius)), Image.LANCZOS)
-                    photo = ImageTk.PhotoImage(image)
-                    # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
-                    # self.canvas.create_image(x, y, image=photo)
-                    # 保持对图像的引用，防止被垃圾回收
-                    # self.canvas.image = photo
-                    # Keep references to all images
-                    self.image_references.append(photo)
-                    # Create draggable image
+            #self.canvas.bind("<B1-Motion>", self.erase)
+            #self.canvas.bind("<Button-1>", self.set_erase_point)
 
-                # Add label below the image
-                label_text = self.role_entries_name[
-                                 _avatar] + "(" + _avatar + ")" # You can replace this with whatever text you want
-                label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
-                # Bind label's movement with image
-                # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
-                draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text, label2=label_text2, type='image')
-                y += 100
-                self.draggable_items[_avatar] = draggable_image
-            else:
-                label_text = self.role_entries_name[
-                                 _avatar] + "(" + _avatar + ")" # You can replace this with whatever text you want
-                label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
-                # Bind label's movement with image
-                # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
-                draggable_image = DraggableItem(self.canvas, x, y, 50, 50, fill='', outline='black',label=label_text, label2=label_text2,
-                                            type='text')
-                y += 100
-                self.draggable_items[_avatar] = draggable_image
-        # Create draggable rectangle
-        draggable_rectangle = DraggableItem(self.canvas, 150, 50, 100, 80, fill='', outline='black', label='标签',
-                                            type='rectangle')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 100, 100, 100, fill='', outline='black', label='标签',
-                                            type='circle')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 150, 100, 80, fill='', outline='black', label='标签',
-                                            type='oval')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 200, 100, 80, fill='', outline='black', label='标签',
-                                            type='polygon3')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 250, 50, 50, fill='', outline='black', label='标签',
-                                            type='polygon6')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 300, 50, 50, fill='', outline='black', label='标签',
-                                            type='polygon8')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 350, 50, 50, fill='', outline='black', label='标签',
-                                            type='polygon5')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 400, 50, 50, fill='', outline='black', label='标签',
-                                            type='polygonStar')
-        # draggable_rectangle = DraggableItem(self.canvas, 150, 150, 100, 80, fill='white', outline='black', label='text',
-        # type='line')
-        draggable_rectangle = DraggableItem(self.canvas, 150, 450, 50, 50, fill='', outline='black', label='标签',
-                                            type='text')
+            self.draggable_items = {}
+            radius = 0.08
+            x = 100
+            y = 50
+            for _avatar in self.roles:
+                if os.path.exists(self.role_avatar_paths[_avatar]):
+                    with open(self.role_avatar_paths[_avatar], "rb") as f:
+                        image = Image.open(f)
+                        width, height = image.size
+                        image = image.resize((int(width * radius), int(height * radius)), Image.LANCZOS)
+                        photo = ImageTk.PhotoImage(image)
+                        # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
+                        # self.canvas.create_image(x, y, image=photo)
+                        # 保持对图像的引用，防止被垃圾回收
+                        # self.canvas.image = photo
+                        # Keep references to all images
+                        self.image_references.append(photo)
+                        # Create draggable image
+
+                    # Add label below the image
+                    label_text = self.role_entries_name[
+                                     _avatar] + "(" + _avatar + ")" # You can replace this with whatever text you want
+                    label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
+                    # Bind label's movement with image
+                    # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
+                    draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text, label2=label_text2, type='image')
+                    y += 100
+                    self.draggable_items[_avatar] = draggable_image
+                else:
+                    label_text = self.role_entries_name[
+                                     _avatar] + "(" + _avatar + ")" # You can replace this with whatever text you want
+                    label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
+                    # Bind label's movement with image
+                    # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
+                    draggable_image = DraggableItem(self.canvas, x, y, 50, 50, fill='', outline='black',label=label_text, label2=label_text2,
+                                                type='text')
+                    y += 100
+                    self.draggable_items[_avatar] = draggable_image
+            # Create draggable rectangle
+            draggable_rectangle = DraggableItem(self.canvas, 150, 50, 100, 80, fill='', outline='black', label='标签',
+                                                type='rectangle')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 100, 100, 100, fill='', outline='black', label='标签',
+                                                type='circle')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 150, 100, 80, fill='', outline='black', label='标签',
+                                                type='oval')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 200, 100, 80, fill='', outline='black', label='标签',
+                                                type='polygon3')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 250, 50, 50, fill='', outline='black', label='标签',
+                                                type='polygon6')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 300, 50, 50, fill='', outline='black', label='标签',
+                                                type='polygon8')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 350, 50, 50, fill='', outline='black', label='标签',
+                                                type='polygon5')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 400, 50, 50, fill='', outline='black', label='标签',
+                                                type='polygonStar')
+            # draggable_rectangle = DraggableItem(self.canvas, 150, 150, 100, 80, fill='white', outline='black', label='text',
+            # type='line')
+            draggable_rectangle = DraggableItem(self.canvas, 150, 450, 50, 50, fill='', outline='black', label='标签',
+                                                type='text')
+        # 绑定关闭事件
+        #new_window.protocol("WM_DELETE_WINDOW", self.on_close_map)
+
+    def on_close_map(self):
+        if messagebox.askokcancel("储存进度？", "要保存地图State吗？"):
+            saver = CanvasSaver(self.canvas)
+            # Save canvas state to a JSON file
+            saver.save_canvas_state('GameSaves/canvas_state.json')
+        else:
+            if os.path.exists('GameSaves/canvas_state.json'):
+                os.remove('GameSaves/canvas_state.json')
+
 
     def save_settings(self):
         # 将头像路径保存到JSON文件
@@ -2944,7 +2965,7 @@ class TRPGModule:
                 result3 = role_Chart[role][skill_name] + result2
                 self.ChatApp.role_values_entry[role].insert(tk.END, f'\n.st{skill_name}{str(result3)}')
             else:
-                upgrade = "[成长检定]【" + skill_name + "】技能的成长检定(1D100=" + str(result) + "/" + str(info_) + ")失败了..."
+                upgrade = "[成长检定]【" + skill_name + "】技能的成长检定(1D100=" + str(result) + "/" + str(info_) + ")败北了..."
         return upgrade
 
     def skill_check(self, info_, result):
@@ -3941,6 +3962,56 @@ class DraggableItem:
         self.anchor = event.x, event.y
         self.resize_anchor = event.x, event.y
 
+class CanvasSaver:
+    def __init__(self, canvas):
+        self.canvas = canvas
+
+    def save_canvas_state(self, filename):
+        canvas_state = self.get_canvas_state()
+        with open(filename, 'w') as f:
+            json.dump(canvas_state, f)
+        #self.canvas.postscript(file=filename, colormode="color")
+
+    def load_canvas_state(self, filename):
+        with open(filename, 'r') as f:
+            canvas_state = json.load(f)
+        self.set_canvas_state(canvas_state)
+
+    def get_canvas_state(self):
+        canvas_state = {
+            'items': []
+        }
+        for item in self.canvas.find_all():
+            item_type = self.canvas.type(item)
+            item_coords = self.canvas.coords(item)
+
+            item_tags = self.canvas.gettags(item)
+            canvas_state['items'].append({
+                'type': item_type,
+                'coords': item_coords,
+                'tags': item_tags,
+            })
+            if item_type in ["rectangle", "oval"]:
+                fill = self.canvas.itemcget(item, "fill")
+                outline = self.canvas.itemcget(item, "outline")
+                #text = self.canvas.itemcget(item, "text")
+                canvas_state_detail = canvas_state.get("items", {})
+                canvas_state_detail["fill"] = fill
+                canvas_state_detail["outline"] = outline
+                #canvas_state_detail["text"] = text
+        return canvas_state
+
+    def set_canvas_state(self, canvas_state):
+        self.canvas.delete('all')
+        for item_data in canvas_state['items']:
+            item_type = item_data['type']
+            item_coords = item_data['coords']
+            item_tags = item_data['tags']
+            if item_type == 'image':
+                # Add your handling for image items
+                pass
+            else:
+                self.canvas.create_polygon(item_coords, tags=item_tags)
 
 class LoadNPCDialog(simpledialog.Dialog):
     def __init__(self, parent, title):
