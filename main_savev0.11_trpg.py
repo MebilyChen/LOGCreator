@@ -2598,6 +2598,33 @@ class ChatApp:
             json.dump(data, file, ensure_ascii=False)
         # self.new_window.destroy()
 
+    def on_closing_new_window_close(self):
+        with open('GameSaves/Deduction_infos_base.json', 'w', encoding='utf-8') as file:
+            data = {}
+            for role in self.roles:
+                value_list = []
+                if role != "KP":
+                    for item in self.tree2_list[role].get_children():
+                        values = self.tree2_list[role].item(item, 'values')
+                        value_list.append(values)
+                else:
+                    for item in self.tree_main.get_children():
+                        values = self.tree_main.item(item, 'values')
+                        value_list.append(values)
+                data[role] = value_list
+            json.dump(data, file, ensure_ascii=False)
+        with open('GameSaves/Deduction_infos_new.json', 'w', encoding='utf-8') as file:
+            data = {}
+            for role in self.roles:
+                value_list = []
+                if role != "KP":
+                    for item in self.tree_list[role].get_children():
+                        values = self.tree_list[role].item(item, 'values')
+                        value_list.append(values)
+                    data[role] = value_list
+            json.dump(data, file, ensure_ascii=False)
+        self.new_window.destroy()
+
     # 新窗口
     def open_new_window(self):
         self.new_window = tk.Toplevel(root)
@@ -2685,7 +2712,7 @@ class ChatApp:
 
             if role == "KP":
                 self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=12)
-                self.KP_entry.insert(tk.END, "← 重要：关闭此窗口不会自动保存，请手动点击此按钮保存！")
+                self.KP_entry.insert(tk.END, "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响")
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
                 self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
@@ -2764,6 +2791,9 @@ class ChatApp:
                     self.add_inference2self("xxx", "xxx的可能性", 0, role)
                 # self.add_inference("玩家2", "关于Y的信息", 5, "√")
             # 配置可调整大小的框架
+            # 绑定关闭事件
+        self.new_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_close)
+
 
     # 新窗口
     def open_new_window_map(self):
