@@ -1,15 +1,23 @@
 import math
 import os
 import re
+import shutil
+import subprocess
 from random import random
 import random
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, ttk, simpledialog, messagebox
 from datetime import datetime, timedelta
 import configparser
+import imageio
 
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageSequence
 import json
+import apng
+
+import win32gui
+import win32con
+import win32api
 
 
 # import logging
@@ -25,6 +33,9 @@ def create_folder(folder_path):
 
 
 babel_on = False
+frame_Map = 0
+frames_map = {}
+current_frame_map = {}
 
 # 例子：创建名为 'my_folder' 的文件夹在当前工作目录下
 create_folder('AppSettings')
@@ -128,6 +139,57 @@ def load_settings_name():
         # 如果文件不存在，返回默认设置
         return {'KP': 'KP', 'DiceBot': 'DiceBot',
                 'PL 1': 'PL 1'}
+
+
+def load_health_data():
+    try:
+        # 尝试加载角色可变数值路径
+        with open('GameSaves/health_data.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {'KP': {'HP': 0, 'MP': 0, '状态': "正常"}, 'DiceBot': {'HP': 0, 'MP': 0, '状态': "正常"},
+                'PL 1': {'HP': 0, 'MP': 0, '状态': "正常"}}
+
+
+def load_health_data_by_name():
+    try:
+        # 尝试加载角色可变数值路径
+        with open('GameSaves/health_data_by_name.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {'KP': {'HP': 0, 'MP': 0, '状态': "正常"}, 'DiceBot': {'HP': 0, 'MP': 0, '状态': "正常"}}
+
+
+def load_infoCanvas_data():
+    try:
+        # 尝试加载角色简卡图片路径
+        with open('AppSettings/infoCanvas_data.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {}
+
+
+def load_icon_data():
+    try:
+        # 尝试加载角色状态icon路径
+        with open('GameSaves/icon_data.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {}
+
+
+def load_infoCanvas_data_by_name():
+    try:
+        # 尝试加载角色简卡图片路径
+        with open('AppSettings/infoCanvas_data_by_name.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {}
 
 
 def load_PL_INFO():
@@ -1106,6 +1168,7 @@ adv_comment = ""
 class ChatApp:
     def __init__(self, root):
         self.root = root
+
         # 一系列字符串
         string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！这就是全部的陛下庇护！", " - 陛下所言甚是/陶醉", " - "
                                                                                                                "你生而有翼，为何竟愿一生匍匐前进，形如虫蚁？",
@@ -1135,7 +1198,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v0.91" + encouragement)
+        self.root.title("自嗨团 v0.98" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
@@ -1149,6 +1212,26 @@ class ChatApp:
         root.bind("<Control-Return>", self.newline_on_ctrl_enter)
 
         self.babel_data = {}
+        self.Iconcanvas = {}
+        self.Icon_on_avatar = {}
+        self.canvas_icon_animate = {}
+        self.image_references_on_Avatar = {}
+        self.frames_avatar = {}
+        self.current_frame_avatar = {}
+        self.frames_icon = {}
+        self.current_frame_icon = {}
+        self.frames_map = {}
+        self.current_frame_map = {}
+        self.frames_icon_on_canvas = {}
+        self.current_frame_icon_on_canvas = {}
+
+        self.infoCanvas_data = load_infoCanvas_data()
+        self.infoCanvas_data_by_name = load_infoCanvas_data_by_name()
+
+        self.health_data = load_health_data()
+        self.health_data_by_name = load_health_data_by_name()
+
+        self.role_Icon_paths = load_icon_data()
 
         # 初始化角色列表
         self.role_count = load_role_count()
@@ -1185,21 +1268,27 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n退出时保存当前设置（头像、名字、PL数量）\n更新了自定义数值/笔记栏\n.st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n时间模块\n#Armor\n推理信息库\n巴别塔（看控制台）\n装载NPC模板，该功能能够保留当前栏位的名称并读取某一模板\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n更新了自定义数值/笔记栏\n" \
+                       ".st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n时间模块\n#Armor\n推理信息库\n" \
+                       "支持gif啦\n" \
+                       "巴别塔（看控制台）\n装载NPC模板，该功能能够保留当前栏位的名称并读取某一模板\n" \
                        "\nTodo:" \
                        "\n--计算" \
-                       "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..）" \
+                       "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..但已经设置了health_data了，就看怎么用方便）" \
                        "\n--features" \
-                       "\n优化：KP侧快捷NPC调用+NPC列表。现在暂时用程序多开+复制粘贴解决，但如此就无法无缝RP（而且战斗时无法触发PC的Armor显示、无法同步计算时间），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。" \
- \
+                       "\n优化：KP侧快捷NPC调用+NPC列表。" \
                        "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，也能避免无法发布到另一个窗口的问题）。此外精简框架，不要占满屏" \
                        "\n牌堆(基本坑，暂时先去用正经骰娘Bot吧)" \
                        "\n实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
-                       "\n输出染色HTML(坑)" \
-                       "\n骰子性格：针对每个技能单独comment(坑)" \
+                       "\n输出染色HTML(坑) 骰子性格：针对每个技能单独comment(坑)" \
                        "\n继续优化简易小地图, Canvas保存" \
-                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG\nArmor显示优化\n\n" \
-                       "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\n\n" \
+                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG" \
+                       "\nArmor显示优化\n\n" \
+                       "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 " \
+                       "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
+                       "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
+                       "左键头像栏] 选择头像 \n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
+                       "状态Icon叠加/撤销\n如果没有头像和状态图，就会缩进到Frame内的左侧，左上是状态，左中是头像\n\n" \
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
@@ -1231,6 +1320,16 @@ class ChatApp:
 
         for role in self.roles:
             self.role_entries_name[role] = role
+            self.image_references_on_Avatar[role] = []
+            self.canvas_icon_animate[role] = ""
+            self.frames_avatar[role] = []
+            self.current_frame_avatar[role] = []
+            self.frames_icon[role] = []
+            self.current_frame_icon[role] = []
+            self.frames_map[role] = []
+            self.current_frame_map[role] = []
+            self.frames_icon_on_canvas[role] = []
+            self.current_frame_icon_on_canvas[role] = []
             if load_settings_name() != "":
                 self.role_entries_name = load_settings_name()  # 从文件加载设置
         babel(self)
@@ -1303,13 +1402,14 @@ class ChatApp:
         # 头像点击事件
         # self.avatar_click_event = None
 
-        # 加载并显示头像
-        self.load_and_display_avatar(role, frame)
-
         # 每个角色的消息框
         entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3)
-        entry.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
         self.role_entries[role] = entry
+        # 加载并显示头像
+        self.load_and_display_avatar(role, frame)
+        self.load_and_display_icon(role, frame)
+
         if role == "DiceBot":
             # 在 Text 组件中插入初始文本
             initial_text = "复制Bot消息至此并发送，或：\n\n【掷骰】点击每个角色的掷骰按钮进行掷骰，公式栏填写公式或技能，留空默认1d100" \
@@ -1348,7 +1448,7 @@ class ChatApp:
         else:
             _SAN = 100
         entry2 = tk.Text(frame, wrap=tk.WORD, width=10, height=6)
-        entry2.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
+        entry2.grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
         value_tag = f"{role}_values_tag"
         self.role_values_tags[role] = value_tag
         entry2.tag_config(value_tag, justify=tk.LEFT)
@@ -1363,12 +1463,16 @@ class ChatApp:
         entry2.bind("<FocusOut>", lambda event, r=role, t=entry2: self.save_info(event, role))
 
         send_button = tk.Button(frame, text="发送", command=lambda role=role: self.send_message(role))
-        send_button.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+        send_button.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
 
         label = tk.Label(frame, text=role, relief=tk.FLAT,
                          font=("Times New Roman", 16, "bold"))  # flat, groove, raised, ridge, solid, or sunken
-        label.grid(row=2, column=1, pady=0, sticky="nsew")
+        label.grid(row=0, column=1, pady=0, sticky="nsew")
         label.bind("<Button-1>", lambda event, role=role, label=label: self.edit_role_name(event, role, label))
+        label.bind("<Button-3>", lambda event, role=role: self.on_avatar_click(role))
+        label.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+        label.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+
         if self.role_entries_name[role] != role:
             label.configure(text=self.role_entries_name[role])
             # print(self.role_entries_name[role])
@@ -1376,10 +1480,11 @@ class ChatApp:
         label = tk.Label(frame, text="@", relief=tk.FLAT)
         label.grid(row=2, column=0, pady=0, sticky="nsew")
         # label点击事件绑定
-        label.bind("<Button-1>", lambda event, role=role: self.on_avatar_click(role))
+        label.bind("<Button-1>", lambda event, role=role: self.on_at_click(role))
+
         # 添加选择头像按钮
-        choose_avatar_button = tk.Button(frame, text="选择头像", command=lambda role=role: self.choose_avatar(role))
-        choose_avatar_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+        # choose_avatar_button = tk.Button(frame, text="选择简卡", command=lambda role=role: self.on_avatar_click(role))
+        # choose_avatar_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
 
         # 添加保存名牌按钮
         # choose_avatar_button = tk.Button(frame, text="保存", command=lambda role=role: self.choose_avatar(role))
@@ -1387,14 +1492,19 @@ class ChatApp:
 
         # 添加掷骰按钮和面数输入框
         entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1)
-        entry_roll.grid(row=2, column=2, padx=5, pady=5, sticky="nsew")
+        entry_roll.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
         self.role_entries_roll[role] = entry_roll
         roll_button = tk.Button(frame, text="掷骰", command=lambda r=role: self.get_and_roll(r))
-        roll_button.grid(row=1, column=2, padx=5, pady=5)
+        roll_button.grid(row=2, column=2, padx=5, pady=5)
         self.role_roll_button[role] = roll_button
         # 在 Text 组件中插入初始文本
         initial_text = "1d100"
         self.role_entries_roll[role].insert(tk.END, initial_text)
+
+    def apng_to_gif(self, apng_file, gif_file):
+        # 使用 apng2gif 工具将 APNG 转换成 GIF
+        subprocess.run(["apng2gif", apng_file, gif_file])
+        return gif_file
 
     def save_info(self, event, role):
         self.role_values_tags_text[role] = self.role_values_entry[role].get("1.0", tk.END).strip()
@@ -1410,9 +1520,9 @@ class ChatApp:
             self.trpg_toggle = "on"
         else:
             for role in self.roles:
-                self.role_entries_roll[role].grid(row=2, column=2, padx=5, pady=5, sticky="nsew")  # 展开
-                self.role_roll_button[role].grid(row=1, column=2, padx=5, pady=5)
-                self.role_values_entry[role].grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
+                self.role_entries_roll[role].grid(row=0, column=2, padx=5, pady=5, sticky="nsew")  # 展开
+                self.role_roll_button[role].grid(row=2, column=2, padx=5, pady=5)
+                self.role_values_entry[role].grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
             self.trpg_toggle = "off"
 
     def send_message(self, role):
@@ -1594,12 +1704,13 @@ class ChatApp:
         else:
             old_dict["信用评级"] = old_dict["信用"]
         if old_dict["MOV"] == 8:
-            if old_dict["敏捷"] < old_dict["体型"] and old_dict["力量"] < old_dict["体型"]:
+            if (old_dict["敏捷"] < old_dict["体型"]) and (old_dict["力量"] < old_dict["体型"]):
                 old_dict["MOV"] = 7
-            elif old_dict["敏捷"] > old_dict["体型"] and old_dict["力量"] > old_dict["体型"]:
+            elif (old_dict["敏捷"] > old_dict["体型"]) and (old_dict["力量"] > old_dict["体型"]):
                 old_dict["MOV"] = 9
             else:
                 old_dict["MOV"] = 8
+            print(old_dict["MOV"])
         if old_dict["DB"] == 1:
             old_dict["DB"] = "1(+1D4)"
         if old_dict["DB"] == 2:
@@ -1682,6 +1793,7 @@ class ChatApp:
 
             # 按名牌加载设置
             if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
+                self.infoCanvas_data[role] = self.infoCanvas_data_by_name[new_name]
                 role_Chart[role] = role_Chart_at_name[new_name].copy()
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 # self.role_entries[role].delete("1.0", tk.END)
@@ -1750,6 +1862,16 @@ class ChatApp:
         self.role_count = self.role_count
         new_role = f"PL {len(self.roles) - 1}"
         self.roles.append(new_role)
+        self.canvas_icon_animate[new_role] = ""
+        self.image_references_on_Avatar[new_role] = []
+        self.frames_avatar[new_role] = []
+        self.current_frame_avatar[new_role] = []
+        self.frames_icon[new_role] = []
+        self.current_frame_icon[new_role] = []
+        self.frames_map[new_role] = []
+        self.current_frame_map[new_role] = []
+        self.frames_icon_on_canvas[new_role] = []
+        self.current_frame_icon_on_canvas[new_role] = []
         if new_role not in self.role_entries_name:
             self.role_entries_name[new_role] = new_role
         elif self.role_entries_name[new_role] != new_role:
@@ -1874,12 +1996,89 @@ class ChatApp:
         self.role_entries_roll[self.highlighted_role.get()].config(relief=tk.SOLID)
         # self.create_role_frames()
 
+    def on_at_click(self, role):
+        # @点击事件处理
+        # self.current_at_role.set(role)
+        self.avatar_click_event = role
+        current_role = self.current_role.get()
+        self.role_entries[current_role].insert(tk.END, "@" + self.role_entries_name[role] + " ")
+
+    def on_avatar_right_click(self, role):
+        # Icon、Avatar右击事件处理
+        avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择[会附加到头像上的]状态Icon文件",
+                                                 filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                 initialdir="Images/IconImages")
+        if avatar_path:
+            if os.path.exists('Images/IconImages/' + role + '-' + self.role_entries_name[role] + '.png'):
+                pass
+            else:
+                shutil.copyfile(avatar_path,
+                                'Images/IconImages/' + role + '-' + self.role_entries_name[role] + '.png')
+
+            # 更新头像路径
+            self.role_Icon_paths[role] = avatar_path
+            # 加载并显示头像
+            frame = self.role_entries[role].master
+            self.load_and_display_icon_on_avatar(role, frame)
+            self.load_and_display_icon(role, frame)
+        else:
+            self.role_Icon_paths[role] = ""
+            frame = self.role_entries[role].master
+            self.load_and_display_icon_on_avatar(role, frame)
+            self.load_and_display_icon(role, frame)
+
     def on_avatar_click(self, role):
         # 头像点击事件处理
         # self.current_at_role.set(role)
         self.avatar_click_event = role
         current_role = self.current_role.get()
-        self.role_entries[current_role].insert(tk.END, "@" + self.role_entries_name[role] + " ")
+        # self.role_entries[current_role].insert(tk.END, "@" + self.role_entries_name[role] + " ")
+        filename = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择简卡图片",
+                                              filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                              initialdir="Images/SheetImages")
+        _, extension = os.path.splitext(filename)
+        if extension == ".apng" or extension == ".APNG":
+            filename = self.apng_to_gif(filename, _ + ".gif")
+        if filename:
+            if os.path.exists('Images/SheetImages/' + role + '-' + self.role_entries_name[role] + extension):
+                pass
+            else:
+                shutil.copyfile(filename,
+                                'Images/SheetImages/' + role + '-' + self.role_entries_name[role] + extension)
+
+            self.filename = filename
+            self.infoCanvas_data[role] = filename
+            if "PL " not in self.role_entries_name[role]:
+                self.infoCanvas_data_by_name[self.role_entries_name[role]] = filename
+
+    def on_Namelabel_hover(self, role):
+        # print("enter"+role)
+        # 头像悬停事件处理
+        if role in self.infoCanvas_data and self.infoCanvas_data[role]:
+            self.new_window_infoCanvas = tk.Toplevel(root)
+
+            self.avatar_click_event = role
+            current_role = self.current_role.get()
+
+            # 创建图片对象
+            self.infoimage = Image.open(self.infoCanvas_data[role])
+            width, height = self.infoimage.size
+            width = width / 2.2
+            height = height / 2.2
+            self.infoimage.thumbnail((width, height))
+            self.infophoto = ImageTk.PhotoImage(self.infoimage)
+
+            self.infocanvas = tk.Canvas(self.new_window_infoCanvas, width=width * 1.02, height=height * 1.02)
+            self.infocanvas.pack()
+            # 在 Canvas 上展示图片
+            self.infocanvas.create_image(width / 1.95, height / 1.95, image=self.infophoto, tags="image")
+
+    def on_Namelabel_unfocus(self, role):
+        # print("leave" + role)
+        # 头像离开悬停事件处理
+        self.avatar_click_event = role
+        current_role = self.current_role.get()
+        self.new_window_infoCanvas.destroy()
 
     def output_chat_log(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1895,10 +2094,44 @@ class ChatApp:
         with open(filename, "w") as file:
             file.write(f'<html><head></head><body>{chat_log_content}</body></html>')
 
+    def choose_Icon(self, role):
+        avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择状态Icon文件",
+                                                 filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                 initialdir="Images/IconImages")
+        _, extension = os.path.splitext(avatar_path)
+        if extension == ".apng" or extension == ".APNG":
+            avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
+        if avatar_path:
+            if os.path.exists('Images/IconImages/' + role + '-' + self.role_entries_name[role] + extension):
+                pass
+            else:
+                shutil.copyfile(avatar_path,
+                                'Images/IconImages/' + role + '-' + self.role_entries_name[role] + extension)
+
+            # 更新头像路径
+            self.role_Icon_paths[role] = avatar_path
+            # 加载并显示头像
+            frame = self.role_entries[role].master
+            self.load_and_display_icon(role, frame)
+        else:
+            self.role_Icon_paths[role] = ""
+            frame = self.role_entries[role].master
+            self.load_and_display_icon(role, frame)
+
     def choose_avatar(self, role):
         avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择头像文件",
-                                                 filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
+                                                 filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                 initialdir="Images/AvatarImages")
+        _, extension = os.path.splitext(avatar_path)
+        if extension == ".apng" or extension == ".APNG":
+            avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
         if avatar_path:
+            if os.path.exists('Images/AvatarImages/' + role + '-' + self.role_entries_name[role] + extension):
+                pass
+            else:
+                shutil.copyfile(avatar_path,
+                                'Images/AvatarImages/' + role + '-' + self.role_entries_name[role] + extension)
+
             # 更新头像路径
             self.role_avatar_paths[role] = avatar_path
             # 加载并显示头像
@@ -1912,6 +2145,7 @@ class ChatApp:
             role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
 
     def load_and_display_avatar(self, role, frame):
+        self.Avatar = ""
         if role in self.role_avatar_paths:
             # 加载头像
             image_path = self.role_avatar_paths[role]
@@ -1919,6 +2153,7 @@ class ChatApp:
                 if self.role_entries_name[role] in role_Chart_at_name:
                     role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = image_path
                 image = Image.open(image_path)
+                image_temp = Image.open(image_path)
                 # 获取图像的宽和高
                 width, height = image.size
 
@@ -1929,16 +2164,305 @@ class ChatApp:
                     image = image.resize((50, 80), Image.LANCZOS)
                 else:
                     image = image.resize((50, 100), Image.LANCZOS)
+
                 tk_image = ImageTk.PhotoImage(image)
                 label = tk.Label(frame, image=tk_image)
                 label.image = tk_image
-                label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+                label.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
+
                 # 头像点击事件绑定
-                label.bind("<Button-1>", lambda event, role=role: self.on_avatar_click(role))
+                label.bind("<Button-1>", lambda event, role=role: self.choose_avatar(role))
+                frame = self.role_entries[role].master
+                label.bind("<Button-3>",
+                           lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+
+                label.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                label.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+
+                _, extension = os.path.splitext(image_path)
+                if extension == ".gif" or extension == ".GIF":
+
+                    # gif = imageio.mimread(image_path)
+                    self.Iconcanvas[role] = tk.Canvas(frame, width=20, height=20)
+                    self.Iconcanvas[role].grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
+
+                    # self.Avatar = self.Iconcanvas[role].create_image(30, 50, image=tk_image)
+                    if math.fabs(width - height) <= 10:
+                        self.frames_avatar[role] = [ImageTk.PhotoImage(frame.resize((50, 50), Image.LANCZOS)) for frame
+                                                    in ImageSequence.Iterator(image_temp)]
+                    elif math.fabs(width - height) <= 400:
+                        self.frames_avatar[role] = [ImageTk.PhotoImage(frame.resize((50, 80), Image.LANCZOS)) for frame
+                                                    in ImageSequence.Iterator(image_temp)]
+                    else:
+                        self.frames_avatar[role] = [ImageTk.PhotoImage(frame.resize((50, 100), Image.LANCZOS)) for frame
+                                                    in ImageSequence.Iterator(image_temp)]
+                    # 获取 GIF 图片的所有帧
+
+                    # self.frames_avatar[role] = image_temp
+                    # self.frames_avatar[role] = []
+                    # for temp_frame in ImageSequence.Iterator(image_temp):
+                    # 转换为 RGBA 模式并添加到列表中
+                    # frame_rgba = temp_frame.convert("RGBA")
+                    # frame_rgba = ImageTk.PhotoImage(frame_rgba)
+                    # self.frames_avatar[role].append(frame_rgba)
+
+                    # 显示 GIF 图片的第一帧
+                    self.current_frame_avatar[role] = self.Iconcanvas[role].create_image(0, 0, anchor=tk.NW,
+                                                                                         image=self.frames_avatar[role][
+                                                                                             0])
+                    # 播放 GIF 动画
+                    self.animate(0, self.Iconcanvas[role], self.current_frame_avatar[role], self.frames_avatar[role])
+
+                    self.Iconcanvas[role].bind("<Button-1>", lambda event, role=role: self.choose_avatar(role))
+                    self.Iconcanvas[role].bind("<Button-3>",
+                                               lambda event, role=role, frame=frame: self.hide_icon_on_avatar(
+                                                   role, frame))
+
+                    self.Iconcanvas[role].bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                    self.Iconcanvas[role].bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+
+                else:
+                    self.Iconcanvas[role] = tk.Canvas(frame, width=20, height=20)
+                    self.Iconcanvas[role].grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
+                    self.Avatar = self.Iconcanvas[role].create_image(30, 50, image=tk_image)
+
+                    self.Iconcanvas[role].bind("<Button-1>", lambda event, role=role: self.choose_avatar(role))
+                    self.Iconcanvas[role].bind("<Button-3>",
+                                               lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role,
+                                                                                                              frame))
+
+                    self.Iconcanvas[role].bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                    self.Iconcanvas[role].bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+
             else:
+                if self.Avatar:
+                    self.Iconcanvas[role].delete(self.Avatar)
+                self.Iconcanvas[role] = tk.Canvas(frame, width=0, height=0)
+                self.Iconcanvas[role].grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
+
+                self.Iconcanvas[role].bind("<Button-1>", lambda event, role=role: self.choose_avatar(role))
+                self.Iconcanvas[role].bind("<Button-3>",
+                                           lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+
+                self.Iconcanvas[role].bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                self.Iconcanvas[role].bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+
                 label = tk.Label(frame)
-                label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-                label.bind("<Button-1>", lambda event, role=role: self.on_avatar_click(role))
+                label.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
+
+                label.bind("<Button-1>", lambda event, role=role: self.choose_avatar(role))
+                label.bind("<Button-3>", lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+
+                label.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                label.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+
+    def hide_icon_on_avatar(self, role, frame):
+        if role in self.Icon_on_avatar:
+            self.Iconcanvas[role].delete(self.Icon_on_avatar.pop(role))
+            if self.current_frame_icon_on_canvas[role]:
+                self.Iconcanvas[role].delete(self.current_frame_icon_on_canvas[role])
+            # self.Iconcanvas[role].delete(self.Icon_on_avatar[role])
+        else:
+            # self.Icon_on_avatar[role] = ""
+            self.load_and_display_icon_on_avatar(role, frame)
+
+    def load_and_display_icon_on_avatar(self, role, frame):
+        if role not in self.Icon_on_avatar:
+            self.Icon_on_avatar[role] = ""
+        else:
+            print("delete load_and_display_icon_on_avatar")
+            self.Iconcanvas[role].delete(self.Icon_on_avatar[role])
+        if role in self.role_Icon_paths:
+            # 加载头像
+            image_path = self.role_Icon_paths[role]
+            if image_path:
+                image = Image.open(image_path)
+                image_temp = Image.open(image_path)
+                # 获取图像的宽和高
+                width, height = image.size
+                # 根据宽高比设置头像大小
+                if math.fabs(width - height) <= 10:
+                    image = image.resize((50, 50), Image.LANCZOS)  # 调整头像大小
+                elif math.fabs(width - height) <= 400:
+                    image = image.resize((50, 80), Image.LANCZOS)
+                else:
+                    image = image.resize((50, 100), Image.LANCZOS)
+
+                _, extension = os.path.splitext(image_path)
+                if extension == ".gif" or extension == ".GIF":
+
+                    # self.Avatar = self.Iconcanvas[role].create_image(30, 50, image=tk_image)
+                    if math.fabs(width - height) <= 10:
+                        self.frames_icon_on_canvas[role] = [ImageTk.PhotoImage(frame.resize((50, 50), Image.LANCZOS))
+                                                            for frame in ImageSequence.Iterator(image_temp)]
+                    elif math.fabs(width - height) <= 400:
+                        self.frames_icon_on_canvas[role] = [ImageTk.PhotoImage(frame.resize((50, 80), Image.LANCZOS))
+                                                            for frame in ImageSequence.Iterator(image_temp)]
+                    else:
+                        self.frames_icon_on_canvas[role] = [ImageTk.PhotoImage(frame.resize((50, 100), Image.LANCZOS))
+                                                            for frame in ImageSequence.Iterator(image_temp)]
+                    # 显示 GIF 图片的第一帧
+                    self.current_frame_icon_on_canvas[role] = self.Iconcanvas[role].create_image(0, 0, anchor=tk.NW,
+                                                                                                 image=
+                                                                                                 self.frames_icon_on_canvas[
+                                                                                                     role][
+                                                                                                     0])
+                    # 播放 GIF 动画
+                    self.animate(0, self.Iconcanvas[role], self.current_frame_icon_on_canvas[role],
+                                 self.frames_icon_on_canvas[role])
+                else:
+                    if self.current_frame_icon_on_canvas[role]:
+                        self.Iconcanvas[role].delete(self.current_frame_icon_on_canvas[role])
+                    tk_image = ImageTk.PhotoImage(image)
+                    # self.Iconcanvas.create_rectangle(0, 0, 30, 30, fill="red")
+                    if math.fabs(width - height) <= 10:
+                        self.Icon_on_avatar[role] = self.Iconcanvas[role].create_image(20, 20, image=tk_image)
+                    else:
+                        self.Icon_on_avatar[role] = self.Iconcanvas[role].create_image(30, 40, image=tk_image)
+                    self.image_references_on_Avatar[role].append(tk_image)
+
+                    # elif math.fabs(width - height) <= 100:
+                    # image = image.resize((20, 30), Image.LANCZOS)
+                    # else:
+                    # image = image.resize((10, 30), Image.LANCZOS)
+
+                    # label3 = tk.Label(frame, image=tk_image, background = "white")
+                    # label3.image = tk_image
+
+                    # hwnd = self.Iconcanvas.winfo_id()
+                    # colorkey = win32api.RGB(255, 255, 255)  # full black in COLORREF structure
+                    # wnd_exstyle = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+                    # new_exstyle = wnd_exstyle | win32con.WS_EX_LAYERED
+                    # win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, new_exstyle)
+                    # win32gui.SetLayeredWindowAttributes(hwnd, colorkey, 255, win32con.LWA_COLORKEY)
+
+            else:
+                if self.Icon_on_avatar[role]:
+                    self.Iconcanvas[role].delete(self.Icon_on_avatar[role])
+                    # self.Iconcanvas[role].delete(self.current_frame_avatar[role])
+        else:
+            pass
+
+    def animate(self, frame_index, canvas, current_frame, frames):
+        # print(str(frame_index)+"/" + str(len(frames)))
+        # 更新当前帧
+        canvas.itemconfig(current_frame, image=frames[frame_index])
+        # canvas.create_image(20, 20, anchor=tk.NW, image=frames[frame_index])
+        # 循环播放下一帧
+        frame_index = (frame_index + 1) % len(frames)
+        self.after_id = canvas.after(50, self.animate, frame_index, canvas, current_frame, frames)
+
+    def load_and_display_icon(self, role, frame):
+        # self.Icon = ""
+        if role in self.role_Icon_paths:
+            # 加载头像
+            image_path = self.role_Icon_paths[role]
+            if image_path:
+                image = Image.open(image_path)
+                # 获取图像的宽和高
+                width, height = image.size
+                if height != width:
+                    image2 = image.resize((50, 30), Image.LANCZOS)
+                else:
+                    image2 = image.resize((30, 30), Image.LANCZOS)
+
+                _, extension = os.path.splitext(image_path)
+                if extension == ".gif" or extension == ".GIF":
+                    # print("帧数:", image.n_frames)
+                    self.canvas_icon_animate[role] = tk.Canvas(frame, width=20, height=20)
+                    self.canvas_icon_animate[role].grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+                    # 获取 GIF 图片的所有帧
+                    if height != width:
+                        self.frames_icon[role] = [ImageTk.PhotoImage(frame.resize((50, 30), Image.LANCZOS)) for frame in
+                                                  ImageSequence.Iterator(image)]
+                    else:
+                        self.frames_icon[role] = [ImageTk.PhotoImage(frame.resize((30, 30), Image.LANCZOS)) for frame in
+                                                  ImageSequence.Iterator(image)]
+
+                    # 显示 GIF 图片的第一帧
+                    self.current_frame_icon[role] = self.canvas_icon_animate[role].create_image(0, 0, anchor=tk.NW,
+                                                                                                image=
+                                                                                                self.frames_icon[role][
+                                                                                                    0])
+                    # 播放 GIF 动画
+                    self.animate(0, self.canvas_icon_animate[role], self.current_frame_icon[role],
+                                 self.frames_icon[role])
+
+                    self.canvas_icon_animate[role].bind("<Button-1>", lambda event, role=role: self.choose_Icon(role))
+                    self.canvas_icon_animate[role].bind("<Enter>",
+                                                        lambda event, role=role: self.on_Namelabel_hover(role))
+                    self.canvas_icon_animate[role].bind("<Leave>",
+                                                        lambda event, role=role: self.on_Namelabel_unfocus(role))
+                    frame = self.role_entries[role].master
+                    self.canvas_icon_animate[role].bind("<Button-3>",
+                                                        lambda event, role=role, frame=frame: self.hide_icon_on_avatar(
+                                                            role, frame))
+                elif self.canvas_icon_animate[role]:
+                    self.canvas_icon_animate[role].destroy()
+                    # 根据宽高比设置头像大小
+                    # if width >= 100:
+                    # image = image.resize((50, 50), Image.LANCZOS)  # 调整头像大小
+
+                    # elif math.fabs(width - height) <= 100:
+                    # image = image.resize((20, 30), Image.LANCZOS)
+                    # else:
+                    # image = image.resize((10, 30), Image.LANCZOS)
+                    # tk_image = ImageTk.PhotoImage(image)
+                    tk_image2 = ImageTk.PhotoImage(image2)
+                    label2 = tk.Label(frame, image=tk_image2)
+                    label2.image = tk_image2
+
+                    # self.Icon = self.Iconcanvas.create_image(200, 200, image=tk_image)
+
+                    # 头像点击事件绑定
+                    label2.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+                    label2.bind("<Button-1>", lambda event, role=role: self.choose_Icon(role))
+                    label2.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                    label2.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+                    frame = self.role_entries[role].master
+                    label2.bind("<Button-3>",
+                                lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+                else:
+                    tk_image2 = ImageTk.PhotoImage(image2)
+                    label2 = tk.Label(frame, image=tk_image2)
+                    label2.image = tk_image2
+
+                    # self.Icon = self.Iconcanvas.create_image(200, 200, image=tk_image)
+
+                    # 头像点击事件绑定
+                    label2.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+                    label2.bind("<Button-1>", lambda event, role=role: self.choose_Icon(role))
+                    label2.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                    label2.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+                    frame = self.role_entries[role].master
+                    label2.bind("<Button-3>",
+                                lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+                # label2.bind("<Button-3>", lambda event, role=role: self.on_avatar_right_click(role))
+
+            else:
+                if self.canvas_icon_animate[role]:
+                    self.canvas_icon_animate[role].destroy()
+                label2 = tk.Label(frame)
+                # if self.Icon:
+                # self.Iconcanvas.delete(self.Icon)
+                label2.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+                label2.bind("<Button-1>", lambda event, role=role: self.choose_Icon(role))
+                label2.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+                label2.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+                frame = self.role_entries[role].master
+                label2.bind("<Button-3>",
+                            lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+                # label2.bind("<Button-3>", lambda event, role=role: self.on_avatar_right_click(role))
+        else:
+            label2 = tk.Label(frame)
+            label2.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+            label2.bind("<Button-1>", lambda event, role=role: self.choose_Icon(role))
+            label2.bind("<Enter>", lambda event, role=role: self.on_Namelabel_hover(role))
+            label2.bind("<Leave>", lambda event, role=role: self.on_Namelabel_unfocus(role))
+            frame = self.role_entries[role].master
+            label2.bind("<Button-3>",
+                        lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
+            # label2.bind("<Button-3>", lambda event, role=role: self.on_avatar_right_click(role))
 
     def get_and_roll(self, role):
         # 搜索包含 ">>>" 的行的起始索引
@@ -2300,29 +2824,34 @@ class ChatApp:
         self.dialog2 = LoadNPCDialog(self.root, f"选择要加载的NPC")
         result = self.dialog2.result
         # print(result)
-        slot = result["slot"]
-        for name, value in result.items():
-            if name == "slot":
-                pass
-            else:
-                if value == "":
-                    value = name
-                self.role_entries[slot].insert("1.0", f"正在使用[{name}]的属性扮演【{value}】\n===\n")
-                # 按名牌加载设置
-                # print(slot)
-                role_Chart[slot] = role_Chart_at_name[name].copy()
-                SAN = role_Chart_at_name[name].get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                HP = role_Chart_at_name[name].get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                MP = role_Chart_at_name[name].get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                MOV = role_Chart_at_name[name].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                POW = role_Chart_at_name[name].get("POW")
-                DB = role_Chart_at_name[name].get("DB")
-                SAN_ = role_Chart_at_name[name].get("#SAN")
-                self.role_values_entry[slot].insert("1.0",
-                                                    f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
-                self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("1.0", "6.0").strip()}\n\n')
-            # print(result)
+        if result:
+            slot = result["slot"]
+            for name, value in result.items():
+                if name == "slot":
+                    pass
+                else:
+                    if value == "":
+                        value = name
+                    self.role_entries[slot].insert("1.0", f"正在使用[{name}]的属性扮演【{value}】\n===\n")
+                    if name in self.infoCanvas_data_by_name:
+                        self.infoCanvas_data[slot] = self.infoCanvas_data_by_name[name]
+                    else:
+                        print("该模板没有简卡图片！")
+                    # 按名牌加载设置
+                    # print(slot)
+                    role_Chart[slot] = role_Chart_at_name[name].copy()
+                    SAN = role_Chart_at_name[name].get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    HP = role_Chart_at_name[name].get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    MP = role_Chart_at_name[name].get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    MOV = role_Chart_at_name[name].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    POW = role_Chart_at_name[name].get("POW")
+                    DB = role_Chart_at_name[name].get("DB")
+                    SAN_ = role_Chart_at_name[name].get("#SAN")
+                    self.role_values_entry[slot].insert("1.0",
+                                                        f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                    self.chat_log.insert(tk.END,
+                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("1.0", "6.0").strip()}\n\n')
+                # print(result)
 
     def set_start_point(self, event):
         self.start_x = event.x
@@ -2794,16 +3323,17 @@ class ChatApp:
             # 绑定关闭事件
         self.new_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_close)
 
-
     # 新窗口
     def open_new_window_map(self):
+        global frame_Map
         new_window = tk.Toplevel(self.new_window)
         new_window.title("简易地图")
 
         self.image_references = []  # Add this list attribute to store references to images
 
         # text = self.time_log.get("1.0", tk.END).strip()
-        label = tk.Label(new_window, text="此地图仅供单次使用，关闭窗口即销毁: [左键]拖动 | [右键]绘图/副本 | [右键角色图/文本]载入战斗图像 | [右键战斗图像]销毁图像 | [单击标签]编辑标签 | [中键拖拽标签]缩放(仅限矩形和圆)")
+        label = tk.Label(new_window,
+                         text="此地图仅供单次使用，关闭窗口即销毁: [左键]拖动 | [右键]绘图/副本 | [右键角色图/文本]载入战斗图像 | [右键战斗图像]销毁图像 | [单击标签]编辑标签 | [中键拖拽标签]缩放(仅限矩形和圆)")
         label.pack()
 
         # 创建 Canvas 组件
@@ -2811,9 +3341,9 @@ class ChatApp:
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         if os.path.exists('GameSaves/canvas_state.json'):
-            #saver = CanvasSaver(self.canvas)
-            #saver.load_canvas_state('GameSaves/canvas_state.json')
-            #print("发现了保存State，读取旧地图...")
+            # saver = CanvasSaver(self.canvas)
+            # saver.load_canvas_state('GameSaves/canvas_state.json')
+            # print("发现了保存State，读取旧地图...")
             pass
         else:
             print("无保存State，创建新地图...")
@@ -2826,8 +3356,8 @@ class ChatApp:
             self.canvas.bind("<B3-Motion>", self.draw)
             self.canvas.bind("<Button-3>", self.set_start_point)
 
-            #self.canvas.bind("<B1-Motion>", self.erase)
-            #self.canvas.bind("<Button-1>", self.set_erase_point)
+            # self.canvas.bind("<B1-Motion>", self.erase)
+            # self.canvas.bind("<Button-1>", self.set_erase_point)
 
             self.draggable_items = {}
             radius = 0.08
@@ -2850,21 +3380,41 @@ class ChatApp:
 
                     # Add label below the image
                     label_text = self.role_entries_name[
-                                     _avatar] + "(" + _avatar + ")" # You can replace this with whatever text you want
+                                     _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
                     label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
                     # Bind label's movement with image
                     # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
-                    draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text, label2=label_text2, type='image')
-                    y += 100
-                    self.draggable_items[_avatar] = draggable_image
+                    _, extension = os.path.splitext(self.role_avatar_paths[_avatar])
+                    if extension == ".gif" or extension == ".GIF":
+                        image = Image.open(self.role_avatar_paths[_avatar])
+                        width, height = image.size
+                        frames_map[frame_Map] = [
+                            ImageTk.PhotoImage(frame.resize((int(width * 0.25), int(height * 0.25)), Image.LANCZOS))
+                            for frame
+                            in ImageSequence.Iterator(image)]
+                        # 显示 GIF 图片的第一帧
+                        current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
+                                                                     image=frames_map[frame_Map][0],
+                                                                     label=label_text,
+                                                                     label2=label_text2, type="image_animate",
+                                                                     frame=frame_Map)
+                        y += 100
+                        self.draggable_items[_avatar] = current_frame_map[frame_Map]
+                        frame_Map += 1
+                    else:
+                        draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text,
+                                                        label2=label_text2, type='image')
+                        y += 100
+                        self.draggable_items[_avatar] = draggable_image
                 else:
                     label_text = self.role_entries_name[
-                                     _avatar] + "(" + _avatar + ")" # You can replace this with whatever text you want
+                                     _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
                     label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
                     # Bind label's movement with image
                     # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
-                    draggable_image = DraggableItem(self.canvas, x, y, 50, 50, fill='', outline='black',label=label_text, label2=label_text2,
-                                                type='text')
+                    draggable_image = DraggableItem(self.canvas, x, y, 50, 50, fill='', outline='black',
+                                                    label=label_text, label2=label_text2,
+                                                    type='text')
                     y += 100
                     self.draggable_items[_avatar] = draggable_image
             # Create draggable rectangle
@@ -2889,7 +3439,7 @@ class ChatApp:
             draggable_rectangle = DraggableItem(self.canvas, 150, 450, 50, 50, fill='', outline='black', label='标签',
                                                 type='text')
         # 绑定关闭事件
-        #new_window.protocol("WM_DELETE_WINDOW", self.on_close_map)
+        # new_window.protocol("WM_DELETE_WINDOW", self.on_close_map)
 
     def on_close_map(self):
         if messagebox.askokcancel("储存进度？", "要保存地图State吗？"):
@@ -2900,14 +3450,26 @@ class ChatApp:
             if os.path.exists('GameSaves/canvas_state.json'):
                 os.remove('GameSaves/canvas_state.json')
 
-
     def save_settings(self):
         # 将头像路径保存到JSON文件
         with open('AppSettings/avatar_settings.json', 'w', encoding='utf-8') as file:
             json.dump(self.role_avatar_paths, file, ensure_ascii=False)
+        # 将状态Icon路径保存到JSON文件
+        with open('GameSaves/icon_data.json', 'w', encoding='utf-8') as file:
+            json.dump(self.role_Icon_paths, file, ensure_ascii=False)
         # 将姓名牌路径保存到JSON文件
         with open('AppSettings/name_settings.json', 'w', encoding='utf-8') as file:
             json.dump(self.role_entries_name, file, ensure_ascii=False)
+        # 将角色简卡路径保存到JSON文件
+        with open('AppSettings/infoCanvas_data.json', 'w', encoding='utf-8') as file:
+            json.dump(self.infoCanvas_data, file, ensure_ascii=False)
+        with open('AppSettings/infoCanvas_data_by_name.json', 'w', encoding='utf-8') as file:
+            json.dump(self.infoCanvas_data_by_name, file, ensure_ascii=False)
+        # 将角色可变数值保存到JSON文件
+        with open('GameSaves/health_data.json', 'w', encoding='utf-8') as file:
+            json.dump(self.health_data, file, ensure_ascii=False)
+        with open('GameSaves/health_data_by_name.json', 'w', encoding='utf-8') as file:
+            json.dump(self.health_data_by_name, file, ensure_ascii=False)
         # 尝试保存自定义角色数值信息
         with open('GameSaves/pl_info.json', 'w', encoding='utf-8') as file:
             json.dump(self.role_values_tags_text, file, ensure_ascii=False)
@@ -3766,10 +4328,14 @@ class TRPGModule:
 
 
 class DraggableItem:
-    def __init__(self, canvas, x, y, width, height, fill=None, image=None, outline=None, label=None, label2=None, type=None):
+    def __init__(self, canvas, x, y, width, height, fill=None, image=None, outline=None, label=None, label2=None,
+                 type=None, frame=None):
+        global frame_Map
+        global frames_Map
+        global current_frame_map
         rgba_color = "#000000"  # 黑色
         alpha = 128  # 50% 的透明度
-        #self.rgba_color_with_alpha = rgba_color + "{:02x}".format(alpha)   # 添加透明度
+        # self.rgba_color_with_alpha = rgba_color + "{:02x}".format(alpha)   # 添加透明度
         self.rgba_color_with_alpha = fill
         self.canvas = canvas
         self.width = width
@@ -3780,30 +4346,37 @@ class DraggableItem:
         self.label2 = label2
         self.itemType = type
         self.image_references = []
+        self.frame = frame
 
         if image:
             self.item = canvas.create_image(x, y, image=image, tags="draggable")
+            if self.itemType == "image_animate" or self.itemType == "image_temp_animate":
+                # 播放 GIF 动画
+                # print(current_frame_map)
+                self.animate_on_map(0, self.canvas, self.item,
+                                    frames_map[self.frame])
             if label is not None:
                 label_below_image = tk.Label(self.canvas, text=label)
                 # self.label_below_image.pack()
                 # self.label_below_image.place(x=x - 50, y=y + 60)  # Adjust the position as needed
-                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image, anchor=tk.NW)
+                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image,
+                                                                          anchor=tk.NW)
 
-                #label_below_image2 = tk.Label(self.canvas, text=label2, relief=tk.SUNKEN)
+                # label_below_image2 = tk.Label(self.canvas, text=label2, relief=tk.SUNKEN)
                 # self.label_below_image.pack()
                 # self.label_below_image.place(x=x - 50, y=y + 60)  # Adjust the position as needed
-                #self.label_below_image_canvas2 = self.canvas.create_window(x - 35, y+45, window=label_below_image2,
-                                                                          #anchor=tk.NW)
-                self.label_below_image_canvas2 = canvas.create_text(x, y + 50, text=label2, font=("Arial", 10),
-                                                                   fill="black",
-                                                                   tags="draggable")
-                self.label_below_image_canvas2_edit = canvas.create_text(x-45, y + 50, text="❤", font=("Arial", 10),
+                # self.label_below_image_canvas2 = self.canvas.create_window(x - 35, y+45, window=label_below_image2,
+                # anchor=tk.NW)
+                self.label_below_image_canvas2 = canvas.create_text(x, y + 70, text=label2, font=("Arial", 10),
                                                                     fill="black",
                                                                     tags="draggable")
-                #if label2 is not None:
-                    #self.label_below_image_canvas = canvas.create_text(x + 50, y + 50, text=label2, font=("Arial", 5),
-                    #fill="black",
-                    #tags="draggable")
+                self.label_below_image_canvas2_edit = canvas.create_text(x - 45, y + 70, text="❤", font=("Arial", 10),
+                                                                         fill="black",
+                                                                         tags="draggable")
+                # if label2 is not None:
+                # self.label_below_image_canvas = canvas.create_text(x + 50, y + 50, text=label2, font=("Arial", 5),
+                # fill="black",
+                # tags="draggable")
             else:
                 self.label_below_image_canvas = None
                 self.label_below_image_canvas2 = None
@@ -3812,13 +4385,16 @@ class DraggableItem:
             self.label_below_image_canvas2_edit = None
 
             if type == "rectangle":
-                self.item = canvas.create_rectangle(x, y, x + width, y + height, fill=self.rgba_color_with_alpha, outline=outline,
+                self.item = canvas.create_rectangle(x, y, x + width, y + height, fill=self.rgba_color_with_alpha,
+                                                    outline=outline,
                                                     tags="draggable")
             elif type == "circle":
-                self.item = canvas.create_oval(x, y, x + width, y + width, fill=self.rgba_color_with_alpha, outline=outline,
+                self.item = canvas.create_oval(x, y, x + width, y + width, fill=self.rgba_color_with_alpha,
+                                               outline=outline,
                                                tags="draggable")
             elif type == "oval":
-                self.item = canvas.create_oval(x, y, x + width, y + height, fill=self.rgba_color_with_alpha, outline=outline,
+                self.item = canvas.create_oval(x, y, x + width, y + height, fill=self.rgba_color_with_alpha,
+                                               outline=outline,
                                                tags="draggable")
             elif type == "polygon3":
                 x1 = x - width / 2
@@ -3875,24 +4451,26 @@ class DraggableItem:
 
             self.itemType = type
             if label is not None:
-                #label_below_image = tk.Label(self.canvas, text=label)
+                # label_below_image = tk.Label(self.canvas, text=label)
                 # self.label_below_image.pack()
                 # self.label_below_image.place(x=x - 50, y=y + 60)  # Adjust the position as needed
-                #self.label_below_image_canvas = self.canvas.create_window(x, y, window=label_below_image, anchor=tk.NW)
+                # self.label_below_image_canvas = self.canvas.create_window(x, y, window=label_below_image, anchor=tk.NW)
                 label_below_image2 = tk.Label(self.canvas, text=label2)
                 if label2 is not None:
                     self.itemType = "text_PC"
-                    self.label_below_image_canvas2 = self.canvas.create_window(x+ 50, y - 10, window=label_below_image2,
-                                                                           anchor=tk.NW)
+                    self.label_below_image_canvas2 = self.canvas.create_window(x + 50, y - 10,
+                                                                               window=label_below_image2,
+                                                                               anchor=tk.NW)
                 else:
                     self.label_below_image_canvas2 = None
                 if type == "text":
-                    self.label_below_image_canvas = canvas.create_text(x + 30, y+35, text="❤", font=("Arial", 10),
+                    self.label_below_image_canvas = canvas.create_text(x + 30, y + 35, text="❤", font=("Arial", 10),
                                                                        fill="black",
-                                                                tags="draggable")
+                                                                       tags="draggable")
                 else:
-                    self.label_below_image_canvas = canvas.create_text(x+10, y-5, text=label, font=("Arial", 10), fill="black",
-                                   tags="draggable")
+                    self.label_below_image_canvas = canvas.create_text(x + 10, y - 5, text=label, font=("Arial", 10),
+                                                                       fill="black",
+                                                                       tags="draggable")
 
             else:
                 self.label_below_image_canvas = None
@@ -3911,8 +4489,8 @@ class DraggableItem:
 
     def on_tag_press(self, event):
         # 弹出输入窗口并获取用户输入的文本
-        #print("text")
-        if self.itemType == "image" or self.itemType == "image_temp":
+        # print("text")
+        if self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
             intiText = self.label2
         else:
             intiText = "标签"
@@ -3920,16 +4498,15 @@ class DraggableItem:
         if new_text:
             if self.itemType == "text":
                 self.canvas.itemconfig(self.item, text=new_text)
-            elif self.itemType == "image" or self.itemType == "image_temp":
+            elif self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
                 self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text)
             else:
                 self.canvas.itemconfig(self.label_below_image_canvas, text=new_text)
 
-
     def on_resize(self, event):
         self.resize_anchor = event.x - 100, event.y - 50
         label_coords = self.canvas.coords(self.label_below_image_canvas)
-        #self.resize_anchor = (self.resize_anchor[0] + label_coords[0], self.resize_anchor[1] + label_coords[1])
+        # self.resize_anchor = (self.resize_anchor[0] + label_coords[0], self.resize_anchor[1] + label_coords[1])
         pass
 
     def on_right_drag(self, event):
@@ -3942,48 +4519,85 @@ class DraggableItem:
                                self.canvas.coords(self.item)[1], self.width, self.height)
             self.resize_anchor = event.x, event.y
 
+    def apng_to_gif(self, apng_file, gif_file):
+        # 使用 apng2gif 工具将 APNG 转换成 GIF
+        subprocess.run(["apng2gif", apng_file, gif_file])
+        return gif_file
+
+    def animate_on_map(self, frame_index, canvas, current_frame, frames):
+        # print(str(frame_index)+"/" + str(len(frames)))
+        # 更新当前帧
+        canvas.itemconfig(current_frame, image=frames[frame_index])
+        # canvas.create_image(20, 20, anchor=tk.NW, image=frames[frame_index])
+        # 循环播放下一帧
+        frame_index = (frame_index + 1) % len(frames)
+        self.after_id = canvas.after(50, self.animate_on_map, frame_index, canvas, current_frame, frames)
+
     def on_right_press(self, event):
+        global frame_Map
+        global frames_Map
+        global current_frame_map
         self.anchor = event.x, event.y
-        if(("polygon" in self.itemType) and self.itemType != "polygon3"):
+        if (("polygon" in self.itemType) and self.itemType != "polygon3"):
             draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, 50, 50, fill='white',
-                                            outline='black', label='标签', type=self.itemType)
-        elif self.itemType == "image_temp":
+                                                outline='black', label='标签', type=self.itemType)
+        elif self.itemType == "image_temp" or self.itemType == "image_temp_animate":
             self.canvas.delete(self.item)
             self.canvas.delete(self.label_below_image_canvas2)
             self.canvas.delete(self.label_below_image_canvas)
             self.canvas.delete(self.label_below_image_canvas2_edit)
-        elif self.itemType == "image" or self.itemType == "text_PC":
+        elif self.itemType == "image" or self.itemType == "text_PC" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
             # 创建武器选择变量
             avatar_path = filedialog.askopenfilename(title="为【" + self.label + "】选择战斗图片",
-                                                     filetypes=[("Image files", "*.png;*.jpg;*.jpeg")],initialdir="Images")
-
+                                                     filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                     initialdir="Images/BattleImages")
             if avatar_path:
-                with open(avatar_path, "rb") as f:
-                    image = Image.open(f)
+                _, extension = os.path.splitext(avatar_path)
+                if extension == ".apng" or extension == ".APNG":
+                    avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
+                if extension == ".gif" or extension == ".GIF":
+                    image = Image.open(avatar_path)
                     width, height = image.size
-                    image = image.resize((int(width * 0.25), int(height * 0.25)), Image.LANCZOS)
-                    photo = ImageTk.PhotoImage(image)
-                    # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
-                    # self.canvas.create_image(x, y, image=photo)
-                    # 保持对图像的引用，防止被垃圾回收
-                    # self.canvas.image = photo
-                    # Keep references to all images
-                    self.image_references.append(photo)
-                    # Create draggable image
-                image = tk.PhotoImage(file=avatar_path)
-                draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo , label=self.label,
-                                                label2=self.label2, type = "image_temp")
+                    frames_map[frame_Map] = [
+                        ImageTk.PhotoImage(frame.resize((int(width * 0.25), int(height * 0.25)), Image.LANCZOS))
+                        for frame
+                        in ImageSequence.Iterator(image)]
+                    # 显示 GIF 图片的第一帧
+                    current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
+                                                                 image=frames_map[frame_Map][0],
+                                                                 label=self.label,
+                                                                 label2=self.label2, type="image_temp_animate",
+                                                                 frame=frame_Map)
+                    frame_Map += 1
 
-            #self.weapon_var = tk.StringVar(root)
-            #self.weapon_var.set("请选择战斗图片")
+                else:
+                    with open(avatar_path, "rb") as f:
+                        image = Image.open(f)
+                        width, height = image.size
+                        image = image.resize((int(width * 0.25), int(height * 0.25)), Image.LANCZOS)
+                        photo = ImageTk.PhotoImage(image)
+                        # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
+                        # self.canvas.create_image(x, y, image=photo)
+                        # 保持对图像的引用，防止被垃圾回收
+                        # self.canvas.image = photo
+                        # Keep references to all images
+                        self.image_references.append(photo)
+                        # Create draggable image
+                    image = tk.PhotoImage(file=avatar_path)
+                    draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
+                                                    label=self.label,
+                                                    label2=self.label2, type="image_temp")
+
+            # self.weapon_var = tk.StringVar(root)
+            # self.weapon_var.set("请选择战斗图片")
 
             # 创建下拉列表
-            #self.weapon_menu = tk.OptionMenu(root, self.weapon_var, "剑", "盾", "长矛")
-            #self.weapon_menu.pack()
+            # self.weapon_menu = tk.OptionMenu(root, self.weapon_var, "剑", "盾", "长矛")
+            # self.weapon_menu.pack()
 
             # 创建按钮，用于确认选择
-            #self.select_weapon_button = tk.Button(root, text="选择", command=self.select_weapon)
-            #self.select_weapon_button.pack()
+            # self.select_weapon_button = tk.Button(root, text="选择", command=self.select_weapon)
+            # self.select_weapon_button.pack()
 
         else:
             draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, 100, 80, fill='white',
@@ -4008,17 +4622,17 @@ class DraggableItem:
                 image = tk.PhotoImage(file="default.gif")
 
             # 显示图片在 Canvas 上
-            draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label, label2=self.label2)
+            draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label,
+                                            label2=self.label2)
 
     def on_press(self, event):
         self.start_x = event.x
         self.start_y = event.y
         self.anchor = event.x, event.y
         self.resize_anchor = event.x - 100, event.y - 50
-        #self.canvas.tag_lift(self.item)
-        #if self.label_below_image_canvas is not None:
-            #self.canvas.tag_lift(self.item)
-
+        # self.canvas.tag_lift(self.item)
+        # if self.label_below_image_canvas is not None:
+        # self.canvas.tag_lift(self.item)
 
     def on_drag(self, event):
         delta_x = event.x - self.start_x
@@ -4029,7 +4643,7 @@ class DraggableItem:
             if self.label_below_image_canvas2 != None:
                 self.canvas.move(self.label_below_image_canvas2, delta_x, delta_y)
                 if self.label_below_image_canvas2_edit != None:
-                   self.canvas.move(self.label_below_image_canvas2_edit, delta_x, delta_y)
+                    self.canvas.move(self.label_below_image_canvas2_edit, delta_x, delta_y)
         self.start_x = event.x
         self.start_y = event.y
         # dx = event.x - self.anchor[0]
@@ -4037,6 +4651,7 @@ class DraggableItem:
         # self.canvas.move(self.item, dx, dy)
         self.anchor = event.x, event.y
         self.resize_anchor = event.x, event.y
+
 
 class CanvasSaver:
     def __init__(self, canvas):
@@ -4046,7 +4661,7 @@ class CanvasSaver:
         canvas_state = self.get_canvas_state()
         with open(filename, 'w') as f:
             json.dump(canvas_state, f)
-        #self.canvas.postscript(file=filename, colormode="color")
+        # self.canvas.postscript(file=filename, colormode="color")
 
     def load_canvas_state(self, filename):
         with open(filename, 'r') as f:
@@ -4070,11 +4685,11 @@ class CanvasSaver:
             if item_type in ["rectangle", "oval"]:
                 fill = self.canvas.itemcget(item, "fill")
                 outline = self.canvas.itemcget(item, "outline")
-                #text = self.canvas.itemcget(item, "text")
+                # text = self.canvas.itemcget(item, "text")
                 canvas_state_detail = canvas_state.get("items", {})
                 canvas_state_detail["fill"] = fill
                 canvas_state_detail["outline"] = outline
-                #canvas_state_detail["text"] = text
+                # canvas_state_detail["text"] = text
         return canvas_state
 
     def set_canvas_state(self, canvas_state):
@@ -4088,6 +4703,7 @@ class CanvasSaver:
                 pass
             else:
                 self.canvas.create_polygon(item_coords, tags=item_tags)
+
 
 class LoadNPCDialog(simpledialog.Dialog):
     def __init__(self, parent, title):
@@ -4278,11 +4894,11 @@ def calculate_final_result(result_percentage):
     elif result_percentage == -40:
         final_result = "2真词1假词"
     elif result_percentage == -20:
-        final_result = "2假词/1真2假"
+        final_result = "2假词/1真2假/不提供"
     elif result_percentage == -10:
-        final_result = "1假词/1真1假"
+        final_result = "1假词/1真1假/不提供"
     elif result_percentage == 0:
-        final_result = "0关键词"
+        final_result = "不提供"
     elif result_percentage == 10:
         final_result = "1关键词"
     elif result_percentage == 20:
@@ -4447,4 +5063,5 @@ if __name__ == "__main__":
     app = ChatApp(root)
     root.protocol("WM_DELETE_WINDOW", app.on_closing)  # 捕获窗口关闭事件
     # root.protocol("WM_DELETE_WINDOW", self.new_window.on_closing)  # 捕获窗口关闭事件
+    # root.wm_attributes('-transparentcolor', 'white')
     root.mainloop()
