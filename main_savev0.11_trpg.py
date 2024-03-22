@@ -37,6 +37,8 @@ babel_on = False
 frame_Map = 0
 frames_map = {}
 current_frame_map = {}
+Is_fill = False
+Is_square = False
 
 def play_audio(file_path, name, loops = -1):
     if file_path:
@@ -1317,19 +1319,19 @@ class ChatApp:
         # 在 Text 组件中插入初始文本
         initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in，更新了自定义数值/笔记栏，" \
                        ".st存入Json数据库，技能成长自动判定，导出技能st，骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...），时间模块，#Armor，推理信息库" \
-                       "，支持gif啦，功能：载入新的立绘时自动采用活字命令格式，角色连接到立绘文件夹，" \
-                       "巴别塔（看控制台），装载NPC模板，该功能能够保留当前栏位的名称并读取某一模板\n" \
+                       "，支持gif啦，载入新立绘时自动插入活字命令，" \
+                       "巴别塔（看控制台），装载NPC模板，保留栏位名称并读取某一模板\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..但已经设置了health_data了，就看怎么用方便）" \
                        "\n--features" \
-                       "\n优化：KP侧快捷NPC调用+NPC列表。" \
-                       "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，也能避免无法发布到另一个窗口的问题）。此外精简框架，不要占满屏" \
+                       "\n优化：NPC列表" \
+                       "\n优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，避免无法发布到另一个窗口），精简框架，不要占满屏" \
                        "\n牌堆；实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
                        "\n输出染色HTML，骰子性格：针对每个技能单独comment(坑)" \
-                       "\n继续优化地图，实现实时同步数值和时间，Canvas保存" \
+                       "\n优化地图，实现实时同步数值和时间，Canvas保存" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG" \
-                       "\nArmor显示优化\n\n" \
+                       "\nArmor显示优化\n小地图图形缩放BUG\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 " \
                        "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
                        "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
@@ -2380,14 +2382,14 @@ class ChatApp:
                     'Images/SheetImages/' + role + '-' + self.role_entries_name[role] + "-" + filename_ + extension):
                 pass
             else:
-                if os.path.exists('Images/SheetImages/' + filename + extension):
+                if os.path.exists('Images/SheetImages/' + filename_ + extension):
                     pass
                 else:
                     shutil.copyfile(filename,
                                     'Images/SheetImages/' + role + '-' + self.role_entries_name[
-                                        role] + '-' + filename + extension)
+                                        role] + '-' + filename_ + extension)
                     shutil.copyfile(filename,
-                                    'Images/SheetImages/' + filename + extension)
+                                    'Images/SheetImages/' + filename_ + extension)
             self.filename = filename
             self.infoCanvas_data[role] = filename
             if "PL " not in self.role_entries_name[role]:
@@ -2405,8 +2407,8 @@ class ChatApp:
             # 创建图片对象
             self.infoimage = Image.open(self.infoCanvas_data[role])
             width, height = self.infoimage.size
-            canvas_h = int(height / 3)
-            canvas_w = int(width / 3)
+            canvas_h = int(height / 2.2)
+            canvas_w = int(width / 2.2)
             self.infoimage  = self.infoimage.resize((canvas_w, canvas_h), Image.LANCZOS)  # 调整头像大小
             #self.infoimage.thumbnail((width, height))
             self.infophoto = ImageTk.PhotoImage(self.infoimage)
@@ -3695,7 +3697,7 @@ class ChatApp:
 
         text = self.time_log.get("1.0", tk.END).strip()
         label = tk.Label(new_window,
-                         text="此地图仅供单次使用，关闭窗口即销毁: [左键]拖动 | [右键]绘图/副本 | [右键角色图/文本]载入战斗图像 | [右键战斗图像]销毁图像 | [单击标签]编辑标签 | [中键拖拽标签]缩放(仅限矩形和圆)")
+                         text="地图即时使用，信息不互通，关闭即销毁: [右键]绘图/副本(大小随机&透明度正负) | [右键角色/无图则❤]载入战斗图像 | [右键战斗图像]销毁 | [单击标签/❤]编辑 | [中键拖拽标签]缩放(仅限矩形和圆)")
         label.pack()
 
         label2 = tk.Label(new_window,
@@ -4912,10 +4914,26 @@ class DraggableItem:
         global frame_Map
         global frames_Map
         global current_frame_map
+        global Is_fill
+        global Is_square
         self.anchor = event.x, event.y
         if (("polygon" in self.itemType) and self.itemType != "polygon3"):
-            draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, 50, 50, fill='white',
-                                                outline='black', label='标签', type=self.itemType)
+            if Is_fill:
+                draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
+                                                    random.randint(20, 150), fill='white',
+                                                    outline='black', label='标签', type=self.itemType)
+                Is_fill = False
+            else:
+                if Is_square:
+                    draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, 100, 80, fill='',
+                                                        outline='black', label='标签', type=self.itemType)
+                    Is_square = False
+                else:
+                    draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
+                                                        random.randint(20, 150), fill='',
+                                                        outline='black', label='标签', type=self.itemType)
+                    Is_square = True
+                Is_fill = True
         elif self.itemType == "image_temp" or self.itemType == "image_temp_animate":
             self.canvas.delete(self.item)
             self.canvas.delete(self.label_below_image_canvas2)
@@ -4982,8 +5000,14 @@ class DraggableItem:
             # self.select_weapon_button.pack()
 
         else:
-            draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, 100, 80, fill='white',
-                                                outline='black', label='标签', type=self.itemType)
+            if Is_fill:
+                draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150), random.randint(20, 150), fill='white',
+                                                    outline='black', label='标签', type=self.itemType)
+                Is_fill = False
+            else:
+                draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150), random.randint(20, 150), fill='',
+                                                    outline='black', label='标签', type=self.itemType)
+                Is_fill = True
 
     def select_weapon(self, event):
         weapon = self.weapon_var.get()
