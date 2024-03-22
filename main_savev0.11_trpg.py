@@ -1235,7 +1235,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v0.98" + encouragement)
+        self.root.title("自嗨团 v1.00" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
