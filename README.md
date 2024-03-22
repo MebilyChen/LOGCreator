@@ -1,6 +1,7 @@
 # Usage
 生成的exe程序在dist文件夹里，自己生成也行，这样能保证是最新版（因为每次都忘了上传exe）  
 `pyinstaller --onefile --icon=AppSettings/icon.ico main_savev0.11_trpg.py`  
+初次启动因为缺文件而有BUG，如果真有人想用，来问我要初始化启动文件  
 配合活字3使用更佳  
 
 # Updates
