@@ -2908,6 +2908,7 @@ class ChatApp:
                     reason = "尝试" + skill
 
             if enemy_matches is not None:
+                self.roll_dice(role, expression, reason)
                 for enemy in self.enemy_matches:
                     role_ = ""
                     for key, nickname in self.role_entries_name.items():
@@ -2916,7 +2917,8 @@ class ChatApp:
                     expression_ = self.enemy_matches[enemy]
                     reason_ = f"与{self.role_entries_name[role]}对抗"
                     self.roll_dice(role_, expression_, reason_)
-            self.roll_dice(role, expression, reason)
+            else:
+                self.roll_dice(role, expression, reason)
 
     def roll_dice(self, role, expression, reason):
         parts_ = []
