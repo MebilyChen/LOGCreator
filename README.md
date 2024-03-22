@@ -1,3 +1,6 @@
+# Usage
+生成的exe程序在dist文件夹里
+
 # Updates
 图片支持gif啦  
 更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in  
