@@ -13,6 +13,7 @@ import imageio
 
 from PIL import Image, ImageTk, ImageSequence
 import json
+import pygame
 import apng
 
 import win32gui
@@ -31,16 +32,40 @@ def create_folder(folder_path):
     except FileExistsError:
         print(f"文件夹 '{folder_path}' 已经存在")
 
-
+audio_list = {}
 babel_on = False
 frame_Map = 0
 frames_map = {}
 current_frame_map = {}
 
+def play_audio(file_path, name, loops = -1):
+    if file_path:
+        pygame.mixer.init()
+        #pygame.mixer.music.load(file_path)
+        #pygame.mixer.music.play(loops = loops)
+        sound = pygame.mixer.Sound(file_path)
+        sound.play(loops = loops)
+        if loops == -1:
+            audio_list[name] = sound
+
+def kill_audio(name):
+    audio_list[name].stop()
+    audio_list.pop(name)
+
 # 例子：创建名为 'my_folder' 的文件夹在当前工作目录下
 create_folder('AppSettings')
 create_folder('Bots')
 create_folder('GameSaves')
+create_folder('Images')
+create_folder('Images/AvatarImages')
+create_folder('Images/IconImages')
+create_folder('Images/SheetImages')
+create_folder('Images/BattleImages')
+create_folder('ReplayResources')
+create_folder('ReplayResources/BG')
+create_folder('ReplayResources/BGM')
+create_folder('ReplayResources/SE')
+create_folder('ReplayResources/HandOut')
 
 # 便于直接编辑的一系列字符串
 string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]
@@ -186,6 +211,16 @@ def load_infoCanvas_data_by_name():
     try:
         # 尝试加载角色简卡图片路径
         with open('AppSettings/infoCanvas_data_by_name.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {}
+
+
+def load_dir_path():
+    try:
+        # 尝试加载角色差分目录路径
+        with open('AppSettings/avatar_dir_path.json', 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
@@ -1233,6 +1268,17 @@ class ChatApp:
 
         self.role_Icon_paths = load_icon_data()
 
+        self.NowBGM = ["全部"]
+        self.NowImage = []
+        self.NowEffect = []
+        self.NowDialogState = True
+        self.NowCharacterEffect = []
+
+        self.role_dir_path = load_dir_path()
+        for role in self.role_dir_path:
+            if "Images/AvatarImages" not in self.role_dir_path[role]:
+                self.role_dir_path[role] = "Images/AvatarImages"
+
         # 初始化角色列表
         self.role_count = load_role_count()
         self.roles = ["KP", "DiceBot", "PL 1"]
@@ -1263,32 +1309,32 @@ class ChatApp:
         self.time_log = tk.Text(root, wrap=tk.WORD, width=10, height=0)
         self.time_log.grid(row=3, column=2, padx=10, pady=10, rowspan=3, sticky="nsew")
         self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" + date)
+        self.time_log.bind("<Button-3>", lambda event: self.refreshTime)
 
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in\n更新了自定义数值/笔记栏\n" \
-                       ".st存入Json数据库\n技能成长自动判定\n导出技能st\n骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...）\n时间模块\n#Armor\n推理信息库\n" \
-                       "支持gif啦\n" \
-                       "巴别塔（看控制台）\n装载NPC模板，该功能能够保留当前栏位的名称并读取某一模板\n" \
+        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in，更新了自定义数值/笔记栏，" \
+                       ".st存入Json数据库，技能成长自动判定，导出技能st，骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...），时间模块，#Armor，推理信息库" \
+                       "，支持gif啦，功能：载入新的立绘时自动采用活字命令格式，角色连接到立绘文件夹，" \
+                       "巴别塔（看控制台），装载NPC模板，该功能能够保留当前栏位的名称并读取某一模板\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..但已经设置了health_data了，就看怎么用方便）" \
                        "\n--features" \
                        "\n优化：KP侧快捷NPC调用+NPC列表。" \
                        "\n继续优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，也能避免无法发布到另一个窗口的问题）。此外精简框架，不要占满屏" \
-                       "\n牌堆(基本坑，暂时先去用正经骰娘Bot吧)" \
-                       "\n实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
-                       "\n输出染色HTML(坑) 骰子性格：针对每个技能单独comment(坑)" \
-                       "\n继续优化简易小地图, Canvas保存" \
+                       "\n牌堆；实用命令，比如抽人 .who ABCD等 (基本坑，暂时先去用正经骰娘Bot吧)" \
+                       "\n输出染色HTML，骰子性格：针对每个技能单独comment(坑)" \
+                       "\n继续优化地图，实现实时同步数值和时间，Canvas保存" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG" \
                        "\nArmor显示优化\n\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 " \
                        "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
                        "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
-                       "左键头像栏] 选择头像 \n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
-                       "状态Icon叠加/撤销\n如果没有头像和状态图，就会缩进到Frame内的左侧，左上是状态，左中是头像\n\n" \
+                       "左键头像栏] 选择头像\n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
+                       "状态Icon叠加/撤销\n[左键@] 在Focus文本框插入@角色名\n[右键@] 插入活字命令\n如果没有头像和状态Icon，就会缩进到Frame内的左侧，左上是状态，左中是头像\n\n" \
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
@@ -1375,6 +1421,59 @@ class ChatApp:
                 Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
                 self.role_entries["DiceBot"].insert("1.0", f"已录入[{names}]的性格！")
                 break
+
+    def display_image(self, file_path, text, name=None, seconds=-1):
+        if file_path:
+            new_window_HO = tk.Toplevel(root)
+            new_window_HO.title("图片展示：" + text)
+            # label = tk.Label(new_window_HO, text=text)
+            # label.pack()
+            image_references = []  # Add this list attribute to store references to images
+            # 创建 Canvas 组件
+            image = Image.open(file_path)
+            # 获取图像的宽和高
+            width, height = image.size
+            canvas_w = int(width/3)
+            canvas_h = int(height/3)
+            canvas_HO = tk.Canvas(new_window_HO, width=canvas_w, height=canvas_h, bg="white")
+            canvas_HO.pack(fill=tk.BOTH, expand=True)
+            image = image.resize((canvas_w, canvas_h), Image.LANCZOS)  # 调整头像大小
+            tk_image = ImageTk.PhotoImage(image)
+            canvas_HO.create_image(canvas_w/2, canvas_h/2, image=tk_image, tags="image")
+            canvas_HO.image = tk_image
+            # 监听窗口大小变化事件
+            #canvas_HO.bind("<Configure>", lambda event: self.resize_image(canvas_HO, tk_image))
+            new_window_HO.protocol("WM_DELETE_WINDOW", lambda: self.on_kill_image(new_window_HO, text, name))
+
+    def resize_image(self, canvas, tk_image):
+        canvas.delete("image")  # 删除之前的图片
+        width = canvas.winfo_width()  # 获取Canvas的新宽度
+        height = canvas.winfo_height()  # 获取Canvas的新高度
+        resized_image = tk_image.subsample(int(tk_image.width() / width), int(tk_image.height() / height))  # 缩放图片
+        canvas.create_image(0, 0, anchor=tk.NW, image=resized_image, tags="image")  # 在Canvas上绘制调整后的图片
+        canvas.image = resized_image  # 更新图片引用
+
+    def on_kill_image(self,window, type, name):
+        if type == "HandOut":
+            if name in self.NowImage:
+                self.NowImage.remove(name)
+                content = f"【撤除图片】{name}"
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
+                self.chat_log.yview(tk.END)
+        window.destroy()
+
+    def kill_image(self,name):
+        pass
+        # audio_list[name].stop()
+        # audio_list.pop(name)
+
+    def refreshTime(self):
+        log = self.time_log.get("1.0", tk.END)
+        self.chat_log.insert(tk.END,
+                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{log}\n\n')
+        # 滚动到最底部
+        self.chat_log.yview(tk.END)
 
     def create_role_frames(self):
         num_cols = 3
@@ -1481,6 +1580,7 @@ class ChatApp:
         label.grid(row=2, column=0, pady=0, sticky="nsew")
         # label点击事件绑定
         label.bind("<Button-1>", lambda event, role=role: self.on_at_click(role))
+        label.bind("<Button-3>", lambda event, role=role: self.on_at_right_click(role))
 
         # 添加选择头像按钮
         # choose_avatar_button = tk.Button(frame, text="选择简卡", command=lambda role=role: self.on_avatar_click(role))
@@ -1618,10 +1718,12 @@ class ChatApp:
                             parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
                         self.chat_log.insert(tk.END,
                                              f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                        self.chat_log.yview(tk.END)
                     else:
                         if len(parts_skill) == 1 and "#" not in message:
                             self.chat_log.insert(tk.END,
                                                  f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
+                        self.chat_log.yview(tk.END)
                 else:
                     self.role_entries[role].insert(tk.END, "已刷新！")
             else:
@@ -1814,7 +1916,7 @@ class ChatApp:
                 # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{MOV}\n\n\n')
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-
+                self.chat_log.yview(tk.END)
                 self.role_entries[role].insert("1.0", "已加载名牌为[" + new_name + "]的角色卡！\n")
             else:
                 role_Chart[role] = role_Chart_detail_demo.copy()
@@ -1980,6 +2082,7 @@ class ChatApp:
         # 高亮指定角色的 Frame
         self.highlighted_role.set(role)
         self.chat_log.insert(tk.END, ">>> " + self.role_entries_name[role] + "正在输入...")
+        self.chat_log.yview(tk.END)
         for role in self.roles:
             self.role_entries_frame[role].config(relief=tk.GROOVE)
             self.role_entries_roll[role].config(relief=tk.GROOVE)
@@ -2002,6 +2105,238 @@ class ChatApp:
         self.avatar_click_event = role
         current_role = self.current_role.get()
         self.role_entries[current_role].insert(tk.END, "@" + self.role_entries_name[role] + " ")
+
+    def on_at_right_click(self, role):
+        # @右键事件处理
+        filename_ = ""
+        avatar_path = ""
+        # self.current_at_role.set(role)
+        self.avatar_click_event = role
+        current_role = self.current_role.get()
+        options = ["【背景】", "【背景】纯黑", "【BGM】", "【停止BGM】", "【音效】", "【展示图片】", "【撤除图片】", "【特效】震动", "【特效】闪屏", "【高级特效】开始",
+                   "【高级特效】结束", "【改变名字】[+(之后出场角色被改成的名字, 留空为恢复)]", "【对话框特效】震动", "【隐藏/显示对话框】",
+                   f"【开始角色特效】({self.role_entries_name[role]})", "【结束角色特效(连续和剪影)】", "【更换对话框样式】[+(对话框样式名, 留空为撤除样式)]",
+                   "【等待】[+(秒数)]"]
+        # content_ = simpledialog.askstring("Select Option", "请选择下拉项：", initialvalue=options[0], options=options)
+        # 创建新的顶级窗口
+        self.top_ask = tk.Toplevel(root)
+        # 设置窗口标题
+        self.top_ask.title("选择活字命令")
+        # 创建下拉菜单
+        var = tk.StringVar()
+        var.set(options[0])  # 默认选择第一个选项
+        dropdown = tk.OptionMenu(self.top_ask, var, *options)
+        dropdown.pack(padx=10, pady=10)
+        confirm_button = tk.Button(self.top_ask, text="确认", command=lambda: self.confirm_selection(var, role))
+        confirm_button.pack(pady=10)
+
+    def create_dropdown(self, role, options, title):
+        self.avatar_click_event = role
+        current_role = self.current_role.get()
+        # 创建新的顶级窗口
+        self.top_ask2 = tk.Toplevel(root)
+        # 设置窗口标题
+        self.top_ask2.title(title)
+        # 创建下拉菜单
+        var = tk.StringVar()
+        var.set(options[0])  # 默认选择第一个选项
+        dropdown2 = tk.OptionMenu(self.top_ask2, var, *options)
+        dropdown2.pack(padx=20, pady=10)
+        confirm_button2 = tk.Button(self.top_ask2, text="确认", command=lambda: self.confirm_selection2(var))
+        confirm_button2.pack(pady=10)
+
+        # 让程序等待窗口被关闭
+        self.top_ask2.wait_window()
+        # return str(var)
+
+    def confirm_selection2(self, var):
+        self.top_ask2.destroy()  # 销毁窗口
+        self.content_ = var.get()
+
+    def confirm_selection(self, var, role):
+        self.top_ask.destroy()  # 销毁窗口
+        content_ = var.get()
+
+        if (content_ == "【背景】") or ("【BGM】" in content_) or ("音效" in content_) or ("【展示图片】" in content_):
+            if "背景" in content_:
+                avatar_path = filedialog.askopenfilename(
+                    title="选择【背景】图片文件名",
+                    filetypes=[("Image files", "*.png;*.jpg;*.jpeg")],
+                    initialdir="ReplayResources/BG")
+                if avatar_path:
+                    filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
+                    content = f"【背景】{filename_}"
+                    self.display_image(avatar_path,"背景图")
+                    if os.path.exists(
+                            'ReplayResources/BG/' + filename_ + dotextension):
+                        pass
+                    else:
+                        shutil.copyfile(avatar_path,
+                                        'ReplayResources/BG/' + filename_ + dotextension)
+                else:
+                    return
+            elif "音效" in content_:
+                avatar_path = filedialog.askopenfilename(
+                    title="选择【音效】音频文件名",
+                    filetypes=[("Audio files", "*.mp3;*.wav;*.ogg")],
+                    initialdir="ReplayResources/SE")
+                if avatar_path:
+                    filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
+                    play_audio(avatar_path, filename_, 0)
+                    content = f"【音效】{filename_}"
+
+                    if os.path.exists(
+                            'ReplayResources/SE/' + filename_ + dotextension):
+                        pass
+                    else:
+                        shutil.copyfile(avatar_path,
+                                        'ReplayResources/SE/' + filename_ + dotextension)
+                else:
+                    return
+            elif "BGM" in content_:
+                avatar_path = filedialog.askopenfilename(
+                    title="选择【BGM】音频文件名",
+                    filetypes=[("Audio files", "*.mp3;*.wav;*.ogg")],
+                    initialdir="ReplayResources/BGM")
+                if avatar_path:
+                    filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
+                    self.NowBGM.append(filename_)
+                    play_audio(avatar_path, filename_)
+                    content = f"【BGM】{filename_}"
+                    if os.path.exists(
+                            'ReplayResources/BGM/' + filename_ + dotextension):
+                        pass
+                    else:
+                        shutil.copyfile(avatar_path,
+                                        'ReplayResources/BGM/' + filename_ + dotextension)
+                else:
+                    return
+            else:
+                avatar_path = filedialog.askopenfilename(
+                    title="选择【展示图片】图片文件名",
+                    filetypes=[("Image files", "*.png;*.jpg;*.jpeg")],
+                    initialdir="ReplayResources/HandOut")
+                if avatar_path:
+                    filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
+                    if os.path.exists(
+                            'ReplayResources/HandOut/' + filename_ + dotextension):
+                        pass
+                    else:
+                        shutil.copyfile(avatar_path,
+                                        'ReplayResources/HandOut/' + filename_ + dotextension)
+                    self.NowImage.append(filename_)
+                    content = f"【展示图片】{filename_}"
+                    self.display_image(avatar_path, "HandOut", filename_)
+                    content_ = simpledialog.askstring("展示秒数(0为忽略)", "请输入展示秒数(0或不输入为忽略)：")
+                    if content_ == "" or content_ == "0":
+                        pass
+                    else:
+                        content = content + "\n【等待】" + content_ + f"\n【撤除图片】{self.NowImage.pop()}"
+                else:
+                    return
+        elif "隐藏/显示对话框" in content_:
+            if self.NowDialogState:
+                content = "【隐藏对话框】隐藏"
+                content_ = simpledialog.askstring("隐藏秒数(0为忽略)", "请输入隐藏秒数(0或不输入为忽略)：")
+                if content_ == "" or content_ == "0":
+                    self.NowDialogState = False
+                else:
+                    content = content + "\n【等待】" + content_ + f"\n【隐藏对话框】显示"
+                    self.NowDialogState = True
+            else:
+                content = "【隐藏对话框】显示"
+                self.NowDialogState = True
+        elif "恢复名字" in content_:
+            content = "【改变名字】"
+
+        elif "停止BGM" in content_:
+            if len(self.NowBGM) > 1:
+                self.create_dropdown(role, self.NowBGM, "请选择要停止的BGM：")
+                content_ = self.content_
+                if content_:
+                    if content_ == "全部":
+                        content = f"【停止BGM】"
+                        for name in self.NowBGM:
+                            if name != "全部":
+                                kill_audio(name)
+                        self.NowBGM.clear()
+                        self.NowBGM.append("全部")
+                    else:
+                        kill_audio(content_)
+                        content = f"【停止BGM】{content_}"
+                        self.NowBGM.remove(content_)
+                else:
+                    return
+            else:
+                print("没有使用中的BGM！")
+                content = f"【停止BGM】[+(BGM名称)]"
+
+        elif "撤除图片" in content_:
+            if self.NowImage:
+                self.create_dropdown(role, self.NowImage, "请选择要撤除的图片：")
+                content_ = self.content_
+                if content_:
+                    content = f"【撤除图片】{content_}"
+                    self.NowImage.remove(content_)
+                else:
+                    return
+            else:
+                print("没有使用中的图片！")
+                content = f"【撤除图片】[+(HandOut名称)]"
+        elif "【高级特效】开始" in content_:
+            _list = ["---环境---", "下雨", "下雪", "暴风雪", "大雾", "水下", "---设备---", "监控录像", "胶卷", "黑白电视", "彩色电视", "黑白电影",
+                     "---故障---", "轻微故障", "中等故障", "严重故障", "---漫画---", "黑色集中线", "白色集中线", "---事件---", "幻觉", "血迹", "直面古神"]
+            self.create_dropdown(role, _list, "请选择要使用的高级特效：")
+            content_ = self.content_
+            if content_:
+                content = f"【高级特效】开始{content_}"
+                self.NowEffect.append(content_)
+            else:
+                return
+        elif "【高级特效】结束" in content_:
+            if self.NowEffect:
+                self.create_dropdown(role, self.NowEffect, "请选择要结束的高级特效：")
+                content_ = self.content_
+                if content_:
+                    content = f"【高级特效】结束{content_}"
+                    self.NowEffect.remove(content_)
+                else:
+                    return
+            else:
+                print("没有使用中的高级特效！")
+                content = f"【高级特效】结束[+(特效名)]"
+        elif "开始角色特效" in content_:
+            _list = [f"({self.role_entries_name[role]})震动",
+                     f"({self.role_entries_name[role]})左右震动",
+                     f"({self.role_entries_name[role]})连续震动",
+                     f"({self.role_entries_name[role]})剪影",
+                     f"({self.role_entries_name[role]})转圈",
+                     f"({self.role_entries_name[role]})连续转圈",
+                     f"({self.role_entries_name[role]})跳动",
+                     f"({self.role_entries_name[role]})下沉"]
+            self.create_dropdown(role, _list, "请选择要进行的角色特效：")
+            content_ = self.content_
+            if ("连续" in content_) or ("剪影" in content_):
+                self.NowCharacterEffect.append(content_)
+            content = f"【角色特效】" + content_
+        elif "结束角色特效" in content_:
+            if self.NowCharacterEffect:
+                self.create_dropdown(role, self.NowCharacterEffect, "请选择要结束的角色特效：")
+                content_ = self.content_
+                if content_:
+                    content = f"【角色特效】" + content_.replace("连续", "结束").replace("剪影", "结束剪影")
+                    self.NowCharacterEffect.remove(content_)
+                else:
+                    return
+            else:
+                content = f"【角色特效】([+(角色名)])结束[+(震动/转圈/剪影)]"
+                print("没有使用中的角色特效！")
+        else:
+            content = content_
+        # 发布到LOG
+        self.chat_log.insert(tk.END,
+                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
+        self.chat_log.yview(tk.END)
 
     def on_avatar_right_click(self, role):
         # Icon、Avatar右击事件处理
@@ -2037,15 +2372,22 @@ class ChatApp:
                                               filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                               initialdir="Images/SheetImages")
         _, extension = os.path.splitext(filename)
+        filename_, dot = os.path.splitext(os.path.basename(filename))
         if extension == ".apng" or extension == ".APNG":
             filename = self.apng_to_gif(filename, _ + ".gif")
         if filename:
-            if os.path.exists('Images/SheetImages/' + role + '-' + self.role_entries_name[role] + extension):
+            if os.path.exists(
+                    'Images/SheetImages/' + role + '-' + self.role_entries_name[role] + "-" + filename_ + extension):
                 pass
             else:
-                shutil.copyfile(filename,
-                                'Images/SheetImages/' + role + '-' + self.role_entries_name[role] + extension)
-
+                if os.path.exists('Images/SheetImages/' + filename + extension):
+                    pass
+                else:
+                    shutil.copyfile(filename,
+                                    'Images/SheetImages/' + role + '-' + self.role_entries_name[
+                                        role] + '-' + filename + extension)
+                    shutil.copyfile(filename,
+                                    'Images/SheetImages/' + filename + extension)
             self.filename = filename
             self.infoCanvas_data[role] = filename
             if "PL " not in self.role_entries_name[role]:
@@ -2056,22 +2398,23 @@ class ChatApp:
         # 头像悬停事件处理
         if role in self.infoCanvas_data and self.infoCanvas_data[role]:
             self.new_window_infoCanvas = tk.Toplevel(root)
-
+            self.new_window_infoCanvas.title(f"{role} - {self.role_entries_name[role]}的简图")
             self.avatar_click_event = role
             current_role = self.current_role.get()
 
             # 创建图片对象
             self.infoimage = Image.open(self.infoCanvas_data[role])
             width, height = self.infoimage.size
-            width = width / 2.2
-            height = height / 2.2
-            self.infoimage.thumbnail((width, height))
+            canvas_h = int(height / 3)
+            canvas_w = int(width / 3)
+            self.infoimage  = self.infoimage.resize((canvas_w, canvas_h), Image.LANCZOS)  # 调整头像大小
+            #self.infoimage.thumbnail((width, height))
             self.infophoto = ImageTk.PhotoImage(self.infoimage)
 
-            self.infocanvas = tk.Canvas(self.new_window_infoCanvas, width=width * 1.02, height=height * 1.02)
+            self.infocanvas = tk.Canvas(self.new_window_infoCanvas, width=canvas_w+5, height=canvas_h+5)
             self.infocanvas.pack()
             # 在 Canvas 上展示图片
-            self.infocanvas.create_image(width / 1.95, height / 1.95, image=self.infophoto, tags="image")
+            self.infocanvas.create_image(canvas_w / 2 +5, canvas_h / 2 +5, image=self.infophoto, tags="image")
 
     def on_Namelabel_unfocus(self, role):
         # print("leave" + role)
@@ -2099,14 +2442,15 @@ class ChatApp:
                                                  filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                                  initialdir="Images/IconImages")
         _, extension = os.path.splitext(avatar_path)
+        filename, dot = os.path.splitext(os.path.basename(avatar_path))
         if extension == ".apng" or extension == ".APNG":
             avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
         if avatar_path:
-            if os.path.exists('Images/IconImages/' + role + '-' + self.role_entries_name[role] + extension):
+            if os.path.exists('Images/IconImages/' + filename + extension):
                 pass
             else:
                 shutil.copyfile(avatar_path,
-                                'Images/IconImages/' + role + '-' + self.role_entries_name[role] + extension)
+                                'Images/IconImages/' + filename + extension)
 
             # 更新头像路径
             self.role_Icon_paths[role] = avatar_path
@@ -2119,19 +2463,35 @@ class ChatApp:
             self.load_and_display_icon(role, frame)
 
     def choose_avatar(self, role):
+        if role in self.role_dir_path:
+            initDir = self.role_dir_path[role]
+        else:
+            initDir = "Images/AvatarImages"
         avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择头像文件",
                                                  filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
-                                                 initialdir="Images/AvatarImages")
-        _, extension = os.path.splitext(avatar_path)
-        if extension == ".apng" or extension == ".APNG":
-            avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
+                                                 initialdir=initDir)
         if avatar_path:
-            if os.path.exists('Images/AvatarImages/' + role + '-' + self.role_entries_name[role] + extension):
+            _, extension = os.path.splitext(avatar_path)
+            filename, dot = os.path.splitext(os.path.basename(avatar_path))
+            self.role_dir_path[role] = os.path.dirname(avatar_path)
+            if extension == ".apng" or extension == ".APNG":
+                avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
+            if os.path.exists(
+                    'Images/AvatarImages/' + role + '-' + self.role_entries_name[role] + '-' + filename + extension):
                 pass
             else:
-                shutil.copyfile(avatar_path,
-                                'Images/AvatarImages/' + role + '-' + self.role_entries_name[role] + extension)
-
+                if os.path.exists('Images/AvatarImages/' + filename + extension):
+                    pass
+                else:
+                    shutil.copyfile(avatar_path,
+                                    'Images/AvatarImages/' + role + '-' + self.role_entries_name[
+                                        role] + '-' + filename + extension)
+                    shutil.copyfile(avatar_path,
+                                    'Images/AvatarImages/' + filename + extension)
+            # 发布到LOG
+            self.chat_log.insert(tk.END,
+                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【差分】<{self.role_entries_name[role]}({filename})>\n\n')
+            self.chat_log.yview(tk.END)
             # 更新头像路径
             self.role_avatar_paths[role] = avatar_path
             # 加载并显示头像
@@ -2605,7 +2965,6 @@ class ChatApp:
                     self.role_entries["DiceBot"].delete("1.0", tk.END)
                     if len(parts_) > 1:
                         self.role_entries[role].insert(tk.END, parts_[1])
-
                         weapon_list_ = {}
                         if parts_ and "成功" in parts_[1]:
                             role_Chart_detail_ = role_Chart.get(role, {}).copy()
@@ -2701,63 +3060,64 @@ class ChatApp:
                 self.chat_log.yview(tk.END)
 
                 weapon_list = {}
-                if parts_ and "成功" in parts_[1]:
-                    role_Chart_detail = role_Chart.get(role, {}).copy()
-                    for skill, value in role_Chart_detail.items():
-                        if "#" in skill:
-                            weapon_list[skill.replace("#", "")] = value
-                    for weapon, value in weapon_list.items():
-                        if weapon in expression:
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"{value}")
-                            # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
-                            for role_armor in self.roles:
-                                if role_armor != role:
-                                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
-                                    if "ARMOR" in role_Chart_detail_armor:
-                                        value_armor = role_Chart_detail_armor["ARMOR"]
-                                    else:
-                                        value_armor = 0
-                                    self.role_entries_roll[role_armor].delete("1.0", tk.END)
-                                    self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
-                            break
-                            # print("sadadd:" + value)
-                        if "急救" in expression:
-                            self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
-                        if "医学" in expression:
-                            self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"1d3")
+                if len(parts_) > 1:
+                    if parts_ and "成功" in parts_[1]:
+                        role_Chart_detail = role_Chart.get(role, {}).copy()
+                        for skill, value in role_Chart_detail.items():
+                            if "#" in skill:
+                                weapon_list[skill.replace("#", "")] = value
+                        for weapon, value in weapon_list.items():
+                            if weapon in expression:
+                                self.role_entries_roll[role].delete("1.0", tk.END)
+                                self.role_entries_roll[role].insert("1.0", f"{value}")
+                                # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
+                                for role_armor in self.roles:
+                                    if role_armor != role:
+                                        role_Chart_detail_armor = role_Chart.get(role, {}).copy()
+                                        if "ARMOR" in role_Chart_detail_armor:
+                                            value_armor = role_Chart_detail_armor["ARMOR"]
+                                        else:
+                                            value_armor = 0
+                                        self.role_entries_roll[role_armor].delete("1.0", tk.END)
+                                        self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
+                                break
+                                # print("sadadd:" + value)
+                            if "急救" in expression:
+                                self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                            if "医学" in expression:
+                                self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
+                                self.role_entries_roll[role].delete("1.0", tk.END)
+                                self.role_entries_roll[role].insert("1.0", f"1d3")
+                            if "精神分析" in expression:
+                                self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                                self.role_entries_roll[role].delete("1.0", tk.END)
+                                self.role_entries_roll[role].insert("1.0", f"1d3")
+                    if parts_ and "大失败" in parts_[1]:
                         if "精神分析" in expression:
-                            self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                            self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
                             self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"1d3")
-                if parts_ and "大失败" in parts_[1]:
-                    if "精神分析" in expression:
-                        self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
-                        self.role_entries_roll[role].delete("1.0", tk.END)
-                        self.role_entries_roll[role].insert("1.0", f"1d6")
-                    for weapon, value in weapon_list.items():
-                        if weapon in expression:
-                            for role_armor in self.roles:
-                                if role_armor != role:
-                                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
-                                    if "ARMOR" in role_Chart_detail_armor:
-                                        value_armor = role_Chart_detail_armor["ARMOR"]
-                                    else:
-                                        value_armor = 0
-                                    self.role_entries_roll[role_armor].delete("1.0", tk.END)
-                                    self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
-                elif parts_ and "失败" in parts_[1]:
-                    role_Chart_detail_armor = role_Chart.get(role, {}).copy()
-                    for weapon, value in weapon_list.items():
-                        if weapon in expression:
-                            if "ARMOR" in role_Chart_detail_armor:
-                                value_armor = role_Chart_detail_armor["ARMOR"]
-                            else:
-                                value_armor = 0
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"ARMOR:{value_armor}")
+                            self.role_entries_roll[role].insert("1.0", f"1d6")
+                        for weapon, value in weapon_list.items():
+                            if weapon in expression:
+                                for role_armor in self.roles:
+                                    if role_armor != role:
+                                        role_Chart_detail_armor = role_Chart.get(role, {}).copy()
+                                        if "ARMOR" in role_Chart_detail_armor:
+                                            value_armor = role_Chart_detail_armor["ARMOR"]
+                                        else:
+                                            value_armor = 0
+                                        self.role_entries_roll[role_armor].delete("1.0", tk.END)
+                                        self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
+                    elif parts_ and "失败" in parts_[1]:
+                        role_Chart_detail_armor = role_Chart.get(role, {}).copy()
+                        for weapon, value in weapon_list.items():
+                            if weapon in expression:
+                                if "ARMOR" in role_Chart_detail_armor:
+                                    value_armor = role_Chart_detail_armor["ARMOR"]
+                                else:
+                                    value_armor = 0
+                                self.role_entries_roll[role].delete("1.0", tk.END)
+                                self.role_entries_roll[role].insert("1.0", f"ARMOR:{value_armor}")
 
         # 清空输入框文本
         self.role_entries[role].delete("1.0", tk.END)
@@ -2765,30 +3125,31 @@ class ChatApp:
             self.role_entries[role].insert(tk.END, parts_[1])
 
             weapon_list__ = {}
-            if parts_ and "成功" in parts_[1]:
-                role_Chart_detail__ = role_Chart.get(role, {}).copy()
-                for skill, value in role_Chart_detail__.items():
-                    if "#" in skill:
-                        weapon_list__[skill.replace("#", "")] = value
-                for weapon, value in weapon_list__.items():
-                    if weapon in expression:
-                        self.role_entries[role].insert("1.0", f"[{weapon}]伤害\n")
-                        break
-                if "急救" in expression:
-                    self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
-                if "医学" in expression:
-                    self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
-                    self.role_entries_roll[role].delete("1.0", tk.END)
-                    self.role_entries_roll[role].insert("1.0", f"1d3")
-                if "精神分析" in expression:
-                    self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
-                    self.role_entries_roll[role].delete("1.0", tk.END)
-                    self.role_entries_roll[role].insert("1.0", f"1d3")
-            if parts_ and "大失败" in parts_[1]:
-                if "精神分析" in expression:
-                    self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
-                    self.role_entries_roll[role].delete("1.0", tk.END)
-                    self.role_entries_roll[role].insert("1.0", f"1d6")
+            if len(parts_) > 1:
+                if parts_ and "成功" in parts_[1]:
+                    role_Chart_detail__ = role_Chart.get(role, {}).copy()
+                    for skill, value in role_Chart_detail__.items():
+                        if "#" in skill:
+                            weapon_list__[skill.replace("#", "")] = value
+                    for weapon, value in weapon_list__.items():
+                        if weapon in expression:
+                            self.role_entries[role].insert("1.0", f"[{weapon}]伤害\n")
+                            break
+                    if "急救" in expression:
+                        self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                    if "医学" in expression:
+                        self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
+                        self.role_entries_roll[role].delete("1.0", tk.END)
+                        self.role_entries_roll[role].insert("1.0", f"1d3")
+                    if "精神分析" in expression:
+                        self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                        self.role_entries_roll[role].delete("1.0", tk.END)
+                        self.role_entries_roll[role].insert("1.0", f"1d3")
+                if parts_ and "大失败" in parts_[1]:
+                    if "精神分析" in expression:
+                        self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
+                        self.role_entries_roll[role].delete("1.0", tk.END)
+                        self.role_entries_roll[role].insert("1.0", f"1d6")
 
     def roll_dice_silent(self, role, expression, reason):
         pattern = re.compile(r'[\u4e00-\u9fa5]')
@@ -2851,6 +3212,7 @@ class ChatApp:
                                                         f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                     self.chat_log.insert(tk.END,
                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("1.0", "6.0").strip()}\n\n')
+                    self.chat_log.yview(tk.END)
                 # print(result)
 
     def set_start_point(self, event):
@@ -3331,10 +3693,14 @@ class ChatApp:
 
         self.image_references = []  # Add this list attribute to store references to images
 
-        # text = self.time_log.get("1.0", tk.END).strip()
+        text = self.time_log.get("1.0", tk.END).strip()
         label = tk.Label(new_window,
                          text="此地图仅供单次使用，关闭窗口即销毁: [左键]拖动 | [右键]绘图/副本 | [右键角色图/文本]载入战斗图像 | [右键战斗图像]销毁图像 | [单击标签]编辑标签 | [中键拖拽标签]缩放(仅限矩形和圆)")
         label.pack()
+
+        label2 = tk.Label(new_window,
+                          text=text)
+        label2.pack()
 
         # 创建 Canvas 组件
         self.canvas = tk.Canvas(new_window, width=400, height=400, bg="white")
@@ -3463,6 +3829,9 @@ class ChatApp:
         # 将角色简卡路径保存到JSON文件
         with open('AppSettings/infoCanvas_data.json', 'w', encoding='utf-8') as file:
             json.dump(self.infoCanvas_data, file, ensure_ascii=False)
+        # 将差分目录路径保存到JSON文件
+        with open('AppSettings/avatar_dir_path.json', 'w', encoding='utf-8') as file:
+            json.dump(self.role_dir_path, file, ensure_ascii=False)
         with open('AppSettings/infoCanvas_data_by_name.json', 'w', encoding='utf-8') as file:
             json.dump(self.infoCanvas_data_by_name, file, ensure_ascii=False)
         # 将角色可变数值保存到JSON文件
@@ -4533,6 +4902,12 @@ class DraggableItem:
         frame_index = (frame_index + 1) % len(frames)
         self.after_id = canvas.after(50, self.animate_on_map, frame_index, canvas, current_frame, frames)
 
+    def update_time(self, canvas, label):
+        # print(str(frame_index)+"/" + str(len(frames)))
+        # 更新当前帧
+        # canvas.itemconfig(label, image=frames[frame_index])
+        canvas.after()
+
     def on_right_press(self, event):
         global frame_Map
         global frames_Map
@@ -4553,6 +4928,13 @@ class DraggableItem:
                                                      initialdir="Images/BattleImages")
             if avatar_path:
                 _, extension = os.path.splitext(avatar_path)
+                filename, dot = os.path.splitext(os.path.basename(avatar_path))
+                if os.path.exists(
+                        'Images/BattleImages/' + filename + extension):
+                    pass
+                else:
+                    shutil.copyfile(avatar_path,
+                                    'Images/BattleImages/' + filename + extension)
                 if extension == ".apng" or extension == ".APNG":
                     avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
                 if extension == ".gif" or extension == ".GIF":
