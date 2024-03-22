@@ -1,6 +1,7 @@
 # Usage
-生成的exe程序在dist文件夹里，自己生成也行
-`pyinstaller --onefile --icon=AppSettings/icon.ico main_savev0.11_trpg.py`
+生成的exe程序在dist文件夹里，自己生成也行，这样能保证是最新版（因为每次都忘了上传exe）  
+`pyinstaller --onefile --icon=AppSettings/icon.ico main_savev0.11_trpg.py`  
+配合活字3使用更佳  
 
 # Updates
 图片支持gif啦  
@@ -14,7 +15,8 @@
 #Armor  
 推理信息库  
 载入新立绘时自动插入活字命令  
-巴别塔（看控制台），装载NPC模板，保留栏位名称并读取某一模板  
+巴别塔（看控制台）  
+装载NPC模板，保留栏位名称并读取某一模板    
 
 # Todo
 ## --计算
