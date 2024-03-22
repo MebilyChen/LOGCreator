@@ -46,6 +46,10 @@ Armor显示优化
 ![主界面](https://github.com/MebilyChen/LOGCreator/assets/71856534/be388bcb-a07f-449e-a38a-869d2d95a281)
 状态Icon演示：  
 ![状态Icon演示](https://github.com/MebilyChen/LOGCreator/assets/71856534/beb13955-67b5-4c89-acdb-6d0cc25ea645)
+掷骰演示：
+![掷骰演示](https://github.com/MebilyChen/LOGCreator/assets/71856534/f5a6f1d3-136c-4a5e-ad9a-132a171ec8d3)
+![掷骰演示2](https://github.com/MebilyChen/LOGCreator/assets/71856534/0b3235a3-5aa0-4c07-98ca-4b75be60bb9b)
+
 ### 调查信息库界面
 ![调查信息库界面](https://github.com/MebilyChen/LOGCreator/assets/71856534/6d996d5c-9c7a-46c8-a124-97baaede4953)
 ### 巴别塔模块 
