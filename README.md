@@ -49,14 +49,13 @@ Armor显示优化
 掷骰演示：  
 ![掷骰演示](https://github.com/MebilyChen/LOGCreator/assets/71856534/f5a6f1d3-136c-4a5e-ad9a-132a171ec8d3)
 ![掷骰演示2](https://github.com/MebilyChen/LOGCreator/assets/71856534/0b3235a3-5aa0-4c07-98ca-4b75be60bb9b)
-
 ### 调查信息库界面
 ![调查信息库界面](https://github.com/MebilyChen/LOGCreator/assets/71856534/6d996d5c-9c7a-46c8-a124-97baaede4953)
-### 巴别塔模块 
-![巴别塔](https://github.com/MebilyChen/LOGCreator/assets/71856534/7034db10-ceef-4347-9e6d-1d0fef8273c2)
 ### 小地图
 ![简易地图](https://github.com/MebilyChen/LOGCreator/assets/71856534/6bfc25c0-0a20-40e8-a761-978970636e57)
 ![地图使用](https://github.com/MebilyChen/LOGCreator/assets/71856534/0e79fff3-cfa9-4b84-a182-48a8a7e36d0f)
+### 巴别塔模块 
+![巴别塔](https://github.com/MebilyChen/LOGCreator/assets/71856534/7034db10-ceef-4347-9e6d-1d0fef8273c2)
 ### 活字3支持
 ![活字3命令支持](https://github.com/MebilyChen/LOGCreator/assets/71856534/1f984fb9-6282-4942-8623-2129143d2db6)
 
