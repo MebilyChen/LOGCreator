@@ -2,6 +2,7 @@
 生成的exe程序在dist文件夹里，自己生成也行，这样能保证是最新版（因为每次都忘了上传exe）  
 `pyinstaller --onefile --icon=AppSettings/icon.ico main_savev0.11_trpg.py`  
 初次启动因为缺文件而有BUG，如果真有人想用，来问我要初始化启动文件  
+![目录](https://github.com/MebilyChen/LOGCreator/assets/71856534/308267dd-8902-4ee7-aacc-e59ed9b66be5)
 配合活字3使用更佳  
 
 # Updates
@@ -40,6 +41,19 @@ Armor显示优化
 
 # Tips
 ## 界面
+### 主界面  
+![主界面](https://github.com/MebilyChen/LOGCreator/assets/71856534/be388bcb-a07f-449e-a38a-869d2d95a281)
+### 调查信息库界面
+![调查信息库界面](https://github.com/MebilyChen/LOGCreator/assets/71856534/6d996d5c-9c7a-46c8-a124-97baaede4953)
+### 巴别塔模块 
+![巴别塔](https://github.com/MebilyChen/LOGCreator/assets/71856534/7034db10-ceef-4347-9e6d-1d0fef8273c2)
+### 小地图
+![简易地图](https://github.com/MebilyChen/LOGCreator/assets/71856534/6bfc25c0-0a20-40e8-a761-978970636e57)
+![地图使用](https://github.com/MebilyChen/LOGCreator/assets/71856534/0e79fff3-cfa9-4b84-a182-48a8a7e36d0f)
+### 活字3支持
+![活字3命令支持](https://github.com/MebilyChen/LOGCreator/assets/71856534/1f984fb9-6282-4942-8623-2129143d2db6)
+
+## 交互
 在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5来载入武器伤害公式  
 小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP  
 NPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP"（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。  
