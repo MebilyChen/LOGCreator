@@ -1,5 +1,6 @@
 # Usage
-生成的exe程序在dist文件夹里
+生成的exe程序在dist文件夹里，自己生成也行
+`pyinstaller --onefile --icon=AppSettings/icon.ico main_savev0.11_trpg.py`
 
 # Updates
 图片支持gif啦  
