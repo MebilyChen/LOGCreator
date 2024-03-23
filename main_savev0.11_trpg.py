@@ -1248,7 +1248,7 @@ class ChatApp:
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", self.newline_on_ctrl_enter)
 
-        self.chat_log_huozi = ""
+        #self.chat_log_huozi = ""
 
         self.babel_data = {}
         self.Iconcanvas = {}
@@ -1478,7 +1478,7 @@ class ChatApp:
 
                 self.chat_log.insert(tk.END,
                                      f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
-                self.chat_log_huozi = self.chat_log_huozi + f"{content}\n\n"
+                #self.chat_log_huozi = self.chat_log_huozi + f"{content}\n\n"
                 self.chat_log.yview(tk.END)
         window.destroy()
 
@@ -1491,7 +1491,7 @@ class ChatApp:
         log = self.time_log.get("1.0", tk.END)
         self.chat_log.insert(tk.END,
                              f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{log}\n\n')
-        self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>{log}\n"
+        #self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>{log}\n"
         # 滚动到最底部
         self.chat_log.yview(tk.END)
 
@@ -1573,7 +1573,7 @@ class ChatApp:
         entry2.tag_config(value_tag, justify=tk.LEFT)
         self.role_values_tags_text = load_PL_INFO()
         if role not in self.role_values_tags_text:
-            entry2.insert(tk.END, f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB',
+            entry2.insert(tk.END, f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB',
                           value_tag)
         else:
             entry2.insert(tk.END, self.role_values_tags_text[role], value_tag)
@@ -1680,7 +1680,7 @@ class ChatApp:
                     # print(str(parts[0][0]).upper()+":"+str(role_Chart[role][str(parts[0][0]).upper()]))
                     self.chat_log.insert(tk.END,
                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n\n')
-                    self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n"
+                    #self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n"
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                 else:
@@ -1714,9 +1714,11 @@ class ChatApp:
                                                         f'{MP_}/{MP}:MP\n')
                 if "SAN" in message:
                     SAN_ = self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
+                    #if SAN_ == 0 or SAN_ == "":
+                        #SAN_ = POW
                     self.role_values_entry[role].delete("1.0", "2.0")
                     self.role_values_entry[role].insert("1.0",
-                                                        f'{SAN_}/{POW}/{_SAN}:S\n')
+                                                        f'{SAN_}/{_SAN}:SAN\n')
                 if "MOV" in message:
                     MOV_ = self.role_values_entry[role].get("4.0", "5.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("4.0", "5.0")
@@ -1728,7 +1730,7 @@ class ChatApp:
                                                         f'\n{DB}:DB\n')
                 else:
                     self.role_values_entry[role].insert("1.0",
-                                                        f'{SAN}/{POW}/{_SAN}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                                                        f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
@@ -1739,13 +1741,13 @@ class ChatApp:
                             parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
                         self.chat_log.insert(tk.END,
                                              f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
-                        self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get('1.0', '5.0').strip()}\n"
+                        #self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get('1.0', '5.0').strip()}\n"
                         self.chat_log.yview(tk.END)
                     else:
                         if len(parts_skill) == 1 and "#" not in message:
                             self.chat_log.insert(tk.END,
                                                  f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
-                        self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n"
+                        #self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n"
                         self.chat_log.yview(tk.END)
                 else:
                     self.role_entries[role].insert(tk.END, "已刷新！")
@@ -1930,9 +1932,12 @@ class ChatApp:
                 MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 POW = role_Chart_detail.get("POW")
                 DB = role_Chart_detail.get("DB")
-                SAN_ = role_Chart_detail.get("#SAN")
+                if "#SAN" in role_Chart_detail:
+                    SAN_ = role_Chart_detail.get("#SAN")
+                else:
+                    _SAN_ = 100
                 self.role_values_entry[role].insert("1.0",
-                                                    f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                                                    f'{SAN}/{SAN_}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 # self.role_entries[role].delete("1.0", tk.END)
                 # self.role_entries[role].insert(tk.END, "已录入！")
                 # self.chat_log.insert(tk.END,
@@ -3297,9 +3302,12 @@ class ChatApp:
                     MOV = role_Chart_at_name[name].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                     POW = role_Chart_at_name[name].get("POW")
                     DB = role_Chart_at_name[name].get("DB")
-                    SAN_ = role_Chart_at_name[name].get("#SAN")
+                    if "#SAN" in role_Chart_at_name[name]:
+                        SAN_ = role_Chart_at_name[name].get("#SAN")
+                    else:
+                        SAN_ = 100
                     self.role_values_entry[slot].insert("1.0",
-                                                        f'{SAN}/{POW}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                                                        f'{SAN}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                     self.chat_log.insert(tk.END,
                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("1.0", "6.0").strip()}\n\n')
                     self.chat_log.yview(tk.END)
@@ -4410,9 +4418,13 @@ class TRPGModule:
                             role_Chart[role]["SAN"] = role_Chart[role]["SAN"] - result2
                             POW = role_Chart[role].get("POW")
                             SAN = role_Chart[role].get("SAN")
+                            if "#SAN" in role_Chart[role]:
+                                SAN_ = role_Chart[role].get("#SAN")
+                            else:
+                                SAN_ = 100
                             self.ChatApp.role_values_entry[role].delete("1.0", "2.0")
                             self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                        f'{SAN}/{POW}:SAN\n')
+                                                                        f'{SAN}/{SAN_}:SAN\n')
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，扣除{result2}点SAN。"
@@ -4424,9 +4436,13 @@ class TRPGModule:
                             role_Chart[role]["SAN"] = role_Chart[role]["SAN"] - result2
                             POW = role_Chart[role].get("POW")
                             SAN = role_Chart[role].get("SAN")
+                            if "#SAN" in role_Chart[role]:
+                                SAN_ = role_Chart[role].get("#SAN")
+                            else:
+                                SAN_ = 100
                             self.ChatApp.role_values_entry[role].delete("1.0", "2.0")
                             self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                        f'{SAN}/{POW}:SAN\n')
+                                                                        f'{SAN}/{SAN_}:SAN\n')
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             return f"{result}/{info}={result2}：San Check成功，扣除{result2}点SAN。"
@@ -4442,9 +4458,13 @@ class TRPGModule:
                         role_Chart[role]["SAN"] = role_Chart[role]["SAN"] - result2
                         POW = role_Chart[role].get("POW")
                         SAN = role_Chart[role].get("SAN")
+                        if "#SAN" in role_Chart[role]:
+                            SAN_ = role_Chart[role].get("#SAN")
+                        else:
+                            SAN_ = 100
                         self.ChatApp.role_values_entry[role].delete("1.0", "2.0")
                         self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                    f'{SAN}/{POW}:SAN\n')
+                                                                    f'{SAN}/{SAN_}:SAN\n')
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                         return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！扣除{result2}点SAN。"
@@ -4453,9 +4473,13 @@ class TRPGModule:
                         role_Chart[role]["SAN"] = role_Chart[role]["SAN"] - result2
                         POW = role_Chart[role].get("POW")
                         SAN = role_Chart[role].get("SAN")
+                        if "#SAN" in role_Chart[role]:
+                            SAN_ = role_Chart[role].get("#SAN")
+                        else:
+                            SAN_ = 100
                         self.ChatApp.role_values_entry[role].delete("1.0", "2.0")
                         self.ChatApp.role_values_entry[role].insert("1.0",
-                                                                    f'{SAN}/{POW}:SAN\n')
+                                                                    f'{SAN}/{SAN_}:SAN\n')
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                         return f"{result}/{info}={result2}：San Check失败！扣除{result2}点SAN。"
