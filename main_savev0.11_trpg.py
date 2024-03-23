@@ -2471,6 +2471,7 @@ class ChatApp:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"(活字)chat_log_{timestamp}.txt"
             chat_log_content = self.chat_log.get("1.0", tk.END)
+            chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
             pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
             #pattern =  r'[\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2}'
             matches = re.findall(pattern, chat_log_content)
