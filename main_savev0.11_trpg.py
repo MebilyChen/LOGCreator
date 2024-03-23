@@ -1334,10 +1334,7 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：\n更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、多轮骰、武器伤害Built-in，更新了自定义数值/笔记栏，" \
-                       ".st存入Json数据库，技能成长自动判定，导出技能st，骰子性格（结果播报语句。但因为不会出现在log里，所以基本也没啥影响...），时间模块，#Armor，推理信息库" \
-                       "，支持gif啦，载入新立绘时自动插入活字命令，.draw牌堆(draw_表示暗抽，?表示不放回)，格式json，详情见程序" \
-                       "巴别塔（看控制台），装载NPC模板，保留栏位名称并读取某一模板\n" \
+        initial_text = "Updates：详情见readme\n" \
                        "\nTodo:" \
                        "\n--计算" \
                        "\n暂无" \
@@ -1760,14 +1757,34 @@ class ChatApp:
                 else:
                     print("未找到牌堆或牌堆为空！")
                 return
-
-            if ".who" in message or "。who" in message:
+            if ".whoabcd" in message.lower() or "。whoabcd" in message.lower() or "。who abcd" in message.lower() or ".whoabcd" in message.lower():
+                rolelist = []
+                result = ""
+                for role in self.roles:
+                    if role != "DiceBot":
+                        rolelist.append(role)
+                random.shuffle(rolelist)
+                for r in rolelist:
+                    result = result + " > " + self.role_entries_name[r]
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n抽取幸运顺序：{result}\n\n')
+                self.chat_log.yview(tk.END)
+                return
+            elif ".who" in message or "。who" in message:
                 rolelist = []
                 for role in self.roles:
                     if role != "DiceBot" and role != "KP":
                         rolelist.append(role)
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n抽取幸运儿：【{self.role_entries_name[random.choice(rolelist)]}】\n\n')
+                self.chat_log.yview(tk.END)
+                return
+            elif ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
+                message = message.lower().replace(".no","").replace(".yes","").replace("。no","").replace("。yes","").replace("。yesno","").replace(".yesno","")
+                reason_ = "[" + message + "]的"
+                list_ = ["是", "否"]
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason_}是或否：【{random.choice(list_)}】\n\n')
                 self.chat_log.yview(tk.END)
                 return
         if message:
