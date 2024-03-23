@@ -1248,6 +1248,8 @@ class ChatApp:
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", self.newline_on_ctrl_enter)
 
+        self.chat_log_huozi = ""
+
         self.babel_data = {}
         self.Iconcanvas = {}
         self.Icon_on_avatar = {}
@@ -1331,12 +1333,12 @@ class ChatApp:
                        "\n输出染色HTML，骰子性格：针对每个技能单独comment(坑)" \
                        "\n优化地图，实现实时同步数值和时间，Canvas保存" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG" \
-                       "\nArmor显示优化\n小地图图形缩放BUG\n\n" \
+                       "\nArmor显示优化\n小地图图形缩放BUG\n" \
                        "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 " \
                        "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
                        "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
                        "左键头像栏] 选择头像\n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
-                       "状态Icon叠加/撤销\n[左键@] 在Focus文本框插入@角色名\n[右键@] 插入活字命令\n如果没有头像和状态Icon，就会缩进到Frame内的左侧，左上是状态，左中是头像\n\n" \
+                       "状态Icon叠加/撤销\n[左键@] 在Focus文本框插入@角色名\n[右键@] 插入活字命令\n如果没有头像和状态Icon，就会缩进到Frame内的左侧，左上是状态，左中是头像\n" \
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
@@ -1460,8 +1462,23 @@ class ChatApp:
             if name in self.NowImage:
                 self.NowImage.remove(name)
                 content = f"【撤除图片】{name}"
+
+                # 搜索包含 ">>>" 的行的起始索引
+                start_index = "1.0"
+                while True:
+                    match_index = self.chat_log.search(">>>", start_index, tk.END)
+                    if not match_index:
+                        break
+                    # 删除包含 ">>>" 的行
+                    line_start = self.chat_log.index(match_index)
+                    line_end = self.chat_log.index(match_index + " lineend")
+                    self.chat_log.delete(line_start, line_end)
+                    # 更新搜索的起始位置
+                    start_index = line_end
+
                 self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
+                                     f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
+                self.chat_log_huozi = self.chat_log_huozi + f"{content}\n\n"
                 self.chat_log.yview(tk.END)
         window.destroy()
 
@@ -1474,6 +1491,7 @@ class ChatApp:
         log = self.time_log.get("1.0", tk.END)
         self.chat_log.insert(tk.END,
                              f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{log}\n\n')
+        self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>{log}\n"
         # 滚动到最底部
         self.chat_log.yview(tk.END)
 
@@ -1513,16 +1531,16 @@ class ChatApp:
 
         if role == "DiceBot":
             # 在 Text 组件中插入初始文本
-            initial_text = "复制Bot消息至此并发送，或：\n\n【掷骰】点击每个角色的掷骰按钮进行掷骰，公式栏填写公式或技能，留空默认1d100" \
-                           "\n\n【优劣势】命令头部的+/-表示优劣势（++意志30）" \
-                           "\n\n【补正骰】命令后部的+/-表示补正（意志+30）" \
-                           "\n\n【联合骰】技能1+技能2+技能3..." \
-                           "\n\n【对抗骰】在角色消息栏@其他对抗人 并点击掷骰" \
-                           "\n\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
-                           "\n\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色）" \
-                           "\n\n【.st】输入后点击发送按钮或回车（而不是掷骰按钮）" \
-                           "\n\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用r斗殴击晕敌人”）" \
-                           "\n\n===以上可删除===\n\n"
+            initial_text = "复制Bot消息至此并发送，或：\n【掷骰】点击每个角色的掷骰按钮进行掷骰，公式栏填写公式或技能，留空默认1d100" \
+                           "\n【优劣势】命令头部的+/-表示优劣势（++意志30）" \
+                           "\n【补正骰】命令后部的+/-表示补正（意志+30）" \
+                           "\n【联合骰】技能1+技能2+技能3..." \
+                           "\n【对抗骰】在角色消息栏@其他对抗人 并点击掷骰" \
+                           "\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
+                           "\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色）" \
+                           "\n【.st】输入后点击发送按钮或回车（而不是掷骰按钮）" \
+                           "\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用r斗殴击晕敌人”）" \
+                           "\n===以上可删除===\n\n"
             self.role_entries[role].insert(tk.END, initial_text)
         if role == "KP":
             initial_text = "如何创建NPC模板：" \
@@ -1533,7 +1551,7 @@ class ChatApp:
                            "\n4.在KP栏把自己的名字改成模板名，会自动录入数值(即时数值例如HP、MP变化不会录入)。如果不想更改KP，新建一个NPC栏来用也行，最好不用骰子栏，会出奇怪BUG" \
                            "。或者多开程序也行，但注意一定要分开保存程序数据文件，被覆盖就会哭哭。" \
                            "\n5.如果要重新启用巴别塔，删除新创建的角色，改回第0步的文件名（除非把新添加的角色也加入巴别塔）" \
-                           "\n\n===以上可删除===\n\n"
+                           "\n===以上可删除===\n\n"
             self.role_entries[role].insert(tk.END, initial_text)
 
             # 创建数值tag，显示数值
@@ -1662,6 +1680,7 @@ class ChatApp:
                     # print(str(parts[0][0]).upper()+":"+str(role_Chart[role][str(parts[0][0]).upper()]))
                     self.chat_log.insert(tk.END,
                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n\n')
+                    self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n"
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                 else:
@@ -1720,11 +1739,13 @@ class ChatApp:
                             parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
                         self.chat_log.insert(tk.END,
                                              f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                        self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get('1.0', '5.0').strip()}\n"
                         self.chat_log.yview(tk.END)
                     else:
                         if len(parts_skill) == 1 and "#" not in message:
                             self.chat_log.insert(tk.END,
                                                  f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n\n')
+                        self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n"
                         self.chat_log.yview(tk.END)
                 else:
                     self.role_entries[role].insert(tk.END, "已刷新！")
@@ -2335,9 +2356,23 @@ class ChatApp:
                 print("没有使用中的角色特效！")
         else:
             content = content_
+
+        # 搜索包含 ">>>" 的行的起始索引
+        start_index = "1.0"
+        while True:
+            match_index = self.chat_log.search(">>>", start_index, tk.END)
+            if not match_index:
+                break
+            # 删除包含 ">>>" 的行
+            line_start = self.chat_log.index(match_index)
+            line_end = self.chat_log.index(match_index + " lineend")
+            self.chat_log.delete(line_start, line_end)
+            # 更新搜索的起始位置
+            start_index = line_end
+
         # 发布到LOG
         self.chat_log.insert(tk.END,
-                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
+                             f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
         self.chat_log.yview(tk.END)
 
     def on_avatar_right_click(self, role):
@@ -2426,9 +2461,45 @@ class ChatApp:
         self.new_window_infoCanvas.destroy()
 
     def output_chat_log(self):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"chat_log_{timestamp}.txt"
-        chat_log_content = self.chat_log.get("1.0", tk.END)
+        new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字):", initialvalue="QQ")
+        if new_text == "QQ":
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"(QQ)chat_log_{timestamp}.txt"
+            chat_log_content = self.chat_log.get("1.0", tk.END)
+        elif new_text == "活字":
+            chat_log_content_ = ""
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"(活字)chat_log_{timestamp}.txt"
+            chat_log_content = self.chat_log.get("1.0", tk.END)
+            pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
+            #pattern =  r'[\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2}'
+            matches = re.findall(pattern, chat_log_content)
+            # 输出转换后的格式
+            for match in matches:
+                name = match[0]
+                timestamp = match[1]
+                content = match[2]
+                print(name)
+                print(timestamp)
+                print(content)
+                chat_log_content_ = chat_log_content_+ f"<{name}>{content}\n"
+            chat_log_content = chat_log_content_
+            #for m in matches:
+                #regex_pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*)(\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2})'
+                #match = re.search(regex_pattern, m)
+                #if match:
+                    # 获取捕获组的内容
+                    #name = match.group(1)  # 括号内第一个捕获组的内容
+                    #date_time = match.group(2)  # 括号内第二个捕获组的内容
+                    #chat_log_content = chat_log_content.replace(m,f"<{name}>")
+            chat_log_content = chat_log_content.replace("<活字命令>", "")
+            chat_log_content = chat_log_content.replace("【差分】", "【请编辑差分】")
+            chat_log_content = chat_log_content.replace("<【骰子】>", "【骰子】")
+
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"(QQ)chat_log_{timestamp}.txt"
+            chat_log_content = self.chat_log.get("1.0", tk.END)
         with open(filename, "w") as file:
             file.write(chat_log_content)
 
@@ -2491,8 +2562,21 @@ class ChatApp:
                     shutil.copyfile(avatar_path,
                                     'Images/AvatarImages/' + filename + extension)
             # 发布到LOG
+            # 搜索包含 ">>>" 的行的起始索引
+            start_index = "1.0"
+            while True:
+                match_index = self.chat_log.search(">>>", start_index, tk.END)
+                if not match_index:
+                    break
+                # 删除包含 ">>>" 的行
+                line_start = self.chat_log.index(match_index)
+                line_end = self.chat_log.index(match_index + " lineend")
+                self.chat_log.delete(line_start, line_end)
+                # 更新搜索的起始位置
+                start_index = line_end
+
             self.chat_log.insert(tk.END,
-                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【差分】<{self.role_entries_name[role]}({filename})>\n\n')
+                                 f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【差分】<{self.role_entries_name[role]}({filename})>\n\n')
             self.chat_log.yview(tk.END)
             # 更新头像路径
             self.role_avatar_paths[role] = avatar_path
@@ -2960,9 +3044,10 @@ class ChatApp:
                         else:
                             result = ""
                     if reason == "":
-                        message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
+                        #message = f'<{self.role_entries_name["DiceBot"]}>(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n'
+                        message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
                     else:
-                        message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
+                        message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
                     self.chat_log.insert(tk.END, message)
                     self.chat_log.yview(tk.END)
                     self.role_entries[role].delete("1.0", tk.END)
@@ -3057,9 +3142,9 @@ class ChatApp:
                     else:
                         result = ""
                 if reason == "":
-                    message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
+                    message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
                 else:
-                    message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
+                    message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
                 self.chat_log.insert(tk.END, message)
                 self.chat_log.yview(tk.END)
 
