@@ -1334,7 +1334,7 @@ class ChatApp:
                        "\n优化地图，实现实时同步数值和时间，Canvas保存" \
                        "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG" \
                        "\nArmor显示优化\n小地图图形缩放BUG\n" \
-                       "Tips:\n在角色笔记栏中修改不会影响到角色卡数值，修改HP、MP时均修改的是上限\n使用 .st#斗殴@1D3+5 " \
+                       "Tips:\n.st HP、MP时均修改的是上限，修改实时hp/mp需使用掷骰栏掷骰，或者直接修改\n使用 .st#斗殴@1D3+5 " \
                        "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
                        "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
                        "左键头像栏] 选择头像\n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
@@ -3017,6 +3017,10 @@ class ChatApp:
             for role in self.roles:
                 if role != "DiceBot":
                     result_ = self.trpg_module.roll(expression, role, allin=True)
+                    if ("HP" in expression.upper()) or ("MP" in expression.upper()):
+                        expression = ""
+                        reason = ""
+                        return
                     parts_ = result_.split('：')
                     SANC = ""
                     expressionUPP = expression.upper()
@@ -3114,6 +3118,13 @@ class ChatApp:
                 pass
             else:
                 result_ = self.trpg_module.roll(expression, role)
+                if ("HP" in expression.upper()) or ("MP" in expression.upper()):
+                    expression = ""
+                    reason = ""
+                    #message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
+                    #self.chat_log.insert(tk.END, message)
+                    #self.chat_log.yview(tk.END)
+                    return
                 parts_ = result_.split('：')
                 print(parts_)
                 SANC = ""
@@ -3938,6 +3949,8 @@ class ChatApp:
         with open('GameSaves/health_data_by_name.json', 'w', encoding='utf-8') as file:
             json.dump(self.health_data_by_name, file, ensure_ascii=False)
         # 尝试保存自定义角色数值信息
+        for role in self.role_values_tags:
+            self.role_values_tags_text[role] = self.role_values_entry[role].get("1.0", tk.END).strip()
         with open('GameSaves/pl_info.json', 'w', encoding='utf-8') as file:
             json.dump(self.role_values_tags_text, file, ensure_ascii=False)
         # 尝试保存地点时间天气信息
@@ -4092,6 +4105,8 @@ class TRPGModule:
         global time
         global place
         global weather
+        HP_MP_check = ""
+        fuhao = ""
         combine_infos = {}
         if self.random_seed is not None:
             random.seed(self.random_seed)
@@ -4108,6 +4123,15 @@ class TRPGModule:
             part_eng = pattern_user.findall(expression)
             part_combine = pattern_combine.findall(expression)
             # print(part_eng)
+            if "HP" in expression.upper() or "MP" in expression.upper():
+                print("HP/MP变化")
+                if "HP" in expression.upper():
+                    HP_MP_check = "HP"
+                elif "MP" in expression.upper():
+                    HP_MP_check = "MP"
+                else:
+                    HP_MP_check = ""
+                expression = expression.upper().replace("HP", "").replace("MP", "")
             if pattern_combine.match(expression) and len(part_combine) > 1:
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 print("联合掷骰")  # 意志+斗殴+潜行
@@ -4116,7 +4140,7 @@ class TRPGModule:
                     combine_infos[a] = role_Chart_detail[a]
                 print(combine_infos)
                 expression = "COMBINE CHECK"
-            if pattern_advantage.match(expression):
+            if pattern_advantage.match(expression) and HP_MP_check == "":
                 print("优劣势掷骰")  # ++xxx
                 expression_slice = expression
                 matches = []
@@ -4310,7 +4334,7 @@ class TRPGModule:
                 str_ = '\n'.join(upgrades).strip()
                 return f"{result}/{infos}:{'/'.join(comments)}：{str_}"
 
-            elif bool(pattern.search(expression)) or part_eng[0][0] != "d":
+            elif HP_MP_check == "" and (bool(pattern.search(expression)) or part_eng[0][0] != "d"):
                 expression_num = 0
                 print("技能检定")
                 # print(part_eng[0][0])
@@ -4483,6 +4507,92 @@ class TRPGModule:
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除SC]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                         return f"{result}/{info}={result2}：San Check失败！扣除{result2}点SAN。"
+            if HP_MP_check != "":
+                print(HP_MP_check)
+                fuhao = expression[0]
+                expression = expression.replace(fuhao, "").lower()
+                exp = expression
+                HP = role_Chart[role].get("HP")
+                MP = role_Chart[role].get("MP")
+                if ("+" or "-" or "*" or "/") in expression:
+                    # if 有多个d
+                    seen_letters = set()
+                    result = 0
+                    for char in expression:
+                        if char.isalpha():
+                            if char in seen_letters:
+                                # 使用正则表达式分割中文、英文和数字
+                                parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/d()]', expression)
+                                # 构建新的表达式，替换掉中文和英文
+                                num_expression = ''.join(parts)
+                                # 替换掷骰表达式
+                                num_expression = re.sub(r'(\d+)d(\d+)', lambda match: '+'.join(
+                                    str(random.randint(1, int(match.group(2)))) for _ in range(int(match.group(1)))),
+                                                        num_expression)
+                                # 计算结果
+                                result += eval(num_expression)
+                            seen_letters.add(char)
+                    # if(只有一个d)
+                    # 使用正则表达式分割中文、英文和数字
+                    parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/()]', expression)
+                    # 构建算式
+                    formula_dice = ''.join(parts[0:3])
+                    # 解析表达式
+                    parts_ = formula_dice.split('d')
+                    num_rolls = int(parts_[0])
+                    num_faces = int(parts_[1])
+                    # 执行掷骰
+                    rolls = [random.randint(1, num_faces) for _ in range(num_rolls)]
+                    result = sum(rolls)
+                    formula_add = str(result) + parts[3] + parts[4]
+                    result = eval(formula_add)
+                elif "d" in expression:
+                    # 解析表达式
+                    parts = expression.split('d')
+                    num_rolls = int(parts[0])
+                    num_faces = int(parts[1])
+
+                    # 执行掷骰
+                    rolls = [random.randint(1, num_faces) for _ in range(num_rolls)]
+                    result = sum(rolls)
+                    if num_rolls == 1:
+                        exp = f"{expression}"
+                    else:
+                        exp = f"{'+'.join(map(str, rolls))}"
+                else:
+                    result = expression
+                    exp = ""
+                temp_HP_MP_check = HP_MP_check + "_"
+                if HP_MP_check == "HP":
+                    itm = self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip()
+                else:
+                    itm = self.ChatApp.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip()
+                if temp_HP_MP_check in role_Chart[role]:
+                    if str(role_Chart[role].get(temp_HP_MP_check)) != itm:
+                        role_Chart[role][temp_HP_MP_check] = itm
+                    itm = eval(str(role_Chart[role].get(temp_HP_MP_check))+fuhao+str(result))
+                else:
+                    if HP_MP_check == "HP":
+                        itm = eval(str(self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip())+fuhao+result)
+                    else:
+                        itm = eval(str(self.ChatApp.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip())+fuhao+result)
+                role_Chart[role][temp_HP_MP_check] = itm
+                if HP_MP_check == "HP":
+                    self.ChatApp.role_values_entry[role].delete("2.0", "3.0")
+                    self.ChatApp.role_values_entry[role].insert("2.0",
+                                                                f'{itm}/{HP}:HP\n')
+                else:
+                    self.ChatApp.role_values_entry[role].delete("3.0", "4.0")
+                    self.ChatApp.role_values_entry[role].insert("3.0",
+                                                                f'{itm}/{MP}:MP\n')
+                des = f"{fuhao}{exp}={result}点{HP_MP_check}".replace("-=","减少").replace("+=", "恢复")
+                des2 = "已" + des
+                des2= des2.replace("已+", "已恢复").replace("已-", "已减少")
+                self.ChatApp.chat_log.insert(tk.END,
+                                             f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("2.0", "4.0").strip()}\n\n')
+                self.ChatApp.chat_log.yview(tk.END)
+                self.ChatApp.role_entries[role].insert(tk.END, des+"。")
+                return
 
             if ("+" or "-" or "*" or "/") in expression:
                 # if 有多个d
