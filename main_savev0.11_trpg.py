@@ -2478,6 +2478,8 @@ class ChatApp:
             filename = f"(活字)chat_log_{timestamp}.txt"
             chat_log_content = self.chat_log.get("1.0", tk.END)
             chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
+
+            #pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n(.*?)\n\n'
             pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
             #pattern =  r'[\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2}'
             matches = re.findall(pattern, chat_log_content)
@@ -3068,14 +3070,17 @@ class ChatApp:
                         weapon_list_ = {}
                         if parts_ and "成功" in parts_[1]:
                             role_Chart_detail_ = role_Chart.get(role, {}).copy()
-                            # DB_ = role_Chart_detail_["DB"]
+                            DB_ = role_Chart_detail_["DB"]
+                            DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0","")
+                            if ("D" not in DB_) and ("-" not in DB_):
+                                DB_ = "+"+DB_
                             for skill, value in role_Chart_detail_.items():
                                 if "#" in skill:
                                     weapon_list_[skill.replace("#", "")] = value
                             for weapon, value in weapon_list_.items():
                                 if weapon in expression:
                                     self.role_entries_roll[role].delete("1.0", tk.END)
-                                    self.role_entries_roll[role].insert("1.0", f"{value}")
+                                    self.role_entries_roll[role].insert("1.0", f"{value.replace('+DB', DB_)}")
                                     self.role_entries[role].insert("1.0", f"[{weapon}]伤害\n")
                                     for role_armor in self.roles:
                                         if role_armor != role and "ARMOR:" in str(self.role_entries_roll[role_armor]):
@@ -3173,10 +3178,14 @@ class ChatApp:
                         for skill, value in role_Chart_detail.items():
                             if "#" in skill:
                                 weapon_list[skill.replace("#", "")] = value
+                        DB_ = role_Chart_detail["DB"]
+                        DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0","")
+                        if ("D" not in DB_) and ("-" not in DB_):
+                            DB_ = "+"+DB_
                         for weapon, value in weapon_list.items():
                             if weapon in expression:
                                 self.role_entries_roll[role].delete("1.0", tk.END)
-                                self.role_entries_roll[role].insert("1.0", f"{value}")
+                                self.role_entries_roll[role].insert("1.0", f"{value.replace('+DB', DB_)}")
                                 # self.role_entries[role].insert(tk.END, f"{weapon}伤害")
                                 for role_armor in self.roles:
                                     if role_armor != role:
@@ -4515,11 +4524,12 @@ class TRPGModule:
                 exp = expression
                 HP = role_Chart[role].get("HP")
                 MP = role_Chart[role].get("MP")
-                if ("+" or "-" or "*" or "/") in expression:
-                    # if 有多个d
+                if ("+" in expression) or ("-" in expression) or ("*" in expression) or ("/" in expression):
+                    # if 有多个d 有多个符号
                     seen_letters = set()
                     result = 0
                     for char in expression:
+                        print(char)
                         if char.isalpha():
                             if char in seen_letters:
                                 # 使用正则表达式分割中文、英文和数字
@@ -4595,14 +4605,17 @@ class TRPGModule:
                 self.ChatApp.role_entries[role].insert(tk.END, des+"。")
                 return
 
-            if ("+" or "-" or "*" or "/") in expression:
-                # if 有多个d
+            if ("+" in expression) or ("-" in expression) or ("*" in expression) or ("/" in expression):
+                print(expression)
+                # if 有多个d 有多个符号
                 seen_letters = set()
                 for char in expression:
                     if char.isalpha():
+                        print("multiple Ds with +/-")
                         if char in seen_letters:
                             # 使用正则表达式分割中文、英文和数字
                             parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/d()]', expression)
+                            #print(parts)
                             # 构建新的表达式，替换掉中文和英文
                             num_expression = ''.join(parts)
                             # 替换掷骰表达式
@@ -4626,10 +4639,13 @@ class TRPGModule:
                                 # 执行算式
                                 return f"{num_expression}={result}"
                         seen_letters.add(char)
-
+                    else:
+                        pass
                 # if(只有一个d)
+                print("one D with +/-")
                 # 使用正则表达式分割中文、英文和数字
                 parts = re.findall(r'[A-Za-z]+|\d+|[\u4e00-\u9fa5]+|[+\-*/()]', expression)
+
                 # 构建算式
                 formula_dice = ''.join(parts[0:3])
                 # 解析表达式
@@ -4652,6 +4668,7 @@ class TRPGModule:
                     # 执行算式
                     return f"{formula_add}={result}"
             else:
+                print("one D no +/-")
                 # 解析表达式
                 parts = expression.split('d')
                 num_rolls = int(parts[0])
