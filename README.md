@@ -6,8 +6,8 @@
 配合活字3使用更佳  
 
 # Updates
-把SAN值显示改成了SAN_/SAN（之前是SAN_/POW/SAN）
-图片支持gif啦  
+把SAN值显示改成了SAN_/SAN（之前是SAN_/POW/SAN）   
+图片支持gif啦(〃'▽'〃)    
 更新了TRPG掷骰模块:联合骰、SC、优劣势、补正骰、对抗骰、武器伤害Built-in  
 更新了自定义数值/笔记栏  
 .st存入Json数据库  
