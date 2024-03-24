@@ -84,7 +84,7 @@ string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 
 # 部分活字文字特效编辑
 # 高亮
-style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳
+style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳，保留【】
 # 掷骰原因（只接受color，除非同步修改掷骰角色）
 style_dice_reason_color = "因<color=#FFFF00>" #黄
 # 掷骰角色
