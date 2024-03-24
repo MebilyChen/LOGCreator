@@ -1554,9 +1554,9 @@ class ChatApp:
                            "\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
                            "\n【多轮掷骰】命令头部的*表示轮数（3*意志）" \
                            "\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色，是否显示技能名取决于Bot公式栏）" \
-                           "\n【.st draw who[+理由] whoabcd[+理由] yesno[+理由]】输入后点击发送按钮或回车（而不是掷骰按钮）" \
                            "\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用r斗殴击晕敌人”）" \
                            "\n【HP/MP+-】在公式栏填写（例如“HP+1d3”）" \
+                           "\n【.st draw who[+理由] whoabcd[+理由] yesno[+理由]】输入后点击发送按钮或回车（而不是掷骰按钮）" \
                            "\n===以上可删除===\n\n"
             self.role_entries[role].insert(tk.END, initial_text)
         if role == "KP":
@@ -2627,9 +2627,9 @@ class ChatApp:
                 name = match[0]
                 timestamp = match[1]
                 content = match[2]
-                print(name)
-                print(timestamp)
-                print(content)
+                #print(name)
+                #print(timestamp)
+                #print(content)
                 chat_log_content_ = chat_log_content_ + f"<{name}>{content}\n"
             chat_log_content = chat_log_content_
             # for m in matches:
@@ -2659,6 +2659,50 @@ class ChatApp:
             # chat_log_content = re.sub(r'(\【骰子\】).*\n\1', r'\1', chat_log_content)
             # 对连续出现的掷骰结果进行合并
             # merged_text = "；".join(matches)
+            #将无说话人的行变更为上一个说话人
+            matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
+            while matches:
+                #matches_lastline = re.findall(r'^(?![【<])[^\\n]*$(?<=<([^>]*)>)', chat_log_content, re.MULTILINE)
+                #chat_log_content = re.sub(r'^(?![【<])[^\\n]*$', "<"+matches_lastline + ">" + r'\1', chat_log_content)
+                # 将文本按行拆分成列表
+                lines = chat_log_content.split('\n')
+                # 用于存放行号的列表
+                #line_numbers = []
+                # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
+                for i, line in enumerate(lines):
+                    if not re.match(r'^[【<]', line):
+                        if line == "":
+                            lines.pop(i)
+                            break
+                        else:
+                            #line_numbers.append(i + 1)  # 行号从1开始
+                            j = 0
+                            for k, l in enumerate(lines):
+                                last_line = re.findall(r'<([^>]*)>', lines[i-1-j], re.MULTILINE)
+                                if last_line:
+                                    lines[i] = f"<{last_line[0]}>{lines[i]}"
+                                    break
+                                elif i-1-j < 0:
+                                    print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                    lines = []
+                                    matches = []
+                                    return
+                                j += 1
+                #chat_log_content = chat_log_content.replace("","")
+                chat_log_content = "\n".join(lines)
+                matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
+
+            #高亮文字效果
+            lines = chat_log_content.split('\n')
+            for index, line in enumerate(lines):
+                if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
+                    name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
+                    content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", "<color=#FFFF00><b><弹跳>【").replace("】", "】</弹跳></b></color>")
+                    lines[index] = f"<{name[0]}>{content}"
+                if (line[0] == "【") and ("【骰子】" in line):
+                    content = line.replace("【骰子】", "").replace("因【", "因<color=#FFFF00>").replace("【", "<color=#FFFF00>").replace("】", "</color>")#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                    lines[index] = f"【骰子】{content}"
+            chat_log_content = "\n".join(lines)
 
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -3424,7 +3468,7 @@ class ChatApp:
                                     self.role_entries_roll[role].delete("1.0", tk.END)
                                     self.role_entries_roll[role].insert("1.0", f"ARMOR:{value_armor}")
 
-            if len(parts_) > 1:
+            if len(parts_) > 1 and role != "全员":
                 self.role_entries[role].insert(tk.END, parts_[1])
 
                 weapon_list__ = {}
