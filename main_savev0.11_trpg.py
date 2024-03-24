@@ -83,9 +83,13 @@ string_list_Failure = ["失败了，请您不要灰心..."]
 string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 
 # 部分活字文字特效编辑
+# 高亮
 style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳
+# 掷骰原因
 style_dice_reason_color = "因<color=#FFFF00>" #黄
+# 掷骰角色
 style_dice_pcname_color = ["<color=#FFFF00>", "</color>"] #黄
+# 掷骰技能
 style_dice_skillname_style = ["<弹跳><color=#FFFF00>", "</color></弹跳>"]#黄，弹跳
 
 # timer计算
