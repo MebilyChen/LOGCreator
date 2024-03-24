@@ -1715,6 +1715,7 @@ class ChatApp:
                                                                    f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
                             elif isinstance(Cards_now, dict):
                                 result = random.choice(Cards_list[cardname][cardname])
+                                result = result.replace("}", "%}")
                                 Cards_list[cardname][cardname].remove(result)
                                 if num == 1:
                                     self.role_entries[role].insert(tk.END,
@@ -1733,6 +1734,7 @@ class ChatApp:
                                 result = random.choice(Cards_now)
                             elif isinstance(Cards_now, dict):
                                 result = random.choice(Cards_now[cardname])
+                                result = result.replace("}", "%}")
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
@@ -1747,6 +1749,7 @@ class ChatApp:
                                 if result_ != "":
                                     result_ = result_ + f"[{num}]" + result
                                     result = result_
+                                result = f"\n{result}".replace("\n\n", "\n")
                                 self.chat_log.insert(tk.END,
                                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次牌堆[{cardname}]的暗抽。\n\n')
                                 self.role_entries[role].insert(tk.END,
@@ -1759,6 +1762,7 @@ class ChatApp:
                                 if result_ != "":
                                     result_ = result_ + f"[{num}]" + result
                                     result = result_
+                                result = f"\n{result}".replace("\n\n", "\n")
                                 self.chat_log.insert(tk.END,
                                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n牌堆[{cardname}]的抽取结果：\n{result}\n\n')
                                 self.chat_log.yview(tk.END)
@@ -2710,8 +2714,9 @@ class ChatApp:
                 global style_dice_skillname_style
                 if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
                     name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
-                    content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1])
-                    lines[index] = f"<{name[0]}>{content}"
+                    if name:
+                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1])
+                        lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
                     content = line.replace("【骰子】", "").replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                     lines[index] = f"【骰子】{content}"
