@@ -1753,7 +1753,7 @@ class ChatApp:
                                 self.chat_log.insert(tk.END,
                                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次牌堆[{cardname}]的暗抽。\n\n')
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n牌堆[{cardname}]的抽取结果：\n{result}\n')
+                                                               f'\n牌堆[{cardname}]的抽取结果：{result}\n')
                                 self.chat_log.yview(tk.END)
                             else:
                                 result_ = result_ + f"[{num}]" + result + "\n"
@@ -1762,9 +1762,9 @@ class ChatApp:
                                 if result_ != "":
                                     result_ = result_ + f"[{num}]" + result
                                     result = result_
-                                result = f"\n{result}".replace("\n\n", "\n")
+                                result = f"\n{result}".replace("\n\n\n", "\n")
                                 self.chat_log.insert(tk.END,
-                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n牌堆[{cardname}]的抽取结果：\n{result}\n\n')
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n牌堆[{cardname}]的抽取结果：{result}\n\n')
                                 self.chat_log.yview(tk.END)
                             else:
                                 result_ = result_ + f"[{num}]" + result + "\n"
