@@ -42,7 +42,6 @@ Is_fill = False
 Is_square = False
 Cards_list = {}
 
-
 def play_audio(file_path, name, loops=-1):
     if file_path:
         pygame.mixer.init()
@@ -82,6 +81,12 @@ string_list_Hard_Success = ["困难成功！"]
 string_list_Success = ["检定成功，期待您的表现。", "检定成功，请多加利用/微笑"]
 string_list_Failure = ["失败了，请您不要灰心..."]
 string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
+
+# 部分活字文字特效编辑
+style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳
+style_dice_reason_color = "因<color=#FFFF00>" #黄
+style_dice_pcname_color = ["<color=#FFFF00>", "</color>"] #黄
+style_dice_skillname_style = ["<弹跳><color=#FFFF00>", "</color></弹跳>"]#黄，弹跳
 
 # timer计算
 place = "某地"
@@ -2695,12 +2700,16 @@ class ChatApp:
             #高亮文字效果
             lines = chat_log_content.split('\n')
             for index, line in enumerate(lines):
+                global style_highlight_style
+                global style_dice_reason_color
+                global style_dice_pcname_color
+                global style_dice_skillname_style
                 if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
                     name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
-                    content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", "<color=#FFFF00><b><弹跳>【").replace("】", "】</弹跳></b></color>")
+                    content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1])
                     lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
-                    content = line.replace("【骰子】", "").replace("因【", "因<color=#FFFF00>").replace("【", "<color=#FFFF00>").replace("】", "</color>")#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                    content = line.replace("【骰子】", "").replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                     lines[index] = f"【骰子】{content}"
             chat_log_content = "\n".join(lines)
 
