@@ -42,6 +42,7 @@ Is_fill = False
 Is_square = False
 Cards_list = {}
 
+
 def play_audio(file_path, name, loops=-1):
     if file_path:
         pygame.mixer.init()
@@ -1553,7 +1554,7 @@ class ChatApp:
                            "\n【全体掷骰】保持焦点在Bot消息框，点击Bot的掷骰按钮" \
                            "\n【多轮掷骰】命令头部的*表示轮数（3*意志）" \
                            "\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色，是否显示技能名取决于Bot公式栏）" \
-                           "\n【.st】输入后点击发送按钮或回车（而不是掷骰按钮）" \
+                           "\n【.st draw who[+理由] whoabcd[+理由] yesno[+理由]】输入后点击发送按钮或回车（而不是掷骰按钮）" \
                            "\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用r斗殴击晕敌人”）" \
                            "\n【HP/MP+-】在公式栏填写（例如“HP+1d3”）" \
                            "\n===以上可删除===\n\n"
@@ -1688,10 +1689,10 @@ class ChatApp:
                 cardname = message.replace(".draw_", "").replace("。draw_", "").replace(".draw", "").replace("。draw", "")
                 cardname = cardname.replace("?", "").replace("？", "").strip()
                 Cards_now = load_CardDeck(cardname)
-                #self.role_entries[role].delete("1.0", tk.END)
+                # self.role_entries[role].delete("1.0", tk.END)
                 if Cards_now:
                     result_ = ""
-                    while(num > 0):
+                    while (num > 0):
                         if "?" in message or "？" in message:
                             if cardname not in Cards_list:
                                 Cards_list[cardname] = Cards_now
@@ -1702,13 +1703,13 @@ class ChatApp:
                                 Cards_list[cardname].remove(result)
                                 if num == 1:
                                     self.role_entries[role].insert(tk.END,
-                                                               f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
+                                                                   f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
                             elif isinstance(Cards_now, dict):
                                 result = random.choice(Cards_list[cardname][cardname])
                                 Cards_list[cardname][cardname].remove(result)
                                 if num == 1:
                                     self.role_entries[role].insert(tk.END,
-                                                               f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
+                                                                   f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
@@ -1738,9 +1739,9 @@ class ChatApp:
                                     result_ = result_ + f"[{num}]" + result
                                     result = result_
                                 self.chat_log.insert(tk.END,
-                                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次牌堆[{cardname}]的暗抽。\n\n')
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次牌堆[{cardname}]的暗抽。\n\n')
                                 self.role_entries[role].insert(tk.END,
-                                                         f'\n牌堆[{cardname}]的抽取结果：\n{result}\n')
+                                                               f'\n牌堆[{cardname}]的抽取结果：\n{result}\n')
                                 self.chat_log.yview(tk.END)
                             else:
                                 result_ = result_ + f"[{num}]" + result + "\n"
@@ -1761,6 +1762,11 @@ class ChatApp:
             if ".whoabcd" in message.lower() or "。whoabcd" in message.lower() or "。who abcd" in message.lower() or ".whoabcd" in message.lower():
                 rolelist = []
                 result = ""
+                if message.lower().replace(".who", "").replace("。who", "").replace("abcd", "").strip() != "":
+                    reason = "因[" + message.lower().replace(".who", "").replace("。who", "").replace("abcd",
+                                                                                                    "").strip() + "]"
+                else:
+                    reason = ""
                 for role in self.roles:
                     if role != "DiceBot":
                         rolelist.append(role)
@@ -1768,21 +1774,30 @@ class ChatApp:
                 for r in rolelist:
                     result = result + " > " + self.role_entries_name[r]
                 self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n抽取幸运顺序：{result}\n\n')
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason}抽取幸运顺序：{result}\n\n')
                 self.chat_log.yview(tk.END)
                 return
             elif ".who" in message or "。who" in message:
                 rolelist = []
+                if message.lower().replace(".who", "").replace("。who", "").strip() != "":
+                    reason = "因[" + message.lower().replace(".who", "").replace("。who", "").strip() + "]"
+                else:
+                    reason = ""
                 for role in self.roles:
                     if role != "DiceBot" and role != "KP":
                         rolelist.append(role)
                 self.chat_log.insert(tk.END,
-                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n抽取幸运儿：【{self.role_entries_name[random.choice(rolelist)]}】\n\n')
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason}抽取幸运儿：【{self.role_entries_name[random.choice(rolelist)]}】\n\n')
                 self.chat_log.yview(tk.END)
                 return
             elif ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
-                message = message.lower().replace(".no","").replace(".yes","").replace("。no","").replace("。yes","").replace("。yesno","").replace(".yesno","")
-                reason_ = "[" + message + "]的"
+                message = message.lower().replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes",
+                                                                                                            "").replace(
+                    "。yesno", "").replace(".yesno", "").strip()
+                if message != "":
+                    reason_ = "[" + message + "]的"
+                else:
+                    reason_ = ""
                 list_ = ["是", "否"]
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason_}是或否：【{random.choice(list_)}】\n\n')
@@ -2631,19 +2646,19 @@ class ChatApp:
             # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
             # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
             chat_log_content = chat_log_content.replace(";\n", ";")
-            #chat_log_content = chat_log_content.replace("\n【骰子】", ";")
+            # chat_log_content = chat_log_content.replace("\n【骰子】", ";")
             # 使用正则表达式匹配掷骰结果
-            #matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
+            # matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
             matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
             while matches:
-                #print(matches)
+                # print(matches)
                 chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;', chat_log_content)
                 matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
 
-            #chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;\2', chat_log_content)
-            #chat_log_content = re.sub(r'(\【骰子\】).*\n\1', r'\1', chat_log_content)
+            # chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;\2', chat_log_content)
+            # chat_log_content = re.sub(r'(\【骰子\】).*\n\1', r'\1', chat_log_content)
             # 对连续出现的掷骰结果进行合并
-            #merged_text = "；".join(matches)
+            # merged_text = "；".join(matches)
 
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -3076,7 +3091,7 @@ class ChatApp:
             text = self.role_entries_roll[role].get("1.0", tk.END).strip()
             self.role_entries_roll[self.current_role.get()].delete("1.0", tk.END)
             self.role_entries_roll[self.current_role.get()].insert(tk.END, text)
-            #回车不换行
+            # 回车不换行
 
         text = self.role_entries_roll[self.current_role.get()].get("1.0", tk.END).strip()
         self.role_entries_roll[self.current_role.get()].delete("1.0", tk.END)
@@ -3085,8 +3100,8 @@ class ChatApp:
         if role == "DiceBot":
             if current_role != "DiceBot":
                 if self.role_entries_roll[current_role].get("1.0", tk.END).strip() != "":
-                    #self.role_entries_roll[role].delete("1.0",tk.END)
-                    #self.role_entries_roll[role].insert(self.role_entries_roll[current_role].get("1.0", tk.END).strip(),"1.0")
+                    # self.role_entries_roll[role].delete("1.0",tk.END)
+                    # self.role_entries_roll[role].insert(self.role_entries_roll[current_role].get("1.0", tk.END).strip(),"1.0")
                     self.roll_dice_silent(current_role,
                                           self.role_entries_roll[current_role].get("1.0", tk.END).strip().lower(),
                                           self.role_entries[current_role].get("1.0", tk.END).strip())
@@ -3165,8 +3180,8 @@ class ChatApp:
         if role != "全员":
             # 清空输入框文本
             # 多轮掷骰应该分开计算
-            #多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
-            #单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
+            # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
+            # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
             self.role_entries[role].delete("1.0", tk.END)
         multi_num = 1
         pattern_multi = re.compile(r'[\d+]\*[\u4e00-\u9fa5a-zA-Z]+')
@@ -3231,7 +3246,8 @@ class ChatApp:
                             self.chat_log.insert(tk.END, message)
                             self.chat_log.yview(tk.END)
                         else:
-                            final_words_roles[roles] = final_words_roles[roles] + f"{result}{expressionUPP}={parts_[0]};\n"
+                            final_words_roles[roles] = final_words_roles[
+                                                           roles] + f"{result}{expressionUPP}={parts_[0]};\n"
                         self.role_entries["DiceBot"].delete("1.0", tk.END)
                         if len(parts_) > 1:
                             self.role_entries[roles].insert(tk.END, parts_[1])
@@ -3251,7 +3267,8 @@ class ChatApp:
                                         self.role_entries_roll[roles].insert("1.0", f"{value.replace('+DB', DB_)}")
                                         self.role_entries[roles].insert("1.0", f"[{weapon}]伤害\n")
                                         for role_armor in self.roles:
-                                            if role_armor != roles and "ARMOR:" in str(self.role_entries_roll[role_armor]):
+                                            if role_armor != roles and "ARMOR:" in str(
+                                                    self.role_entries_roll[role_armor]):
                                                 role_Chart_detail_armor = role_Chart.get(roles, {}).copy()
                                                 if "ARMOR" in role_Chart_detail_armor:
                                                     value_armor = role_Chart_detail_armor["ARMOR"]
@@ -3466,7 +3483,8 @@ class ChatApp:
                     SANC = "[SAN CHECK" + expression.split("sc")[1].upper() + "]"
                 else:
                     SANC = "[" + expression.upper() + "]"
-            if self.role_entries_roll["DiceBot"].get("1.0", tk.END).strip().lower() == "" or self.role_entries_roll["DiceBot"].get("1.0", tk.END).strip().lower() == "1d100":
+            if self.role_entries_roll["DiceBot"].get("1.0", tk.END).strip().lower() == "" or self.role_entries_roll[
+                "DiceBot"].get("1.0", tk.END).strip().lower() == "1d100":
                 SANC = ""
             if reason == "":
                 message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}进行了一次{SANC}暗骰。\n\n'
