@@ -85,6 +85,8 @@ string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 # 部分活字文字特效编辑
 # 高亮
 style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳，保留【】
+# 弱高亮
+style_highlight_weak_style = ["<color=#FFFF00><b>[","]</弹跳></b></color>"] #黄加粗，保留[]
 # 掷骰原因（只接受color，除非同步修改掷骰角色）
 style_dice_reason_color = "因<color=#FFFF00>" #黄
 # 掷骰角色
@@ -1223,9 +1225,11 @@ role_Chart = load_Chart().copy()
 role_Chart_at_name = load_Chart_at_name().copy()
 bot_personality_by_name = load_DiceBot_personality()
 adv_comment = ""
-
+Cards_list_by_role = {}
 
 # logging.debug("Variable value: %s", role_Chart_at_name)
+
+
 
 class ChatApp:
     def __init__(self, root):
@@ -1701,7 +1705,7 @@ class ChatApp:
                 # self.role_entries[role].delete("1.0", tk.END)
                 if Cards_now:
                     result_ = ""
-                    while (num > 0):
+                    while num > 0:
                         if "?" in message or "？" in message:
                             if cardname not in Cards_list:
                                 Cards_list[cardname] = Cards_now
@@ -1712,14 +1716,27 @@ class ChatApp:
                                 Cards_list[cardname].remove(result)
                                 if num == 1:
                                     self.role_entries[role].insert(tk.END,
-                                                                   f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
+                                                                   f'\n公有不放回牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
                             elif isinstance(Cards_now, dict):
                                 result = random.choice(Cards_list[cardname][cardname])
+                                if len(Cards_list[cardname][cardname]) != 1:
+                                    Cards_list[cardname][cardname].remove(result)
                                 result = result.replace("}", "%}")
-                                Cards_list[cardname][cardname].remove(result)
+                                matches = re.findall(r'\{%([^%]+)%\}', result)
+                                for m in matches:
+                                    result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                                while "{%" in result:
+                                    result = result.replace("}", "%}")
+                                    matches = re.findall(r'\{%([^%]+)%\}', result)
+                                    for m in matches:
+                                        result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                                 if num == 1:
                                     self.role_entries[role].insert(tk.END,
-                                                                   f'\n不放回牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
+                                                                   f'\n公有不放回牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
+                                    if len(Cards_list[cardname][cardname]) == 0:
+                                        self.role_entries[role].insert(tk.END,
+                                                                       f'已自动补充牌堆。\n')
+                                        Cards_list[cardname] = load_CardDeck(cardname)[cardname]
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
@@ -1734,10 +1751,14 @@ class ChatApp:
                                 result = random.choice(Cards_now)
                             elif isinstance(Cards_now, dict):
                                 result = random.choice(Cards_now[cardname])
-                                result = result.replace("}", "%}")
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                                while "{%" in result:
+                                    result = result.replace("}", "%}")
+                                    matches = re.findall(r'\{%([^%]+)%\}', result)
+                                    for m in matches:
+                                        result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                                 if "{" in result or "%" in result:
                                     result = result + "\n> WAR: 请检查JSON牌堆格式！引用应为{%string%}，JSON文件名应与抽取名相同！"
                             else:
@@ -1751,9 +1772,9 @@ class ChatApp:
                                     result = result_
                                 result = f"\n{result}".replace("\n\n", "\n")
                                 self.chat_log.insert(tk.END,
-                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次牌堆[{cardname}]的暗抽。\n\n')
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次公有牌堆[{cardname}]的暗抽。\n\n')
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n牌堆[{cardname}]的抽取结果：{result}\n')
+                                                               f'\n公有的牌堆[{cardname}]的抽取结果：{result}\n')
                                 self.chat_log.yview(tk.END)
                             else:
                                 result_ = result_ + f"[{num}]" + result + "\n"
@@ -1764,7 +1785,7 @@ class ChatApp:
                                     result = result_
                                 result = f"\n{result}".replace("\n\n\n", "\n")
                                 self.chat_log.insert(tk.END,
-                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                                 self.chat_log.yview(tk.END)
                             else:
                                 result_ = result_ + f"[{num}]" + result + "\n"
@@ -1772,6 +1793,12 @@ class ChatApp:
                 else:
                     print("未找到牌堆或牌堆为空！")
                 return
+            elif "。alldraw" in message or ".alldraw" in message or ".drawall" in message or "。drawall" in message:
+                message = message.replace("all", "")
+                for role in self.roles:
+                    if role != "DiceBot":
+                        self.drawcard(message, role)
+                message = ""
             if ".whoabcd" in message.lower() or "。whoabcd" in message.lower() or "。who abcd" in message.lower() or ".whoabcd" in message.lower():
                 rolelist = []
                 result = ""
@@ -1815,6 +1842,24 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason_}是或否：【{random.choice(list_)}】\n\n')
                 self.chat_log.yview(tk.END)
+                return
+        else:
+            if ".draw" in message or "。draw" in message or "。selfdraw" in message or ".selfdraw" in message or "。drawself" in message or ".drawself" in message:
+                self.drawcard(message, role)
+                message = ""
+            if ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
+                message = message.lower().replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes",
+                                                                                                            "").replace(
+                    "。yesno", "").replace(".yesno", "").strip()
+                if message != "":
+                    reason_ = "由于[" + message + "]的"
+                else:
+                    reason_ = ""
+                list_ = ["是", "否"]
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}{reason_}是或否：【{random.choice(list_)}】\n\n')
+                self.chat_log.yview(tk.END)
+                message = ""
                 return
         if message:
             timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -1910,6 +1955,205 @@ class ChatApp:
                 # 滚动到最底部
                 self.chat_log.yview(tk.END)
                 self.role_entries[role].delete("1.0", tk.END)
+
+    def drawcard(self, message, role):
+        message = message.replace("alldraw", "draw").replace("drawall", "draw")
+        if "drawself" in message or "selfdraw" in message:
+            message = message.replace("self","")
+            num = 1
+            if "*" in message:
+                num = int(message.split("*")[1])
+                message = message.split("*")[0]
+            cardname = message.replace("drawself", "draw").replace("selfdraw", "draw").replace(".draw_", "").replace("。draw_", "").replace(".draw", "").replace("。draw", "")
+            cardname = cardname.replace("?", "").replace("？", "").strip()
+            Cards_now = load_CardDeck(cardname)
+            # self.role_entries[role].delete("1.0", tk.END)
+            if Cards_now:
+                result_ = ""
+                while num > 0:
+                    if "?" in message or "？" in message:
+                        if role not in Cards_list_by_role:
+                            Cards_list_by_role[role] = {}
+                        if cardname not in Cards_list_by_role[role]:
+                            Cards_list_by_role[role][cardname] = Cards_now
+                        elif len(Cards_list_by_role[role][cardname]) == 0:
+                            Cards_list_by_role[role][cardname] = Cards_now
+                        if isinstance(Cards_now, list):
+                            result = random.choice(Cards_list_by_role[role][cardname])
+                            Cards_list_by_role[role][cardname].remove(result)
+                            if num == 1:
+                                self.role_entries[role].insert(tk.END,
+                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n')
+                        elif isinstance(Cards_now, dict):
+                            result = random.choice(Cards_list_by_role[role][cardname][cardname])
+                            if len(Cards_list_by_role[role][cardname][cardname]) != 1:
+                                Cards_list_by_role[role][cardname][cardname].remove(result)
+                            matches = re.findall(r'\{%([^%]+)%\}', result)
+                            for m in matches:
+                                result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            while "{%" in result:
+                                result = result.replace("}", "%}")
+                                matches = re.findall(r'\{%([^%]+)%\}', result)
+                                for m in matches:
+                                    result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            if num == 1:
+                                self.role_entries[role].insert(tk.END,
+                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n')
+                                if len(Cards_list_by_role[role][cardname][cardname]) == 0:
+                                    self.role_entries[role].insert(tk.END,
+                                                                   f'已自动补充牌堆。\n')
+                                    Cards_list_by_role[role][cardname] = load_CardDeck(cardname)[cardname]
+                            if "{" in result or "%" in result:
+                                result = result + "\n> WAR: 请检查JSON牌堆格式！引用应为{%string%}，JSON文件名应与抽取名相同！"
+                        else:
+                            print("my_var 不是列表也不是字典")
+                            result = "ERR:请检查JSON牌堆格式！"
+                        cardname = cardname + "(不放回)"
+                    else:
+                        if isinstance(Cards_now, list):
+                            result = random.choice(Cards_now)
+                        elif isinstance(Cards_now, dict):
+                            result = random.choice(Cards_now[cardname])
+                            matches = re.findall(r'\{%([^%]+)%\}', result)
+                            for m in matches:
+                                result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            while "{%" in result:
+                                result = result.replace("}", "%}")
+                                matches = re.findall(r'\{%([^%]+)%\}', result)
+                                for m in matches:
+                                    result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            if "{" in result or "%" in result:
+                                result = result + "\n> WAR: 请检查JSON牌堆格式！引用应为{%string%}，JSON文件名应与抽取名相同！"
+                        else:
+                            print("my_var 不是列表也不是字典")
+                            result = "ERR:请检查JSON牌堆格式！"
+
+                    if "draw_" in message or "draw_" in message:
+                        if num == 1:
+                            if result_ != "":
+                                result_ = result_ + f"[{num}]" + result
+                                result = result_
+                            result = f"\n{result}".replace("\n\n", "\n")
+                            self.chat_log.insert(tk.END,
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次{self.role_entries_name[role]}在自己牌堆[{cardname}]的暗抽。\n\n')
+                            self.role_entries[role].insert(tk.END,
+                                                           f'\n【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的抽取结果：{result}\n')
+                            self.chat_log.yview(tk.END)
+                        else:
+                            result_ = result_ + f"[{num}]" + result + "\n"
+                    else:
+                        if num == 1:
+                            if result_ != "":
+                                result_ = result_ + f"[{num}]" + result
+                                result = result_
+                            result = f"\n{result}".replace("\n\n\n", "\n")
+                            self.chat_log.insert(tk.END,
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的抽取结果：{result}\n\n')
+                            self.chat_log.yview(tk.END)
+                        else:
+                            result_ = result_ + f"[{num}]" + result + "\n"
+                    num -= 1
+            else:
+                print("未找到牌堆或牌堆为空！")
+            return
+        else:
+            num = 1
+            if "*" in message:
+                num = int(message.split("*")[1])
+                message = message.split("*")[0]
+            cardname = message.replace(".draw_", "").replace("。draw_", "").replace(".draw", "").replace("。draw", "")
+            cardname = cardname.replace("?", "").replace("？", "").strip()
+            Cards_now = load_CardDeck(cardname)
+            # self.role_entries[role].delete("1.0", tk.END)
+            if Cards_now:
+                result_ = ""
+                while num > 0:
+                    if "?" in message or "？" in message:
+                        if cardname not in Cards_list:
+                            Cards_list[cardname] = Cards_now
+                        elif len(Cards_list[cardname]) == 0:
+                            Cards_list[cardname] = Cards_now
+                        if isinstance(Cards_now, list):
+                            result = random.choice(Cards_list[cardname])
+                            Cards_list[cardname].remove(result)
+                            if num == 1:
+                                self.chat_log.insert(tk.END,
+                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
+                        elif isinstance(Cards_now, dict):
+                            result = random.choice(Cards_list[cardname][cardname])
+                            if len(Cards_list[cardname][cardname]) != 1:
+                                Cards_list[cardname][cardname].remove(result)
+                            matches = re.findall(r'\{%([^%]+)%\}', result)
+                            for m in matches:
+                                result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            while "{%" in result:
+                                result = result.replace("}", "%}")
+                                matches = re.findall(r'\{%([^%]+)%\}', result)
+                                for m in matches:
+                                    result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            if num == 1:
+                                self.chat_log.insert(tk.END,
+                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
+                                if len(Cards_list[cardname][cardname]) == 0:
+                                    self.role_entries[role].insert(tk.END,
+                                                                   f'已自动补充牌堆。\n')
+                                    Cards_list[cardname][cardname] = load_CardDeck(cardname)[cardname]
+                            matches = re.findall(r'\{%([^%]+)%\}', result)
+                            for m in matches:
+                                result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            if "{" in result or "%" in result:
+                                result = result + "\n> WAR: 请检查JSON牌堆格式！引用应为{%string%}，JSON文件名应与抽取名相同！"
+                        else:
+                            print("my_var 不是列表也不是字典")
+                            result = "ERR:请检查JSON牌堆格式！"
+                        cardname = cardname + "(不放回)"
+                    else:
+                        if isinstance(Cards_now, list):
+                            result = random.choice(Cards_now)
+                        elif isinstance(Cards_now, dict):
+                            result = random.choice(Cards_now[cardname])
+                            matches = re.findall(r'\{%([^%]+)%\}', result)
+                            for m in matches:
+                                result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            while "{%" in result:
+                                result = result.replace("}", "%}")
+                                matches = re.findall(r'\{%([^%]+)%\}', result)
+                                for m in matches:
+                                    result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
+                            if "{" in result or "%" in result:
+                                result = result + "\n> WAR: 请检查JSON牌堆格式！引用应为{%string%}，JSON文件名应与抽取名相同！"
+                        else:
+                            print("my_var 不是列表也不是字典")
+                            result = "ERR:请检查JSON牌堆格式！"
+
+                    if "draw_" in message or "draw_" in message:
+                        if num == 1:
+                            if result_ != "":
+                                result_ = result_ + f"[{num}]" + result
+                                result = result_
+                            result = f"\n{result}".replace("\n\n", "\n")
+                            self.chat_log.insert(tk.END,
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次{self.role_entries_name[role]}在公有牌堆[{cardname}]的暗抽。\n\n')
+                            self.role_entries[role].insert(tk.END,
+                                                           f'\n{self.role_entries_name[role]}在公有牌堆[{cardname}]的抽取结果：{result}\n')
+                            self.chat_log.yview(tk.END)
+                        else:
+                            result_ = result_ + f"[{num}]" + result + "\n"
+                    else:
+                        if num == 1:
+                            if result_ != "":
+                                result_ = result_ + f"[{num}]" + result
+                                result = result_
+                            result = f"\n{result}".replace("\n\n\n", "\n")
+                            self.chat_log.insert(tk.END,
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
+                            self.chat_log.yview(tk.END)
+                        else:
+                            result_ = result_ + f"[{num}]" + result + "\n"
+                    num -= 1
+            else:
+                print("未找到牌堆或牌堆为空！")
+            return
 
     def parse_input_skill(self, input_string):
         skills = {}
@@ -2709,13 +2953,14 @@ class ChatApp:
             lines = chat_log_content.split('\n')
             for index, line in enumerate(lines):
                 global style_highlight_style
+                global style_highlight_weak_style
                 global style_dice_reason_color
                 global style_dice_pcname_color
                 global style_dice_skillname_style
                 if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
                     name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
                     if name:
-                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1])
+                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1])
                         lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
                     content = line.replace("【骰子】", "").replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
