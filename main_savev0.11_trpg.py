@@ -86,7 +86,9 @@ string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 # 高亮
 style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳，保留【】
 # 弱高亮
-style_highlight_weak_style = ["<color=#FFFF00><b>[","]</弹跳></b></color>"] #黄加粗，保留[]
+style_highlight_weak_style = ["<color=#FFFF00><b>[","]</b></color>"] #黄加粗，保留[]
+# 弱高亮2
+style_highlight_weak_style2 = ["<color=#FFFF00><b>","</b></color>"] #黄加粗，不保留[]
 # 掷骰原因（只接受color，除非同步修改掷骰角色）
 style_dice_reason_color = "因<color=#FFFF00>" #黄
 # 掷骰角色
@@ -2028,7 +2030,8 @@ class ChatApp:
                             if result_ != "":
                                 result_ = result_ + f"[{num}]" + result
                                 result = result_
-                            result = f"\n{result}".replace("\n\n", "\n")
+                            result = f"\n{result}".replace("\n\n", "")
+                            result = f"\n{result}".replace("\n\n\n", "")
                             self.chat_log.insert(tk.END,
                                                  f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
@@ -2127,11 +2130,12 @@ class ChatApp:
                             if result_ != "":
                                 result_ = result_ + f"[{num}]" + result
                                 result = result_
-                            result = f"\n{result}".replace("\n\n", "\n")
+                            result = f"\n{result}".replace("\n\n\n", "")
+                            result = f"\n{result}".replace("\n\n", "")
                             self.chat_log.insert(tk.END,
                                                  f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
-                                                           f'\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n')
+                                                           f'\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2140,7 +2144,8 @@ class ChatApp:
                             if result_ != "":
                                 result_ = result_ + f"[{num}]" + result
                                 result = result_
-                            result = f"\n{result}".replace("\n\n\n", "\n")
+                            result = f"\n{result}".replace("\n\n\n", "")
+                            result = f"\n{result}".replace("\n\n", "")
                             self.chat_log.insert(tk.END,
                                                  f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
@@ -2974,13 +2979,14 @@ class ChatApp:
             for index, line in enumerate(lines):
                 global style_highlight_style
                 global style_highlight_weak_style
+                global style_highlight_weak_style2
                 global style_dice_reason_color
                 global style_dice_pcname_color
                 global style_dice_skillname_style
                 if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
                     name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
                     if name:
-                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1]).replace("@", f"{style_highlight_weak_style[0]}@{style_highlight_weak_style[1]}")
+                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1]).replace("@", f"{style_highlight_weak_style2[0]}@{style_highlight_weak_style2[1]}")
                         lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
                     content = line.replace("【骰子】", "").replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
