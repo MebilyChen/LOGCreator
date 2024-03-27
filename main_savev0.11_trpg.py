@@ -1351,21 +1351,8 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
-        initial_text = "Updates：详情见readme\n" \
-                       "\nTodo:" \
-                       "\n--计算" \
-                       "\n暂无" \
-                       "\n--features" \
-                       "\n优化：多轮掷骰，尤其是全体掷骰的多轮掷骰表现，多轮掷骰和全体掷骰适配活字剧本格式（;分隔）" \
-                       "\n优化：NPC列表" \
-                       "\n优化：自动加减基础数值（MP、HP）（不这么做是因为要有理由Focus再UnFocus笔记栏来保存..设置了health_data但没有投入使用，就看怎么用方便）" \
-                       "\n优化推理信息库-计算器直接显示在共用库栏位（新建一个Frame，避免无法发布到另一个窗口），精简框架，不要占满屏" \
-                       "\n优化：牌堆；实用命令，比如抽人 .who ABCD等" \
-                       "\n输出染色HTML，骰子性格：针对每个技能单独comment(坑)" \
-                       "\n优化地图，实现实时同步数值和时间，Canvas保存" \
-                       "\n--bugs\n复杂掷骰算式（多个不同面骰子+常数）优化\n补正骰优化\n对抗骰优化\n武器伤害Built-in优化\n自动加减基础数值（SAN）优化\n巴别塔新增角色BUG" \
-                       "\nArmor显示优化\n小地图图形缩放BUG\n" \
-                       "Tips:\n.st HP、MP时均修改的是上限，修改实时hp/mp需使用掷骰栏掷骰，或者直接修改\n使用 .st#斗殴@1D3+5 " \
+        initial_text = "Updates/Todo：详情见readme" \
+                       "\nTips:\n.st HP、MP时均修改的是上限，修改实时hp/mp需使用掷骰栏掷骰，或者直接修改\n使用 .st#斗殴@1D3+5 " \
                        "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
                        "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
                        "左键头像栏] 选择头像\n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
@@ -1420,6 +1407,7 @@ class ChatApp:
             self.add_role_init()
 
         # 为每个文本框绑定焦点变化事件
+        self.chat_log.bind("<FocusIn>", lambda event3: self.reset_focus(event3))
         for role in self.roles:
             entry = self.role_entries[role]
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
@@ -1990,7 +1978,7 @@ class ChatApp:
                             Cards_list_by_role[role][cardname].remove(result)
                             if num == 1:
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n')
+                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n\n')
                         elif isinstance(Cards_now, dict):
                             result = random.choice(Cards_list_by_role[role][cardname][cardname])
                             if len(Cards_list_by_role[role][cardname][cardname]) != 1:
@@ -2005,7 +1993,7 @@ class ChatApp:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             if num == 1:
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n')
+                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n\n')
                                 if len(Cards_list_by_role[role][cardname][cardname]) == 0:
                                     self.role_entries[role].insert(tk.END,
                                                                    f'已自动补充牌堆。\n')
@@ -2086,7 +2074,7 @@ class ChatApp:
                             Cards_list[cardname].remove(result)
                             if num == 1:
                                 self.chat_log.insert(tk.END,
-                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n')
+                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n\n')
                         elif isinstance(Cards_now, dict):
                             result = random.choice(Cards_list[cardname][cardname])
                             if len(Cards_list[cardname][cardname]) != 1:
@@ -2101,7 +2089,7 @@ class ChatApp:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             if num == 1:
                                 self.chat_log.insert(tk.END,
-                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
+                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n\n')
                                 if len(Cards_list[cardname][cardname]) == 0:
                                     self.role_entries[role].insert(tk.END,
                                                                    f'已自动补充牌堆。\n')
@@ -2466,6 +2454,26 @@ class ChatApp:
         self.root.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
 
+    def reset_focus(self, event):
+        # 搜索包含 ">>>" 的行的起始索引
+        start_index = "1.0"
+        while True:
+            match_index = self.chat_log.search(">>>", start_index, tk.END)
+            if not match_index:
+                break
+            # 删除包含 ">>>" 的行
+            line_start = self.chat_log.index(match_index)
+            line_end = self.chat_log.index(match_index + " lineend")
+            self.chat_log.delete(line_start, line_end)
+            # 更新搜索的起始位置
+            start_index = line_end
+        self.current_role.set("")
+        self.root.bind("<Return>", lambda event: self.send_message_on_enter(event))
+        self.chat_log.config(relief=tk.SOLID)
+        for role in self.roles:
+            self.role_entries_frame[role].config(relief=tk.GROOVE)
+            self.role_entries_roll[role].config(relief=tk.GROOVE)
+
     def bind_enter_to_send_roll(self, event, role):
         # 为当前文本框绑定回车键发送消息
         self.current_role.set(role)
@@ -2473,14 +2481,17 @@ class ChatApp:
         self.highlight_role_frame_roll(role)
 
     def send_message_on_enter(self, event, role=None):
-        self.current_role.set(role)
-        # 判断是否同时按下了 Ctrl 键
-        if event.state - 4 == 0:  # 4 表示 Ctrl 键的状态值
-            return
-        # 发送消息
-        current_role = role or self.current_role.get()
-        self.send_message(current_role)
-        self.highlight_role_frame(current_role)
+        if role == None:
+            pass
+        else:
+            self.current_role.set(role)
+            # 判断是否同时按下了 Ctrl 键
+            if event.state - 4 == 0:  # 4 表示 Ctrl 键的状态值
+                return
+            # 发送消息
+            current_role = role or self.current_role.get()
+            self.send_message(current_role)
+            self.highlight_role_frame(current_role)
 
     def send_roll_on_enter(self, event, role=None):
         self.current_role.set(role)
@@ -2969,7 +2980,7 @@ class ChatApp:
                 if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
                     name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
                     if name:
-                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1])
+                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1]).replace("@", f"{style_highlight_weak_style[0]}@{style_highlight_weak_style[1]}")
                         lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
                     content = line.replace("【骰子】", "").replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
