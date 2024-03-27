@@ -235,6 +235,8 @@ def load_icon_data():
         # 如果文件不存在，返回默认设置
         return {}
 
+def undo(event, text_box):
+    text_box.edit_undo()
 
 def load_infoCanvas_data_by_name():
     try:
@@ -1343,6 +1345,7 @@ class ChatApp:
         self.time_log.grid(row=3, column=2, padx=10, pady=10, rowspan=3, sticky="nsew")
         self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" + date)
         self.time_log.bind("<Button-3>", lambda event: self.refreshTime)
+        #self.time_log.bind("<Control-z>", lambda event: undo(self.time_log))
 
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
@@ -1792,6 +1795,7 @@ class ChatApp:
                         num -= 1
                 else:
                     print("未找到牌堆或牌堆为空！")
+                    os.startfile("CardDecks")
                 return
             elif "。alldraw" in message or ".alldraw" in message or ".drawall" in message or "。drawall" in message:
                 message = message.replace("all", "")
@@ -1842,6 +1846,9 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason_}是或否：【{random.choice(list_)}】\n\n')
                 self.chat_log.yview(tk.END)
+                return
+            elif ".draw" == message.lower() or "。draw" == message.lower() or "。全牌堆列表" == message.lower() or ".全牌堆列表" == message.lower():
+                os.startfile("CardDecks")
                 return
         else:
             if ".draw" in message or "。draw" in message or "。selfdraw" in message or ".selfdraw" in message or "。drawself" in message or ".drawself" in message:
@@ -2035,7 +2042,7 @@ class ChatApp:
                                 result = result_
                             result = f"\n{result}".replace("\n\n", "\n")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次{self.role_entries_name[role]}在自己牌堆[{cardname}]的暗抽。\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
                                                            f'\n【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的抽取结果：{result}\n')
                             self.chat_log.yview(tk.END)
@@ -2055,6 +2062,7 @@ class ChatApp:
                     num -= 1
             else:
                 print("未找到牌堆或牌堆为空！")
+                os.startfile("CardDecks")
             return
         else:
             num = 1
@@ -2133,9 +2141,9 @@ class ChatApp:
                                 result = result_
                             result = f"\n{result}".replace("\n\n", "\n")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次{self.role_entries_name[role]}在公有牌堆[{cardname}]的暗抽。\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
-                                                           f'\n{self.role_entries_name[role]}在公有牌堆[{cardname}]的抽取结果：{result}\n')
+                                                           f'\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2146,13 +2154,14 @@ class ChatApp:
                                 result = result_
                             result = f"\n{result}".replace("\n\n\n", "\n")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
                     num -= 1
             else:
                 print("未找到牌堆或牌堆为空！")
+                os.startfile("CardDecks")
             return
 
     def parse_input_skill(self, input_string):
