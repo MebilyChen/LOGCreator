@@ -1980,7 +1980,7 @@ class ChatApp:
                             Cards_list_by_role[role][cardname].remove(result)
                             if num == 1:
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n\n')
+                                                               f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n\n')
                         elif isinstance(Cards_now, dict):
                             result = random.choice(Cards_list_by_role[role][cardname][cardname])
                             if len(Cards_list_by_role[role][cardname][cardname]) != 1:
@@ -1995,7 +1995,7 @@ class ChatApp:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             if num == 1:
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n【{self.role_entries_name[role]}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n\n')
+                                                               f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n\n')
                                 if len(Cards_list_by_role[role][cardname][cardname]) == 0:
                                     self.role_entries[role].insert(tk.END,
                                                                    f'已自动补充牌堆。\n')
@@ -2033,9 +2033,9 @@ class ChatApp:
                             result = f"\n{result}".replace("\n\n", "")
                             result = f"\n{result}".replace("\n\n\n", "")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的暗抽。\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在自己牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
-                                                           f'\n【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的抽取结果：{result}\n')
+                                                           f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在自己牌堆[{cardname}]的抽取结果：{result}\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2046,7 +2046,7 @@ class ChatApp:
                                 result = result_
                             result = f"\n{result}".replace("\n\n\n", "\n")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】在自己牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在自己牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2133,9 +2133,9 @@ class ChatApp:
                             result = f"\n{result}".replace("\n\n\n", "")
                             result = f"\n{result}".replace("\n\n", "")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的暗抽。\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在公有牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
-                                                           f'\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                           f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2147,7 +2147,7 @@ class ChatApp:
                             result = f"\n{result}".replace("\n\n\n", "")
                             result = f"\n{result}".replace("\n\n", "")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
