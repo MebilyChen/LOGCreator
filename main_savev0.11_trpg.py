@@ -3598,7 +3598,7 @@ class ChatApp:
                                     if weapon in expression:
                                         self.role_entries_roll[roles].delete("1.0", tk.END)
                                         self.role_entries_roll[roles].insert("1.0", f"{value.replace('+DB', DB_)}")
-                                        self.role_entries[roles].insert("1.0", f"[{weapon}]伤害\n")
+                                        self.role_entries[roles].insert("1.0", f"[{weapon}伤害]\n")
                                         for role_armor in self.roles:
                                             if role_armor != roles and "ARMOR:" in str(
                                                     self.role_entries_roll[role_armor]):
@@ -3617,12 +3617,12 @@ class ChatApp:
                                     self.role_entries_roll[roles].delete("1.0", tk.END)
                                     self.role_entries_roll[roles].insert("1.0", f"1d3")
                                 if "精神分析" in expression:
-                                    self.role_entries[roles].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                                    self.role_entries[roles].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
                                     self.role_entries_roll[roles].delete("1.0", tk.END)
                                     self.role_entries_roll[roles].insert("1.0", f"1d3")
                             if parts_ and "大失败" in parts_[1]:
                                 if "精神分析" in expression:
-                                    self.role_entries[roles].insert("1.0", f"[精神分析]损失1D6 SAN\n")
+                                    self.role_entries[roles].insert("1.0", f"[精神分析损失]1D6 SAN\n")
                                     self.role_entries_roll[roles].delete("1.0", tk.END)
                                     self.role_entries_roll[roles].insert("1.0", f"1d6")
                             if parts_ and "失败" in parts_[1]:
@@ -3708,7 +3708,7 @@ class ChatApp:
                                 if weapon in expression:
                                     self.role_entries_roll[role].delete("1.0", tk.END)
                                     self.role_entries_roll[role].insert("1.0", f"{value.replace('+DB', DB_)}")
-                                    self.role_entries[role].insert(tk.END, f"{weapon}伤害")
+                                    self.role_entries[role].insert(tk.END, f"[{weapon}伤害]")
                                     for role_armor in self.roles:
                                         if role_armor != role:
                                             role_Chart_detail_armor = role_Chart.get(role, {}).copy()
@@ -3723,16 +3723,16 @@ class ChatApp:
                                 if "急救" in expression:
                                     self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
                                 if "医学" in expression:
-                                    self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
+                                    self.role_entries[role].insert("1.0", f"[医学恢复]1D3 HP\n")
                                     self.role_entries_roll[role].delete("1.0", tk.END)
                                     self.role_entries_roll[role].insert("1.0", f"1d3")
                                 if "精神分析" in expression:
-                                    self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                                    self.role_entries[role].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
                                     self.role_entries_roll[role].delete("1.0", tk.END)
                                     self.role_entries_roll[role].insert("1.0", f"1d3")
                         if parts_ and "大失败" in parts_[1]:
                             if "精神分析" in expression:
-                                self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
+                                self.role_entries[role].insert("1.0", f"[精神分析损失]1D6 SAN\n")
                                 self.role_entries_roll[role].delete("1.0", tk.END)
                                 self.role_entries_roll[role].insert("1.0", f"1d6")
                             for weapon, value in weapon_list.items():
@@ -3769,21 +3769,21 @@ class ChatApp:
                                 weapon_list__[skill.replace("#", "")] = value
                         for weapon, value in weapon_list__.items():
                             if weapon in expression:
-                                self.role_entries[role].insert("1.0", f"[{weapon}]伤害\n")
+                                self.role_entries[role].insert("1.0", f"[{weapon}伤害]\n")
                                 break
                         if "急救" in expression:
                             self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
                         if "医学" in expression:
-                            self.role_entries[role].insert("1.0", f"[医学]恢复1D3 HP\n")
+                            self.role_entries[role].insert("1.0", f"[医学恢复]1D3 HP\n")
                             self.role_entries_roll[role].delete("1.0", tk.END)
                             self.role_entries_roll[role].insert("1.0", f"1d3")
                         if "精神分析" in expression:
-                            self.role_entries[role].insert("1.0", f"[精神分析]恢复1D3 SAN\n")
+                            self.role_entries[role].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
                             self.role_entries_roll[role].delete("1.0", tk.END)
                             self.role_entries_roll[role].insert("1.0", f"1d3")
                     if parts_ and "大失败" in parts_[1]:
                         if "精神分析" in expression:
-                            self.role_entries[role].insert("1.0", f"[精神分析]损失1D6 SAN\n")
+                            self.role_entries[role].insert("1.0", f"[精神分析损失]1D6 SAN\n")
                             self.role_entries_roll[role].delete("1.0", tk.END)
                             self.role_entries_roll[role].insert("1.0", f"1d6")
             multi_num -= 1
