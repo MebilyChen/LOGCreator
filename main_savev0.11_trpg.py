@@ -2989,7 +2989,10 @@ class ChatApp:
                         content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1]).replace("@", f"{style_highlight_weak_style2[0]}@{style_highlight_weak_style2[1]}")
                         lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
-                    content = line.replace("【骰子】", "").replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                    # 把两个=简化成一个
+                    content = line.replace("【骰子】", "")
+                    content = re.sub(r'=([^=]+)=', '=', content)
+                    content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                     lines[index] = f"【骰子】{content}"
             chat_log_content = "\n".join(lines)
 
