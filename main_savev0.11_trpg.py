@@ -9,16 +9,16 @@ import tkinter as tk
 from tkinter import scrolledtext, filedialog, ttk, simpledialog, messagebox
 from datetime import datetime, timedelta
 import configparser
-import imageio
+#import imageio
 
 from PIL import Image, ImageTk, ImageSequence
 import json
 import pygame
-import apng
+#import apng
 
-import win32gui
-import win32con
-import win32api
+#import win32gui
+#import win32con
+#import win32api
 
 
 # import logging
@@ -5791,27 +5791,27 @@ class DraggableItem:
                                                     outline='black', label='标签', type=self.itemType)
                 Is_fill = True
 
-    def select_weapon(self, event):
-        weapon = self.weapon_var.get()
+    #def select_weapon(self, event):
+        #weapon = self.weapon_var.get()
 
         # 根据选择的武器加载相应的图片
-        if weapon:
-            if weapon == "剑":
+        #if weapon:
+            #if weapon == "剑":
                 # 载入剑的图片
-                image = tk.PhotoImage(file="sword.gif")
-            elif weapon == "盾":
+                #image = tk.PhotoImage(file="sword.gif")
+            #elif weapon == "盾":
                 # 载入盾的图片
-                image = tk.PhotoImage(file="shield.gif")
-            elif weapon == "长矛":
+                #image = tk.PhotoImage(file="shield.gif")
+            #elif weapon == "长矛":
                 # 载入长矛的图片
-                image = tk.PhotoImage(file="spear.gif")
-            else:
+                #image = tk.PhotoImage(file="spear.gif")
+            #else:
                 # 默认情况下，载入默认图片
-                image = tk.PhotoImage(file="default.gif")
+                #image = tk.PhotoImage(file="default.gif")
 
             # 显示图片在 Canvas 上
-            draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label,
-                                            label2=self.label2)
+            #draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label,
+                                            #label2=self.label2)
 
     def on_press(self, event):
         self.start_x = event.x
