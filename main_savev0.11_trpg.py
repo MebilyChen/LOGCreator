@@ -5651,6 +5651,7 @@ class DraggableItem:
                 self.canvas.itemconfig(self.item, text=new_text)
             elif self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
                 self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text)
+                self.label2 = new_text;
             else:
                 self.canvas.itemconfig(self.label_below_image_canvas, text=new_text)
 
