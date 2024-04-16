@@ -2975,6 +2975,7 @@ class ChatApp:
                 matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
 
             #高亮文字效果
+            chat_log_content = chat_log_content.replace("<【多轮掷骰】>", "【骰子】")
             lines = chat_log_content.split('\n')
             for index, line in enumerate(lines):
                 global style_highlight_style
@@ -2991,7 +2992,7 @@ class ChatApp:
                 if (line[0] == "【") and ("【骰子】" in line):
                     # 把两个=简化成一个
                     content = line.replace("【骰子】", "")
-                    content = re.sub(r'=([^=]+)=', '=', content)
+                    content = re.sub(r'=([^;=]+)=', '=', content)
                     content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                     lines[index] = f"【骰子】{content}"
             chat_log_content = "\n".join(lines)
@@ -3513,6 +3514,7 @@ class ChatApp:
 
     def roll_dice(self, role, expression, reason):
         final_words = ""
+        is_multiDice = False
         if role != "全员":
             # 清空输入框文本
             # 多轮掷骰应该分开计算
@@ -3525,14 +3527,20 @@ class ChatApp:
             multi_num = int(expression.split("*")[0])
             expression = expression.split("*")[1]
             print("多轮掷骰" + str(multi_num))
+            is_multiDice = True
+        else:
+            is_multiDice = False
         parts_ = []
         pattern = re.compile(r'[\u4e00-\u9fa5]')
         final_words = ""
         final_words_roles = {}
+        final_words_roles_comment = {}
+        for roles in self.roles:
+            final_words_roles[roles] = ""
+            final_words_roles_comment[roles] = ""
         while multi_num > 0:
             if role == "全员":
                 for roles in self.roles:
-                    final_words_roles[roles] = ""
                     if roles != "DiceBot":
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
                         if ("HP" in expression.upper()) or ("MP" in expression.upper()):
@@ -3573,17 +3581,20 @@ class ChatApp:
                                 result = ""
                         if multi_num == 1:
                             self.role_entries[roles].delete("1.0", tk.END)
+                            self.role_entries[roles].insert("1.0", final_words_roles_comment[roles])
                             final_words_roles[roles] = final_words_roles[roles] + f"{result}{expressionUPP}={parts_[0]}"
                             if reason == "":
                                 # message = f'<{self.role_entries_name["DiceBot"]}>(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n'
                                 message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[roles]}】掷骰{SANC}{adv_comment}){final_words_roles[roles]}\n\n'
                             else:
                                 message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[roles]}】因【{reason}】掷骰{SANC}{adv_comment}){final_words_roles[roles]}\n\n'
+                            if is_multiDice:
+                                message = message.replace("【骰子】", "【多轮掷骰】")
                             self.chat_log.insert(tk.END, message)
                             self.chat_log.yview(tk.END)
                         else:
-                            final_words_roles[roles] = final_words_roles[
-                                                           roles] + f"{result}{expressionUPP}={parts_[0]};\n"
+                            final_words_roles[roles] = final_words_roles[roles] + f"{result}{expressionUPP}={parts_[0]};\n"
+                            final_words_roles_comment[roles] = final_words_roles_comment[roles] + f"{parts_[1]}"
                         self.role_entries["DiceBot"].delete("1.0", tk.END)
                         if len(parts_) > 1:
                             self.role_entries[roles].insert(tk.END, parts_[1])
@@ -3691,10 +3702,13 @@ class ChatApp:
                             message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){final_words}\n\n'
                         else:
                             message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){final_words}\n\n'
+                        if is_multiDice:
+                            message = message.replace("【骰子】", "【多轮掷骰】")
                         self.chat_log.insert(tk.END, message)
                         self.chat_log.yview(tk.END)
                     else:
                         final_words = final_words + f"{result}{expressionUPP}={parts_[0]};\n"
+                        #final_words_roles_comment = final_words_roles_comment + f"{parts_[1]}\n"
 
                     weapon_list = {}
                     if len(parts_) > 1:
