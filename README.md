@@ -1,3 +1,96 @@
+【网络问题，仓库暂时停更，如果有人知道怎么解决可以issue】  
+现在的版本没有多轮掷骰的活字3输出优化。
+![image](https://github.com/MebilyChen/LOGCreator/assets/71856534/373e0b58-4a65-4362-ac31-ff6be9f38d54)
+![image](https://github.com/MebilyChen/LOGCreator/assets/71856534/f6067047-767d-4676-ab55-54029117bdd1)
+```
+18:06:34.969: [LOGCreator] git -c credential.helper= -c core.quotepath=false -c log.showSignature=false push --progress --porcelain origin refs/heads/master:master
+Enumerating objects: 30, done.
+Counting objects:   3% (1/28)
+Counting objects:   7% (2/28)
+Counting objects:  10% (3/28)
+Counting objects:  14% (4/28)
+Counting objects:  17% (5/28)
+Counting objects:  21% (6/28)
+Counting objects:  25% (7/28)
+Counting objects:  28% (8/28)
+Counting objects:  32% (9/28)
+Counting objects:  35% (10/28)
+Counting objects:  39% (11/28)
+Counting objects:  42% (12/28)
+Counting objects:  46% (13/28)
+Counting objects:  50% (14/28)
+Counting objects:  53% (15/28)
+Counting objects:  57% (16/28)
+Counting objects:  60% (17/28)
+Counting objects:  64% (18/28)
+Counting objects:  67% (19/28)
+Counting objects:  71% (20/28)
+Counting objects:  75% (21/28)
+Counting objects:  78% (22/28)
+Counting objects:  82% (23/28)
+Counting objects:  85% (24/28)
+Counting objects:  89% (25/28)
+Counting objects:  92% (26/28)
+Counting objects:  96% (27/28)
+Counting objects: 100% (28/28)
+Counting objects: 100% (28/28), done.
+Delta compression using up to 12 threads
+Compressing objects:   4% (1/23)
+Compressing objects:   8% (2/23)
+Compressing objects:  13% (3/23)
+Compressing objects:  17% (4/23)
+Compressing objects:  21% (5/23)
+Compressing objects:  26% (6/23)
+Compressing objects:  30% (7/23)
+Compressing objects:  34% (8/23)
+Compressing objects:  39% (9/23)
+Compressing objects:  43% (10/23)
+Compressing objects:  47% (11/23)
+Compressing objects:  52% (12/23)
+Compressing objects:  56% (13/23)
+Compressing objects:  60% (14/23)
+Compressing objects:  65% (15/23)
+Compressing objects:  69% (16/23)
+Compressing objects:  73% (17/23)
+Compressing objects:  78% (18/23)
+Compressing objects:  82% (19/23)
+Compressing objects:  86% (20/23)
+Compressing objects:  91% (21/23)
+Compressing objects:  95% (22/23)
+Compressing objects: 100% (23/23)
+Compressing objects: 100% (23/23), done.
+Writing objects:   4% (1/24)
+Writing objects:   8% (2/24)
+Writing objects:  12% (3/24)
+Writing objects:  16% (4/24)
+Writing objects:  20% (5/24)
+Writing objects:  25% (6/24)
+Writing objects:  29% (7/24)
+Writing objects:  33% (8/24)
+Writing objects:  37% (9/24)
+Writing objects:  41% (10/24)
+Writing objects:  45% (11/24)
+Writing objects:  50% (12/24)
+Writing objects:  54% (13/24)
+error: RPC failed; HTTP 400 curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err 8)
+send-pack: unexpected disconnect while reading sideband packet
+Writing objects:  54% (13/24), 984.00 KiB | 32.00 KiB/s
+Writing objects:  66% (16/24), 984.00 KiB | 32.00 KiB/s
+Writing objects:  70% (17/24), 984.00 KiB | 32.00 KiB/s
+Writing objects:  75% (18/24), 984.00 KiB | 32.00 KiB/s
+Writing objects:  79% (19/24), 11.47 MiB | 384.00 KiB/s
+Writing objects:  79% (19/24), 11.51 MiB | 375.00 KiB/s
+Writing objects:  83% (20/24), 11.51 MiB | 375.00 KiB/s
+Writing objects:  87% (21/24), 11.51 MiB | 375.00 KiB/s
+Writing objects:  91% (22/24), 11.51 MiB | 375.00 KiB/s
+Writing objects:  95% (23/24), 11.51 MiB | 375.00 KiB/s
+Writing objects: 100% (24/24), 11.51 MiB | 375.00 KiB/s
+Writing objects: 100% (24/24), 45.18 MiB | 1.42 MiB/s, done.
+Total 24 (delta 12), reused 0 (delta 0), pack-reused 0
+fatal: the remote end hung up unexpectedly
+Done
+```
+
 # Usage
 生成的exe程序在dist文件夹里，自己生成也行，这样能保证是最新版（因为每次都忘了上传exe）  
 `pyinstaller --onefile --icon=AppSettings/icon.ico main_savev0.11_trpg.py`  
