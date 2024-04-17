@@ -1,5 +1,4 @@
 【网络问题，仓库暂时停更，如果有人知道怎么解决可以issue】  
-现在的版本没有多轮掷骰的活字3输出优化。
 ![image](https://github.com/MebilyChen/LOGCreator/assets/71856534/373e0b58-4a65-4362-ac31-ff6be9f38d54)
 ![image](https://github.com/MebilyChen/LOGCreator/assets/71856534/f6067047-767d-4676-ab55-54029117bdd1)
 ```
