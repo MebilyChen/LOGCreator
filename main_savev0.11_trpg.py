@@ -1268,7 +1268,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v1.21" + encouragement)
+        self.root.title("自嗨团 v1.28" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
@@ -1343,14 +1343,14 @@ class ChatApp:
         time = self.env["Time"]
         place = self.env["Place"]
         weather = self.env["Weather"]
-        self.time_log = tk.Text(root, wrap=tk.WORD, width=10, height=0)
+        self.time_log = tk.Text(root, wrap=tk.WORD, width=10, height=0, undo=True)
         self.time_log.grid(row=3, column=2, padx=10, pady=10, rowspan=3, sticky="nsew")
         self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" + date)
         self.time_log.bind("<Button-3>", lambda event: self.refreshTime)
-        #self.time_log.bind("<Control-z>", lambda event: undo(self.time_log))
+        #self.time_log.bind("<Control-z>", lambda event: undo(self, self.time_log))
 
         # 初始化聊天LOG
-        self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20)
+        self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20, undo=True)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         # 在 Text 组件中插入初始文本
         initial_text = "Updates/Todo：详情见readme" \
@@ -1543,7 +1543,7 @@ class ChatApp:
         # self.avatar_click_event = None
 
         # 每个角色的消息框
-        entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3)
+        entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3, undo=True)
         entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
         self.role_entries[role] = entry
         # 加载并显示头像
@@ -1589,7 +1589,7 @@ class ChatApp:
             _SAN = role_Chart_detail.get("#SAN")
         else:
             _SAN = 100
-        entry2 = tk.Text(frame, wrap=tk.WORD, width=10, height=6)
+        entry2 = tk.Text(frame, wrap=tk.WORD, width=10, height=6, undo=True)
         entry2.grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
         value_tag = f"{role}_values_tag"
         self.role_values_tags[role] = value_tag
@@ -1634,7 +1634,7 @@ class ChatApp:
         # choose_avatar_button.grid(row=2, column=3, padx=5, pady=5, sticky="nsew")
 
         # 添加掷骰按钮和面数输入框
-        entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1)
+        entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1, undo=True)
         entry_roll.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
         self.role_entries_roll[role] = entry_roll
         roll_button = tk.Button(frame, text="掷骰", command=lambda r=role: self.get_and_roll(r))
@@ -4272,7 +4272,7 @@ class ChatApp:
                             maxheight=5)  # 设置表头的字体大小
 
             if role == "KP":
-                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=12)
+                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=12, undo=True)
                 self.KP_entry.insert(tk.END, "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响")
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
@@ -4291,7 +4291,7 @@ class ChatApp:
                 self.tree_main.grid_rowconfigure(0, weight=1)
                 self.load_treeview_data(self.tree_main, "GameSaves/Deduction_infos_base.json", role)
             else:
-                entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1)
+                entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1, undo=True)
                 entry2.grid(row=1, column=4, padx=0, pady=0, sticky="nsew")
                 self.thoughts[role] = entry2
                 # 创建Treeview
