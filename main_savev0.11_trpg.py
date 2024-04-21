@@ -1347,7 +1347,7 @@ class ChatApp:
         self.time_log.grid(row=3, column=2, padx=10, pady=10, rowspan=3, sticky="nsew")
         self.time_log.insert(tk.END, "【时间】" + time.upper() + "【地点】" + place + "【天气】" + weather + "【日期】" + date)
         self.time_log.bind("<Button-3>", lambda event: self.refreshTime)
-        #self.time_log.bind("<Control-z>", lambda event: undo(self, self.time_log))
+        self.time_log.bind("<FocusIn>", lambda event: self.env_focus(event))
 
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20, undo=True)
@@ -2459,6 +2459,10 @@ class ChatApp:
         self.root.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
 
+    def env_focus(self, event):
+        self.reset_focus(event)
+        self.root.bind("<Return>", lambda event, role="env": self.send_message_on_enter(event, role))
+
     def reset_focus(self, event):
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
@@ -2488,6 +2492,13 @@ class ChatApp:
     def send_message_on_enter(self, event, role=None):
         if role == None:
             pass
+        elif role == "env":
+            env_text = self.time_log.get("1.0", tk.END).strip()
+            self.chat_log.insert(tk.END,
+                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+            self.chat_log.yview(tk.END)
+            self.time_log.delete("1.0", tk.END)
+            self.time_log.insert("1.0", env_text)
         else:
             self.current_role.set(role)
             # 判断是否同时按下了 Ctrl 键
@@ -2538,6 +2549,7 @@ class ChatApp:
             self.role_entries_roll[role].config(relief=tk.GROOVE)
         self.role_entries_frame[self.highlighted_role.get()].config(relief=tk.SOLID)
         # self.create_role_frames()
+        self.chat_log.config(relief=tk.GROOVE)
 
     def highlight_role_frame_roll(self, role):
         # 高亮指定角色的 Frame
