@@ -67,6 +67,7 @@ create_folder('Images/AvatarImages')
 create_folder('Images/IconImages')
 create_folder('Images/SheetImages')
 create_folder('Images/BattleImages')
+create_folder('Images/MapMarkers')
 create_folder('ReplayResources')
 create_folder('ReplayResources/BG')
 create_folder('ReplayResources/BGM')
@@ -1268,7 +1269,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v1.28" + encouragement)
+        self.root.title("自嗨团 v1.31" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
@@ -1358,7 +1359,7 @@ class ChatApp:
                        "来载入武器伤害公式\n小地图可用于追逐、探索和战斗，更好的战斗体验可以结合CCF。小地图中的M是MOV，不是MP\nNPC活动也可以用程序多开+复制粘贴，但如此就无法无缝RP" \
                        "（而且战斗时无法触发PC的Armor显示、无法同步计算时间等），建议KP栏装载至少一个常用NPC，或者保证留有NPC栏位。\n一些复杂操作：\n[右键姓名牌] 选择简卡图片\n[" \
                        "左键头像栏] 选择头像\n[左键Icon栏] 选择状态Icon\n[右键头像栏/Icon栏] " \
-                       "状态Icon叠加/撤销\n[左键@] 在Focus文本框插入@角色名\n[右键@] 插入活字命令\n如果没有头像和状态Icon，就会缩进到Frame内的左侧，左上是状态，左中是头像\n" \
+                       "状态Icon叠加/撤销\n[左键@] 在Focus文本框插入@角色名\n[右键@] 插入活字命令\n如果没有头像和状态Icon，就会缩进到Frame内的左侧，左上是状态，左中是头像\n[Enter世界状态栏]发送游戏世界状态至Log\n" \
                        "===以上可删除===\n\n"
         self.chat_log.insert(tk.END, initial_text)
 
@@ -1419,7 +1420,7 @@ class ChatApp:
 
         # 初始化删除角色按钮
         delete_role_button = tk.Button(root, text="删除角色", command=self.delete_role)
-        delete_role_button.grid(row=1, column=1, padx=5, pady=10, sticky="nsew")
+        delete_role_button.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
 
         # 初始化添加角色按钮
         add_role_button = tk.Button(root, text="添加角色", command=self.add_role)
@@ -1695,7 +1696,8 @@ class ChatApp:
                 cardname = message.replace(".draw_", "").replace("。draw_", "").replace(".draw", "").replace("。draw", "")
                 cardname = cardname.replace("?", "").replace("？", "").strip()
                 Cards_now = load_CardDeck(cardname)
-                # self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", message)
                 if Cards_now:
                     result_ = ""
                     while num > 0:
@@ -4457,16 +4459,24 @@ class ChatApp:
                             for frame
                             in ImageSequence.Iterator(image)]
                         # 显示 GIF 图片的第一帧
-                        current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
-                                                                     image=frames_map[frame_Map][0],
-                                                                     label=label_text,
-                                                                     label2=label_text2, type="image_animate",
-                                                                     frame=frame_Map)
+                        if _avatar == "DiceBot":
+                            current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
+                                                                         image=frames_map[frame_Map][0],type="DiceBotImage_animate",
+                                                                         frame=frame_Map)
+                        else:
+                            current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
+                                                                         image=frames_map[frame_Map][0],
+                                                                         label=label_text,
+                                                                         label2=label_text2, type="image_animate",
+                                                                         frame=frame_Map)
                         y += 100
                         self.draggable_items[_avatar] = current_frame_map[frame_Map]
                         frame_Map += 1
                     else:
-                        draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text,
+                        if _avatar == "DiceBot":
+                            draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, type='DiceBotImage')
+                        else:
+                            draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text,
                                                         label2=label_text2, type='image')
                         y += 100
                         self.draggable_items[_avatar] = draggable_image
@@ -5543,12 +5553,12 @@ class DraggableItem:
 
         if image:
             self.item = canvas.create_image(x, y, image=image, tags="draggable")
-            if self.itemType == "image_animate" or self.itemType == "image_temp_animate":
+            if self.itemType == "image_animate" or self.itemType == "image_temp_animate" or self.itemType == "DiceBotImage_animate":
                 # 播放 GIF 动画
                 # print(current_frame_map)
                 self.animate_on_map(0, self.canvas, self.item,
                                     frames_map[self.frame])
-            if label is not None:
+            if label is not None and label2 is not None:
                 label_below_image = tk.Label(self.canvas, text=label)
                 # self.label_below_image.pack()
                 # self.label_below_image.place(x=x - 50, y=y + 60)  # Adjust the position as needed
@@ -5570,6 +5580,16 @@ class DraggableItem:
                 # self.label_below_image_canvas = canvas.create_text(x + 50, y + 50, text=label2, font=("Arial", 5),
                 # fill="black",
                 # tags="draggable")
+            elif label is None and label2 is not None:
+                label_below_image = tk.LabelFrame(self.canvas)
+                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image,
+                                                                          anchor=tk.NW)
+                self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
+                                                                    fill="black",
+                                                                    tags="draggable")
+                self.label_below_image_canvas2_edit = canvas.create_text(x - 25, y, text=">", font=("Arial", 10),
+                                                                         fill="black",
+                                                                         tags="draggable")
             else:
                 self.label_below_image_canvas = None
                 self.label_below_image_canvas2 = None
@@ -5822,6 +5842,65 @@ class DraggableItem:
             # self.select_weapon_button = tk.Button(root, text="选择", command=self.select_weapon)
             # self.select_weapon_button.pack()
 
+        elif self.itemType == "DiceBotImage":
+            avatar_path = filedialog.askopenfilename(title="载入图片",
+                                                     filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                     initialdir="Images/MapMarkers")
+            if avatar_path:
+                labeltext = simpledialog.askstring("图片标签", "输入标签文字（可留空）:", initialvalue="")
+                suofang = int(simpledialog.askstring("大小", "输入图片大小阈值（可留空，默认50）:", initialvalue="50"))
+                _, extension = os.path.splitext(avatar_path)
+                filename, dot = os.path.splitext(os.path.basename(avatar_path))
+                if os.path.exists(
+                        'Images/MapMarkers/' + filename + extension):
+                    pass
+                else:
+                    shutil.copyfile(avatar_path,
+                                    'Images/MapMarkers/' + filename + extension)
+                if extension == ".apng" or extension == ".APNG":
+                    avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
+                if extension == ".gif" or extension == ".GIF":
+                    image = Image.open(avatar_path)
+                    width, height = image.size
+                    if width >= suofang and height >= suofang:
+                        percentage_w = suofang / width
+                        percentage_h = suofang / height
+                        percentage = min(percentage_w, percentage_h)
+                        image = image.resize((int(width * percentage), int(height * percentage)), Image.LANCZOS)
+                        width, height = image.size
+                    frames_map[frame_Map] = [
+                        ImageTk.PhotoImage(frame.resize((int(width * 0.8), int(height * 0.8)), Image.LANCZOS))
+                        for frame
+                        in ImageSequence.Iterator(image)]
+                    # 显示 GIF 图片的第一帧
+                    current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
+                                                                 image=frames_map[frame_Map][0],
+                                                                 label2=labeltext, type="image_temp_animate",
+                                                                 frame=frame_Map)
+                    frame_Map += 1
+
+                else:
+                    with open(avatar_path, "rb") as f:
+                        image = Image.open(f)
+                        width, height = image.size
+                        if width >= suofang and height >= suofang:
+                            percentage_w = suofang / width
+                            percentage_h = suofang / height
+                            percentage = min(percentage_w, percentage_h)
+                            image = image.resize((int(width * percentage), int(height * percentage)), Image.LANCZOS)
+                            width, height = image.size
+                        image = image.resize((int(width * 0.8), int(height * 0.8)), Image.LANCZOS)
+                        photo = ImageTk.PhotoImage(image)
+                        # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
+                        # self.canvas.create_image(x, y, image=photo)
+                        # 保持对图像的引用，防止被垃圾回收
+                        # self.canvas.image = photo
+                        # Keep references to all images
+                        self.image_references.append(photo)
+                        # Create draggable image
+                    image = tk.PhotoImage(file=avatar_path)
+                    draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
+                                                    label2=labeltext, type="image_temp")
         else:
             if Is_fill:
                 draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
