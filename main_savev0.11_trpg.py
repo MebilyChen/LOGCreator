@@ -1721,6 +1721,7 @@ class ChatApp:
                                 for m in matches:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                                 while "{%" in result:
+                                    result = result.replace("%}", "}")
                                     result = result.replace("}", "%}")
                                     matches = re.findall(r'\{%([^%]+)%\}', result)
                                     for m in matches:
@@ -1750,6 +1751,7 @@ class ChatApp:
                                 for m in matches:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                                 while "{%" in result:
+                                    result = result.replace("%}", "}")
                                     result = result.replace("}", "%}")
                                     matches = re.findall(r'\{%([^%]+)%\}', result)
                                     for m in matches:
@@ -1991,6 +1993,7 @@ class ChatApp:
                             for m in matches:
                                 result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             while "{%" in result:
+                                result = result.replace("%}", "}")
                                 result = result.replace("}", "%}")
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
@@ -2017,6 +2020,7 @@ class ChatApp:
                             for m in matches:
                                 result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             while "{%" in result:
+                                result = result.replace("%}", "}")
                                 result = result.replace("}", "%}")
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
@@ -2088,6 +2092,7 @@ class ChatApp:
                             for m in matches:
                                 result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             while "{%" in result:
+                                result = result.replace("%}", "}")
                                 result = result.replace("}", "%}")
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
@@ -2117,6 +2122,7 @@ class ChatApp:
                             for m in matches:
                                 result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             while "{%" in result:
+                                result = result.replace("%}", "}")
                                 result = result.replace("}", "%}")
                                 matches = re.findall(r'\{%([^%]+)%\}', result)
                                 for m in matches:
@@ -2217,8 +2223,14 @@ class ChatApp:
             old_dict["MP"] = int(old_dict["意志"] / 5)
         if old_dict["SAN"] == "POW":
             old_dict["SAN"] = old_dict["意志"]
-        old_dict["闪避"] = int(old_dict["敏捷"] / 2)
-        old_dict["母语"] = old_dict["教育"]
+        if old_dict["闪避"] > int(old_dict["敏捷"] / 2):
+            pass
+        else:
+            old_dict["闪避"] = int(old_dict["敏捷"] / 2)
+        if old_dict["母语"] > old_dict["教育"]:
+            pass
+        else:
+            old_dict["母语"] = old_dict["教育"]
         old_dict["魅力"] = old_dict["外貌"]
         old_dict["cm"] = old_dict["克苏鲁神话"]
         old_dict["克苏鲁"] = old_dict["克苏鲁神话"]
@@ -2227,7 +2239,7 @@ class ChatApp:
         old_dict["法学"] = old_dict["司法科学"]
         old_dict["霰弹枪"] = old_dict["步枪/霰弹枪"]
         old_dict["步枪"] = old_dict["步枪/霰弹枪"]
-        if old_dict["信用评级"] != 0:
+        if old_dict["信用评级"] > 0:
             old_dict["信用"] = old_dict["信用评级"]
         else:
             old_dict["信用评级"] = old_dict["信用"]
@@ -2262,9 +2274,9 @@ class ChatApp:
                 old_dict["DB"] = "0(0)"
         else:
             old_dict["DB"] = "2(+1D6)"
-        if "图书馆使用" not in old_dict or old_dict["图书馆使用"] == 0:
+        if "图书馆使用" not in old_dict or old_dict["图书馆使用"] == 20:
             old_dict["图书馆使用"] = old_dict["图书馆"]
-        if "图书馆使用" in old_dict and old_dict["图书馆"] == 20:
+        if ("图书馆使用" in old_dict) and old_dict["图书馆使用"] > 20 and old_dict["图书馆"] == 20:
             old_dict["图书馆"] = old_dict["图书馆使用"]
 
         if "ARMOR" not in old_dict:
@@ -4395,7 +4407,7 @@ class ChatApp:
 
         text = self.time_log.get("1.0", tk.END).strip()
         label = tk.Label(new_window,
-                         text="地图即时使用，信息不互通，关闭即销毁: [右键]绘图/副本(大小随机&透明度正负) | [右键角色/无图则❤]载入战斗图像 | [右键战斗图像]销毁 | [单击标签/❤]编辑 | [中键拖拽标签]缩放(仅限矩形和圆)")
+                         text="地图即时使用，信息不互通，关闭即销毁: [右键]绘图/副本 | [右键角色/无图则❤]载入战斗图像 | [右键骰子图像]载入指示物 | [右键战斗图像]销毁 | [单击标签/❤]编辑 | [中键拖拽标签]缩放(仅限矩形和圆)")
         label.pack()
 
         label2 = tk.Label(new_window,
@@ -5532,7 +5544,7 @@ class TRPGModule:
 
 class DraggableItem:
     def __init__(self, canvas, x, y, width, height, fill=None, image=None, outline=None, label=None, label2=None,
-                 type=None, frame=None):
+                 type=None, frame=None, secret=None):
         global frame_Map
         global frames_Map
         global current_frame_map
@@ -5584,12 +5596,21 @@ class DraggableItem:
                 label_below_image = tk.LabelFrame(self.canvas)
                 self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image,
                                                                           anchor=tk.NW)
-                self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
-                                                                    fill="black",
-                                                                    tags="draggable")
-                self.label_below_image_canvas2_edit = canvas.create_text(x - 25, y, text=">", font=("Arial", 10),
-                                                                         fill="black",
-                                                                         tags="draggable")
+                if secret == "y":
+                    self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
+                                                                        fill="white",
+                                                                        tags="draggable")
+                    self.label_below_image_canvas2_edit = canvas.create_text(x, y + 30, text="___", font=("Arial", 10),
+                                                                             fill="white",
+                                                                             tags="draggable")
+                else:
+                    self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
+                                                                        fill="black",
+                                                                        tags="draggable")
+                    self.label_below_image_canvas2_edit = canvas.create_text(x, y + 30, text="___", font=("Arial", 10),
+                                                                             fill="black",
+                                                                             tags="draggable")
+
             else:
                 self.label_below_image_canvas = None
                 self.label_below_image_canvas2 = None
@@ -5708,14 +5729,24 @@ class DraggableItem:
         else:
             intiText = "标签"
         new_text = simpledialog.askstring("Input", "Enter new text:", initialvalue=intiText)
+        secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
         if new_text:
             if self.itemType == "text":
-                self.canvas.itemconfig(self.item, text=new_text)
+                if secret == "y":
+                    self.canvas.itemconfig(self.item, text=new_text, fill="white")
+                else:
+                    self.canvas.itemconfig(self.item, text=new_text, fill="black")
             elif self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
-                self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text)
+                if secret == "y":
+                    self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text, fill="white")
+                else:
+                    self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text, fill="black")
                 self.label2 = new_text
             else:
-                self.canvas.itemconfig(self.label_below_image_canvas, text=new_text)
+                if secret == "y":
+                    self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="white")
+                else:
+                    self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="black")
 
     def on_resize(self, event):
         self.resize_anchor = event.x - 100, event.y - 50
@@ -5848,6 +5879,7 @@ class DraggableItem:
                                                      initialdir="Images/MapMarkers")
             if avatar_path:
                 labeltext = simpledialog.askstring("图片标签", "输入标签文字（可留空）:", initialvalue="")
+                secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
                 suofang = int(simpledialog.askstring("大小", "输入图片大小阈值（可留空，默认50）:", initialvalue="50"))
                 _, extension = os.path.splitext(avatar_path)
                 filename, dot = os.path.splitext(os.path.basename(avatar_path))
@@ -5875,7 +5907,7 @@ class DraggableItem:
                     # 显示 GIF 图片的第一帧
                     current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
                                                                  image=frames_map[frame_Map][0],
-                                                                 label2=labeltext, type="image_temp_animate",
+                                                                 label2=labeltext, type="image_temp_animate", secret=secret,
                                                                  frame=frame_Map)
                     frame_Map += 1
 
@@ -5900,7 +5932,7 @@ class DraggableItem:
                         # Create draggable image
                     image = tk.PhotoImage(file=avatar_path)
                     draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
-                                                    label2=labeltext, type="image_temp")
+                                                    label2=labeltext, secret=secret, type="image_temp")
         else:
             if Is_fill:
                 draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
