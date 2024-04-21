@@ -2889,6 +2889,7 @@ class ChatApp:
 
     def output_chat_log(self):
         new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字):", initialvalue="QQ")
+        name_text = simpledialog.askstring("输入文件名称", "请输入LOG保存名称(可留空):", initialvalue="")
         # 搜索包含 "===以上可删除===" 的行的起始索引
         start_index = "1.0"
         while True:
@@ -2904,13 +2905,13 @@ class ChatApp:
         self.chat_log.delete("0.0", "2.0")
         self.chat_log.delete("0.0", "2.0")
         if new_text == "QQ":
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"(QQ)chat_log_{timestamp}.txt"
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            filename = f"(QQ)_{timestamp}.txt"
             chat_log_content = self.chat_log.get("1.0", tk.END)
         elif new_text == "活字":
             chat_log_content_ = ""
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"(活字)chat_log_{timestamp}.txt"
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            filename = f"(活字)_{timestamp}.txt"
             chat_log_content = self.chat_log.get("1.0", tk.END)
             chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
 
@@ -3012,14 +3013,15 @@ class ChatApp:
             chat_log_content = "\n".join(lines)
 
         else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"(QQ)chat_log_{timestamp}.txt"
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            filename = f"(QQ)_{timestamp}.txt"
             chat_log_content = self.chat_log.get("1.0", tk.END)
+        filename = "【" + name_text + "】" + filename
         with open(filename, "w") as file:
             file.write(chat_log_content)
 
     def output_html_log(self):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"chat_log_{timestamp}.html"
         chat_log_content = self.chat_log.get("1.0", tk.END)
         with open(filename, "w") as file:
