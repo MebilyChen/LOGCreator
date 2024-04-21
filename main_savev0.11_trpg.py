@@ -1391,7 +1391,7 @@ class ChatApp:
         for role in self.roles:
             self.role_entries_name[role] = role
             self.image_references_on_Avatar[role] = []
-            self.canvas_icon_animate[role] = ""
+            self.canvas_icon_animate[role] = tk.Canvas(self.root, width=20, height=20)
             self.frames_avatar[role] = []
             self.current_frame_avatar[role] = []
             self.frames_icon[role] = []
@@ -2356,8 +2356,8 @@ class ChatApp:
 
     def add_role(self):
         self.role_count += 1
-        print(self.role_count)
-        self.role_count = self.role_count
+        #print(self.role_count)
+        #self.role_count = self.role_count
         new_role = f"PL {len(self.roles) - 1}"
         self.roles.append(new_role)
         if new_role not in self.role_entries_name:
@@ -2391,7 +2391,7 @@ class ChatApp:
         self.role_count = self.role_count
         new_role = f"PL {len(self.roles) - 1}"
         self.roles.append(new_role)
-        self.canvas_icon_animate[new_role] = ""
+        self.canvas_icon_animate[new_role] = tk.Canvas(self.root, width=20, height=20)
         self.image_references_on_Avatar[new_role] = []
         self.frames_avatar[new_role] = []
         self.current_frame_avatar[new_role] = []
@@ -2889,6 +2889,20 @@ class ChatApp:
 
     def output_chat_log(self):
         new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字):", initialvalue="QQ")
+        # 搜索包含 "===以上可删除===" 的行的起始索引
+        start_index = "1.0"
+        while True:
+            match_index = self.chat_log.search("===以上可删除===", start_index, tk.END)
+            if not match_index:
+                break
+            # 删除之前的所有行
+            # line_start = self.chat_log.index(match_index)
+            line_end = self.chat_log.index(match_index + " lineend")
+            self.chat_log.delete("0.0", line_end)
+            # 更新搜索的起始位置
+            start_index = line_end
+        self.chat_log.delete("0.0", "2.0")
+        self.chat_log.delete("0.0", "2.0")
         if new_text == "QQ":
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"(QQ)chat_log_{timestamp}.txt"
@@ -3344,7 +3358,7 @@ class ChatApp:
                     self.canvas_icon_animate[role].bind("<Button-3>",
                                                         lambda event, role=role, frame=frame: self.hide_icon_on_avatar(
                                                             role, frame))
-                elif self.canvas_icon_animate[role]:
+                elif role in self.canvas_icon_animate:
                     self.canvas_icon_animate[role].destroy()
                     # 根据宽高比设置头像大小
                     # if width >= 100:
@@ -3387,7 +3401,7 @@ class ChatApp:
                 # label2.bind("<Button-3>", lambda event, role=role: self.on_avatar_right_click(role))
 
             else:
-                if self.canvas_icon_animate[role]:
+                if role in self.canvas_icon_animate:
                     self.canvas_icon_animate[role].destroy()
                 label2 = tk.Label(frame)
                 # if self.Icon:
