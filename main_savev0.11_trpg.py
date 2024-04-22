@@ -4053,7 +4053,7 @@ class ChatApp:
             # 获取条目的值
             values = self.tree_list[role].item(item, "values")
             # 创建一个弹出对话框，让用户输入新的记忆指数
-            new_memory_index = simpledialog.askinteger("修改记忆指数", f"当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
+            new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
                                                        maxvalue=100)
             if new_memory_index is not None:
                 # 更新Treeview中的值
@@ -4075,7 +4075,7 @@ class ChatApp:
             # 获取条目的值
             values = self.tree2_list[role].item(item, "values")
             # 创建一个弹出对话框，让用户输入新的记忆指数
-            new_memory_index = simpledialog.askinteger("修改记忆指数", f"当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
+            new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
                                                        maxvalue=100)
             if new_memory_index is not None:
                 # 更新Treeview中的值
@@ -4266,9 +4266,10 @@ class ChatApp:
                         for item_data in data:
                             treeview.insert('', 'end', values=item_data)
                     else:
-                        data = data_[role]
-                        for item_data in data:
-                            treeview.insert('', 'end', values=item_data)
+                        if role in data_:
+                            data = data_[role]
+                            for item_data in data:
+                                treeview.insert('', 'end', values=item_data)
         except FileNotFoundError:
             print(f"文件 '{filename}' 不存在")
 
