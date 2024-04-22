@@ -6537,7 +6537,7 @@ def fire_babel(self, role):
     print(f"===")
     global babel_on
     role = self.role_entries_name[role]
-    if babel_on:
+    if babel_on and (role in self.babel_data):
         lan_list = {}
         dic = self.babel_data[role]
         lan_main = str(dic["母语"]).replace("0", "英语")
@@ -6547,7 +6547,7 @@ def fire_babel(self, role):
                     lan_list[language] = skill
         for role2 in self.roles:
             role2 = self.role_entries_name[role2]
-            if role2 != role:
+            if role2 != role and (role2 in self.babel_data):
                 dic2 = self.babel_data[role2]
                 # self.list_skills = []
                 if lan_main in dic2:
