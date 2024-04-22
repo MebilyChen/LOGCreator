@@ -3,22 +3,27 @@ import os
 import re
 import shutil
 import subprocess
+# import threading
 from random import random
 import random
+# import time as t
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, ttk, simpledialog, messagebox
 from datetime import datetime, timedelta
 import configparser
-#import imageio
-
+# import imageio
+# import pyautogui
+import ctypes
 from PIL import Image, ImageTk, ImageSequence
 import json
 import pygame
-#import apng
 
-#import win32gui
-#import win32con
-#import win32api
+
+# import apng
+
+# import win32gui
+# import win32con
+# import win32api
 
 
 # import logging
@@ -41,6 +46,8 @@ current_frame_map = {}
 Is_fill = False
 Is_square = False
 Cards_list = {}
+isOpeningFiles = False
+
 
 def play_audio(file_path, name, loops=-1):
     if file_path:
@@ -74,6 +81,7 @@ create_folder('ReplayResources/BGM')
 create_folder('ReplayResources/SE')
 create_folder('ReplayResources/HandOut')
 create_folder('CardDecks')
+create_folder('QuickSaves')
 
 # 便于直接编辑的一系列字符串
 string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]
@@ -85,17 +93,17 @@ string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
 
 # 部分活字文字特效编辑
 # 高亮
-style_highlight_style = ["<color=#FFFF00><b><弹跳>【","】</弹跳></b></color>"] #黄加粗，弹跳，保留【】
+style_highlight_style = ["<color=#FFFF00><b><弹跳>【", "】</弹跳></b></color>"]  # 黄加粗，弹跳，保留【】
 # 弱高亮
-style_highlight_weak_style = ["<color=#FFFF00><b>[","]</b></color>"] #黄加粗，保留[]
+style_highlight_weak_style = ["<color=#FFFF00><b>[", "]</b></color>"]  # 黄加粗，保留[]
 # 弱高亮2
-style_highlight_weak_style2 = ["<color=#FFFF00><b>","</b></color>"] #黄加粗，不保留[]
+style_highlight_weak_style2 = ["<color=#FFFF00><b>", "</b></color>"]  # 黄加粗，不保留[]
 # 掷骰原因（只接受color，除非同步修改掷骰角色）
-style_dice_reason_color = "因<color=#FFFF00>" #黄
+style_dice_reason_color = "因<color=#FFFF00>"  # 黄
 # 掷骰角色
-style_dice_pcname_color = ["<color=#FFFF00>", "</color>"] #黄
+style_dice_pcname_color = ["<color=#FFFF00>", "</color>"]  # 黄
 # 掷骰技能
-style_dice_skillname_style = ["<弹跳><color=#FFFFFF>", "</color></弹跳>"]#白，弹跳
+style_dice_skillname_style = ["<弹跳><color=#FFFFFF>", "</color></弹跳>"]  # 白，弹跳
 
 # timer计算
 place = "某地"
@@ -238,8 +246,10 @@ def load_icon_data():
         # 如果文件不存在，返回默认设置
         return {}
 
+
 def undo(event, text_box):
     text_box.edit_undo()
+
 
 def load_infoCanvas_data_by_name():
     try:
@@ -302,6 +312,7 @@ role_Chart_detail_demo = {
     "HP": "(CON+SIZ)/10",
     "MP": "POW/5",
     "SAN": "POW",
+    "理智": "POW",
     "克苏鲁神话": 0,
     "克苏鲁": 0,
     "cm": 0,
@@ -1232,14 +1243,14 @@ bot_personality_by_name = load_DiceBot_personality()
 adv_comment = ""
 Cards_list_by_role = {}
 
-# logging.debug("Variable value: %s", role_Chart_at_name)
 
+# logging.debug("Variable value: %s", role_Chart_at_name)
 
 
 class ChatApp:
     def __init__(self, root):
         self.root = root
-
+        self.autoSave_firstTime()
         # 一系列字符串
         string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！这就是全部的陛下庇护！", " - 陛下所言甚是/陶醉", " - "
                                                                                                                "你生而有翼，为何竟愿一生匍匐前进，形如虫蚁？",
@@ -1498,6 +1509,8 @@ class ChatApp:
                     # 更新搜索的起始位置
                     start_index = line_end
 
+                self.chat_log.insert(tk.END,
+                                     f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【等待】1\n\n')
                 self.chat_log.insert(tk.END,
                                      f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
                 # self.chat_log_huozi = self.chat_log_huozi + f"{content}\n\n"
@@ -1883,14 +1896,15 @@ class ChatApp:
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
                 else:
-                    new_chart = self.parse_input_skill(message).copy()
+                    new_chart = self.parse_input_skill(message.upper()).copy()
                     print(new_chart)
-                    self.update_skills(role_Chart[role], new_chart)
-                    # if self.role_entries_name[role] in role_Chart_at_name:
-                    role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role].copy()
-                    role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
-                    self.save_role_skill_at_name()
-                    # print(role_Chart_at_name[self.role_entries_name[role]])
+                    if new_chart:
+                        self.update_skills(role_Chart[role], new_chart)
+                        # if self.role_entries_name[role] in role_Chart_at_name:
+                        role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role].copy()
+                        role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
+                        self.save_role_skill_at_name()
+                        # print(role_Chart_at_name[self.role_entries_name[role]])
                 SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
@@ -1901,29 +1915,29 @@ class ChatApp:
                     _SAN = role_Chart_detail.get("#SAN")
                 else:
                     _SAN = 100
-                if "HP" in message:
+                if "HP" in message.upper():
                     HP_ = self.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("2.0", "3.0")
                     self.role_values_entry[role].insert("2.0",
                                                         f'{HP_}/{HP}:HP\n')
-                if "MP" in message:
+                if "MP" in message.upper():
                     MP_ = self.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("3.0", "4.0")
                     self.role_values_entry[role].insert("3.0",
                                                         f'{MP_}/{MP}:MP\n')
-                if "SAN" in message:
+                if "SAN" in message.upper():
                     SAN_ = self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
                     # if SAN_ == 0 or SAN_ == "":
                     # SAN_ = POW
                     self.role_values_entry[role].delete("1.0", "2.0")
                     self.role_values_entry[role].insert("1.0",
                                                         f'{SAN_}/{_SAN}:SAN\n')
-                if "MOV" in message:
+                if "MOV" in message.upper():
                     MOV_ = self.role_values_entry[role].get("4.0", "5.0").split("/")[0].strip()
                     self.role_values_entry[role].delete("4.0", "5.0")
                     self.role_values_entry[role].insert("4.0",
                                                         f'{MOV_}/{MOV}:MOV\n')
-                if "DB" in message:
+                if "DB" in message.upper():
                     self.role_values_entry[role].delete("5.0", "6.0")
                     self.role_values_entry[role].insert("5.0",
                                                         f'\n{DB}:DB\n')
@@ -1960,12 +1974,13 @@ class ChatApp:
     def drawcard(self, message, role):
         message = message.replace("alldraw", "draw").replace("drawall", "draw")
         if "drawself" in message or "selfdraw" in message:
-            message = message.replace("self","")
+            message = message.replace("self", "")
             num = 1
             if "*" in message:
                 num = int(message.split("*")[1])
                 message = message.split("*")[0]
-            cardname = message.replace("drawself", "draw").replace("selfdraw", "draw").replace(".draw_", "").replace("。draw_", "").replace(".draw", "").replace("。draw", "")
+            cardname = message.replace("drawself", "draw").replace("selfdraw", "draw").replace(".draw_", "").replace(
+                "。draw_", "").replace(".draw", "").replace("。draw", "")
             cardname = cardname.replace("?", "").replace("？", "").strip()
             Cards_now = load_CardDeck(cardname)
             # self.role_entries[role].delete("1.0", tk.END)
@@ -1984,7 +1999,7 @@ class ChatApp:
                             Cards_list_by_role[role][cardname].remove(result)
                             if num == 1:
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n\n')
+                                                               f'\n【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname])}张卡。\n\n')
                         elif isinstance(Cards_now, dict):
                             result = random.choice(Cards_list_by_role[role][cardname][cardname])
                             if len(Cards_list_by_role[role][cardname][cardname]) != 1:
@@ -2000,7 +2015,7 @@ class ChatApp:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             if num == 1:
                                 self.role_entries[role].insert(tk.END,
-                                                               f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n\n')
+                                                               f'\n【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】的不放回牌堆[{cardname}]还余{len(Cards_list_by_role[role][cardname][cardname])}张卡。\n\n')
                                 if len(Cards_list_by_role[role][cardname][cardname]) == 0:
                                     self.role_entries[role].insert(tk.END,
                                                                    f'已自动补充牌堆。\n')
@@ -2039,9 +2054,9 @@ class ChatApp:
                             result = f"\n{result}".replace("\n\n", "")
                             result = f"\n{result}".replace("\n\n\n", "")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在自己牌堆[{cardname}]的暗抽。\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】在自己牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
-                                                           f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在自己牌堆[{cardname}]的抽取结果：{result}\n')
+                                                           f'\n【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】在自己牌堆[{cardname}]的抽取结果：{result}\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2052,7 +2067,7 @@ class ChatApp:
                                 result = result_
                             result = f"\n{result}".replace("\n\n\n", "\n")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在自己牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】在自己牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2083,7 +2098,7 @@ class ChatApp:
                             Cards_list[cardname].remove(result)
                             if num == 1:
                                 self.chat_log.insert(tk.END,
-                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n\n')
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname])}张卡。\n\n')
                         elif isinstance(Cards_now, dict):
                             result = random.choice(Cards_list[cardname][cardname])
                             if len(Cards_list[cardname][cardname]) != 1:
@@ -2099,7 +2114,7 @@ class ChatApp:
                                     result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
                             if num == 1:
                                 self.chat_log.insert(tk.END,
-                                                               f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n\n')
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n不放回公有牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n\n')
                                 if len(Cards_list[cardname][cardname]) == 0:
                                     self.role_entries[role].insert(tk.END,
                                                                    f'已自动补充牌堆。\n')
@@ -2141,9 +2156,9 @@ class ChatApp:
                             result = f"\n{result}".replace("\n\n\n", "")
                             result = f"\n{result}".replace("\n\n", "")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在公有牌堆[{cardname}]的暗抽。\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n这是一次【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】在公有牌堆[{cardname}]的暗抽。\n\n')
                             self.role_entries[role].insert(tk.END,
-                                                           f'\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                           f'\n【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2155,7 +2170,7 @@ class ChatApp:
                             result = f"\n{result}".replace("\n\n\n", "")
                             result = f"\n{result}".replace("\n\n", "")
                             self.chat_log.insert(tk.END,
-                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role].replace("【","[").replace("】","]")}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role].replace("【", "[").replace("】", "]")}】在公有牌堆[{cardname}]的抽取结果：{result}\n\n')
                             self.chat_log.yview(tk.END)
                         else:
                             result_ = result_ + f"[{num}]" + result + "\n"
@@ -2189,7 +2204,9 @@ class ChatApp:
         return skills
 
     def update_skills(self, old_dict, new_dict):
+        skill_dict = []
         for skill, value in new_dict.items():
+            skill_dict.append(skill)
             if skill in old_dict:
                 # 如果技能已存在于旧字典中，更新数值
                 old_dict[skill] = value
@@ -2217,22 +2234,30 @@ class ChatApp:
             old_dict["体型"] = old_dict["SIZ"]
             old_dict["幸运"] = old_dict["LUCK"]
         old_dict["灵感"] = old_dict["智力"]
-        if (old_dict["HP"] == "(CON+SIZ)/10") or (old_dict["HP"]) == 0:
+        if (old_dict["HP"] == "(CON+SIZ)/10") or (old_dict["HP"]) == 0 or ("HP" not in skill_dict):
             old_dict["HP"] = int((old_dict["体质"] + old_dict["体型"]) / 10)
-        if (old_dict["MP"] == "POW/5") or (old_dict["MP"]) == 0:
+        if (old_dict["MP"] == "POW/5") or (old_dict["MP"]) == 0 or ("MP" not in skill_dict):
             old_dict["MP"] = int(old_dict["意志"] / 5)
-        if old_dict["SAN"] == "POW":
+        if old_dict["SAN"] == "POW" or ("SAN" not in skill_dict) or (old_dict["SAN"] == old_dict["意志"]):
             old_dict["SAN"] = old_dict["意志"]
+            print(skill_dict)
+        else:
+            pass
+        old_dict["理智"] = old_dict["SAN"]
         if old_dict["闪避"] > int(old_dict["敏捷"] / 2):
+            pass
+        elif "闪避" in new_dict:
             pass
         else:
             old_dict["闪避"] = int(old_dict["敏捷"] / 2)
-        if old_dict["母语"] > old_dict["教育"]:
+        if old_dict["母语"] != "EDU" and old_dict["母语"] > old_dict["教育"]:
+            pass
+        elif "母语" in new_dict:
             pass
         else:
             old_dict["母语"] = old_dict["教育"]
         old_dict["魅力"] = old_dict["外貌"]
-        old_dict["cm"] = old_dict["克苏鲁神话"]
+        old_dict["CM"] = old_dict["克苏鲁神话"]
         old_dict["克苏鲁"] = old_dict["克苏鲁神话"]
         old_dict["计算机"] = old_dict["计算机使用"]
         old_dict["电脑"] = old_dict["计算机使用"]
@@ -2244,13 +2269,14 @@ class ChatApp:
         else:
             old_dict["信用评级"] = old_dict["信用"]
         if old_dict["MOV"] == 8:
-            if (old_dict["敏捷"] < old_dict["体型"]) and (old_dict["力量"] < old_dict["体型"]):
+            if ("mov" in new_dict) or ("MOV" in new_dict):
+                pass
+            elif (old_dict["敏捷"] < old_dict["体型"]) and (old_dict["力量"] < old_dict["体型"]):
                 old_dict["MOV"] = 7
             elif (old_dict["敏捷"] > old_dict["体型"]) and (old_dict["力量"] > old_dict["体型"]):
                 old_dict["MOV"] = 9
             else:
                 old_dict["MOV"] = 8
-            print(old_dict["MOV"])
         if old_dict["DB"] == 1:
             old_dict["DB"] = "1(+1D4)"
         if old_dict["DB"] == 2:
@@ -2333,7 +2359,8 @@ class ChatApp:
 
             # 按名牌加载设置
             if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
-                self.infoCanvas_data[role] = self.infoCanvas_data_by_name[new_name]
+                if new_name in self.infoCanvas_data_by_name:
+                    self.infoCanvas_data[role] = self.infoCanvas_data_by_name[new_name]
                 role_Chart[role] = role_Chart_at_name[new_name].copy()
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 # self.role_entries[role].delete("1.0", tk.END)
@@ -2370,8 +2397,8 @@ class ChatApp:
 
     def add_role(self):
         self.role_count += 1
-        #print(self.role_count)
-        #self.role_count = self.role_count
+        # print(self.role_count)
+        # self.role_count = self.role_count
         new_role = f"PL {len(self.roles) - 1}"
         self.roles.append(new_role)
         if new_role not in self.role_entries_name:
@@ -2950,9 +2977,9 @@ class ChatApp:
                 name = match[0]
                 timestamp = match[1]
                 content = match[2]
-                #print(name)
-                #print(timestamp)
-                #print(content)
+                # print(name)
+                # print(timestamp)
+                # print(content)
                 chat_log_content_ = chat_log_content_ + f"<{name}>{content}\n"
             chat_log_content = chat_log_content_
             # for m in matches:
@@ -2982,15 +3009,15 @@ class ChatApp:
             # chat_log_content = re.sub(r'(\【骰子\】).*\n\1', r'\1', chat_log_content)
             # 对连续出现的掷骰结果进行合并
             # merged_text = "；".join(matches)
-            #将无说话人的行变更为上一个说话人
+            # 将无说话人的行变更为上一个说话人
             matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
             while matches:
-                #matches_lastline = re.findall(r'^(?![【<])[^\\n]*$(?<=<([^>]*)>)', chat_log_content, re.MULTILINE)
-                #chat_log_content = re.sub(r'^(?![【<])[^\\n]*$', "<"+matches_lastline + ">" + r'\1', chat_log_content)
+                # matches_lastline = re.findall(r'^(?![【<])[^\\n]*$(?<=<([^>]*)>)', chat_log_content, re.MULTILINE)
+                # chat_log_content = re.sub(r'^(?![【<])[^\\n]*$', "<"+matches_lastline + ">" + r'\1', chat_log_content)
                 # 将文本按行拆分成列表
                 lines = chat_log_content.split('\n')
                 # 用于存放行号的列表
-                #line_numbers = []
+                # line_numbers = []
                 # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
                 for i, line in enumerate(lines):
                     if not re.match(r'^[【<]', line):
@@ -2998,24 +3025,24 @@ class ChatApp:
                             lines.pop(i)
                             break
                         else:
-                            #line_numbers.append(i + 1)  # 行号从1开始
+                            # line_numbers.append(i + 1)  # 行号从1开始
                             j = 0
                             for k, l in enumerate(lines):
-                                last_line = re.findall(r'<([^>]*)>', lines[i-1-j], re.MULTILINE)
+                                last_line = re.findall(r'<([^>]*)>', lines[i - 1 - j], re.MULTILINE)
                                 if last_line:
                                     lines[i] = f"<{last_line[0]}>{lines[i]}"
                                     break
-                                elif i-1-j < 0:
+                                elif i - 1 - j < 0:
                                     print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
                                     lines = []
                                     matches = []
                                     return
                                 j += 1
-                #chat_log_content = chat_log_content.replace("","")
+                # chat_log_content = chat_log_content.replace("","")
                 chat_log_content = "\n".join(lines)
                 matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
 
-            #高亮文字效果
+            # 高亮文字效果
             chat_log_content = chat_log_content.replace("<【多轮掷骰】>", "【骰子】")
             lines = chat_log_content.split('\n')
             for index, line in enumerate(lines):
@@ -3028,13 +3055,26 @@ class ChatApp:
                 if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
                     name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
                     if name:
-                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace("【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（", "<color=#FFFFFF70>（").replace("）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【", style_highlight_style[0]).replace("】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]", style_highlight_weak_style[1]).replace("@", f"{style_highlight_weak_style2[0]}@{style_highlight_weak_style2[1]}")
+                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace(
+                            "【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（",
+                                                                                                       "<color=#FFFFFF70>（").replace(
+                            "）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【",
+                                                                                                                   style_highlight_style[
+                                                                                                                       0]).replace(
+                            "】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]",
+                                                                                                               style_highlight_weak_style[
+                                                                                                                   1]).replace(
+                            "@", f"{style_highlight_weak_style2[0]}@{style_highlight_weak_style2[1]}")
                         lines[index] = f"<{name[0]}>{content}"
                 if (line[0] == "【") and ("【骰子】" in line):
                     # 把两个=简化成一个
                     content = line.replace("【骰子】", "")
                     content = re.sub(r'=([^;=]+)=', '=', content)
-                    content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[0]).replace("】", style_dice_pcname_color[1]).replace("{", style_dice_skillname_style[0]).replace("}", style_dice_skillname_style[1])#.replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                    content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[
+                        0]).replace("】", style_dice_pcname_color[1]).replace("{",
+                                                                             style_dice_skillname_style[0]).replace("}",
+                                                                                                                    style_dice_skillname_style[
+                                                                                                                        1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                     lines[index] = f"【骰子】{content}"
             chat_log_content = "\n".join(lines)
 
@@ -3331,6 +3371,18 @@ class ChatApp:
                     # self.Iconcanvas[role].delete(self.current_frame_avatar[role])
         else:
             pass
+
+    def autoSave(self):
+        self.quickSave()
+        timestamp = datetime.now().strftime("%H:%M")
+        print(timestamp + ": 已自动保存当前Log")
+        root.after(600000, self.autoSave)
+
+    def autoSave_firstTime(self):
+        root.after(600000, self.autoSave)
+        # timer = threading.Timer(5, autoSave)
+        # timer.start()
+        print("已启动自动保存，间隔为10分钟")
 
     def animate(self, frame_index, canvas, current_frame, frames):
         # print(str(frame_index)+"/" + str(len(frames)))
@@ -3635,7 +3687,8 @@ class ChatApp:
                             self.chat_log.insert(tk.END, message)
                             self.chat_log.yview(tk.END)
                         else:
-                            final_words_roles[roles] = final_words_roles[roles] + f"{result}{expressionUPP}={parts_[0]};\n"
+                            final_words_roles[roles] = final_words_roles[
+                                                           roles] + f"{result}{expressionUPP}={parts_[0]};\n"
                             final_words_roles_comment[roles] = final_words_roles_comment[roles] + f"{parts_[1]}"
                         self.role_entries["DiceBot"].delete("1.0", tk.END)
                         if len(parts_) > 1:
@@ -3668,19 +3721,20 @@ class ChatApp:
                                                                                           f"ARMOR:{value_armor}")
                                 if "急救" in expression:
                                     self.role_entries[roles].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                                    self.role_entries_roll[role].insert("1.0", f"hp+1")
                                 if "医学" in expression:
                                     self.role_entries[roles].insert("1.0", f"[医学]恢复1D3 HP\n")
                                     self.role_entries_roll[roles].delete("1.0", tk.END)
-                                    self.role_entries_roll[roles].insert("1.0", f"1d3")
+                                    self.role_entries_roll[roles].insert("1.0", f"hp+1d3")
                                 if "精神分析" in expression:
                                     self.role_entries[roles].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
                                     self.role_entries_roll[roles].delete("1.0", tk.END)
-                                    self.role_entries_roll[roles].insert("1.0", f"1d3")
+                                    self.role_entries_roll[roles].insert("1.0", f"san+1d3")
                             if parts_ and "大失败" in parts_[1]:
                                 if "精神分析" in expression:
                                     self.role_entries[roles].insert("1.0", f"[精神分析损失]1D6 SAN\n")
                                     self.role_entries_roll[roles].delete("1.0", tk.END)
-                                    self.role_entries_roll[roles].insert("1.0", f"1d6")
+                                    self.role_entries_roll[roles].insert("1.0", f"san-1d6")
                             if parts_ and "失败" in parts_[1]:
                                 for weapon, value in weapon_list_.items():
                                     # print(weapon_list_)
@@ -3750,7 +3804,7 @@ class ChatApp:
                         self.chat_log.yview(tk.END)
                     else:
                         final_words = final_words + f"{result}{expressionUPP}={parts_[0]};\n"
-                        #final_words_roles_comment = final_words_roles_comment + f"{parts_[1]}\n"
+                        # final_words_roles_comment = final_words_roles_comment + f"{parts_[1]}\n"
 
                     weapon_list = {}
                     if len(parts_) > 1:
@@ -3779,21 +3833,21 @@ class ChatApp:
                                             self.role_entries_roll[role_armor].insert("1.0", f"ARMOR:{value_armor}")
                                     break
                                     # print("sadadd:" + value)
-                                if "急救" in expression:
-                                    self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
-                                if "医学" in expression:
-                                    self.role_entries[role].insert("1.0", f"[医学恢复]1D3 HP\n")
-                                    self.role_entries_roll[role].delete("1.0", tk.END)
-                                    self.role_entries_roll[role].insert("1.0", f"1d3")
-                                if "精神分析" in expression:
-                                    self.role_entries[role].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
-                                    self.role_entries_roll[role].delete("1.0", tk.END)
-                                    self.role_entries_roll[role].insert("1.0", f"1d3")
+                            if "急救" in expression:
+                                self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                            if "医学" in expression:
+                                self.role_entries[role].insert("1.0", f"[医学恢复]1D3 HP\n")
+                                self.role_entries_roll[role].delete("1.0", tk.END)
+                                # self.role_entries_roll[role].insert("1.0", f"1d3")
+                            if "精神分析" in expression:
+                                self.role_entries[role].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
+                                self.role_entries_roll[role].delete("1.0", tk.END)
+                                # self.role_entries_roll[role].insert("1.0", f"1d3")
                         if parts_ and "大失败" in parts_[1]:
                             if "精神分析" in expression:
                                 self.role_entries[role].insert("1.0", f"[精神分析损失]1D6 SAN\n")
                                 self.role_entries_roll[role].delete("1.0", tk.END)
-                                self.role_entries_roll[role].insert("1.0", f"1d6")
+                                # self.role_entries_roll[role].insert("1.0", f"1d6")
                             for weapon, value in weapon_list.items():
                                 if weapon in expression:
                                     for role_armor in self.roles:
@@ -3831,20 +3885,21 @@ class ChatApp:
                                 self.role_entries[role].insert("1.0", f"[{weapon}伤害]\n")
                                 break
                         if "急救" in expression:
-                            self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                            # self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
+                            self.role_entries_roll[role].insert("1.0", f"hp+1")
                         if "医学" in expression:
-                            self.role_entries[role].insert("1.0", f"[医学恢复]1D3 HP\n")
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"1d3")
+                            # self.role_entries[role].insert("1.0", f"[医学恢复]1D3 HP\n")
+                            # self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"hp+1d3")
                         if "精神分析" in expression:
-                            self.role_entries[role].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"1d3")
+                            # self.role_entries[role].insert("1.0", f"[精神分析恢复]1D3 SAN\n")
+                            # self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"san+1d3")
                     if parts_ and "大失败" in parts_[1]:
                         if "精神分析" in expression:
-                            self.role_entries[role].insert("1.0", f"[精神分析损失]1D6 SAN\n")
-                            self.role_entries_roll[role].delete("1.0", tk.END)
-                            self.role_entries_roll[role].insert("1.0", f"1d6")
+                            # self.role_entries[role].insert("1.0", f"[精神分析损失]1D6 SAN\n")
+                            # self.role_entries_roll[role].delete("1.0", tk.END)
+                            self.role_entries_roll[role].insert("1.0", f"san-1d6")
             multi_num -= 1
 
     def roll_dice_silent(self, role, expression, reason):
@@ -3932,11 +3987,15 @@ class ChatApp:
         self.start_y = event.y
 
     def draw(self, event):
-        if self.start_x is not None and self.start_y is not None:
-            x, y = event.x, event.y
-            self.canvas.tag_lower(self.canvas.create_line(self.start_x, self.start_y, x, y, width=2))
-            self.start_x = x
-            self.start_y = y
+        global isOpeningFiles
+        if isOpeningFiles:
+            pass
+        else:
+            if self.start_x is not None and self.start_y is not None:
+                x, y = event.x, event.y
+                self.canvas.tag_lower(self.canvas.create_line(self.start_x, self.start_y, x, y, width=2))
+                self.start_x = x
+                self.start_y = y
 
     def set_erase_point(self, event):
         self.start_x = event.x
@@ -3962,26 +4021,30 @@ class ChatApp:
                 selected_item = self.tree_main.selection()
                 # 如果有选中的条目
                 if selected_item:
-                    # 更改选中条目的背景色为红色
-                    # self.tree2_list[role].item(selected_item, tags=('red_background'))
-                    self.tree_main.delete(selected_item)
+                    for l in selected_item:
+                        # 更改选中条目的背景色为红色
+                        # self.tree2_list[role].item(selected_item, tags=('red_background'))
+                        self.tree_main.delete(l)
             if selected_item:
-                # 更改选中条目的背景色为红色
-                # self.tree_list[role].item(selected_item, tags=('red_background'))
-                self.tree_main.delete(selected_item)
+                for l in selected_item:
+                    # 更改选中条目的背景色为红色
+                    # self.tree_list[role].item(selected_item, tags=('red_background'))
+                    self.tree_main.delete(l)
         else:
             selected_item = self.tree2_list[role].selection()
             if selected_item is None:
                 selected_item = self.tree_list[role].selection()
                 # 如果有选中的条目
                 if selected_item:
-                    # 更改选中条目的背景色为红色
-                    # self.tree2_list[role].item(selected_item, tags=('red_background'))
-                    self.tree_list[role].delete(selected_item)
+                    for l in selected_item:
+                        # 更改选中条目的背景色为红色
+                        # self.tree2_list[role].item(selected_item, tags=('red_background'))
+                        self.tree_list[role].delete(l)
             if selected_item:
-                # 更改选中条目的背景色为红色
-                # self.tree_list[role].item(selected_item, tags=('red_background'))
-                self.tree2_list[role].delete(selected_item)
+                for l in selected_item:
+                    # 更改选中条目的背景色为红色
+                    # self.tree_list[role].item(selected_item, tags=('red_background'))
+                    self.tree2_list[role].delete(l)
 
     def on_double_click(self, event, role=None):
         # 获取双击的条目
@@ -4044,6 +4107,11 @@ class ChatApp:
         else:
             self.add_inference2self(result["信息来源"], result["信息内容"], result["记忆指数"], role)
 
+    def add_information_public(self, role=None):
+        self.dialog = MemoryInfoDialog_public(self.new_window, f"为【公共信息池】添加信息", role)
+        result = self.dialog.result
+        self.add_inference2public(result["信息来源"], result["信息内容"], result["评论"], result["共享人"])
+
     def forget_information(self, role):
         # 实现遗忘信息的逻辑
         # 获取所有条目的ID
@@ -4059,27 +4127,57 @@ class ChatApp:
             self.tree_list[role].delete(last_item)
 
     def upload_information(self, role=None):
-        list = self.tree_list[role].get_children()
-        for l in list:
-            self.tree_main.insert("", "end", values=(
-                self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
-                self.role_entries_name[role], self.thoughts[role].get("1.0", tk.END)))
-            print(self.tree_list[role].item(l, "values"))
-            self.tree2_list[role].insert("", "end", values=(
-                self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
-                self.tree_list[role].item(l, "values")[2], "√"))
-            self.tree_list[role].delete(l)
-            # self.add_inference2public(l["信息来源"], "关于X的信息", "想法", role)
-            # self.add_inference2self2("玩家1", "关于X的信息", -4, "√", role)
-        sorted_ids = sorted(self.tree2_list[role].get_children(), key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
-                            reverse=True)
-        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
-        for item_id in sorted_ids:
-            values = self.tree2_list[role].item(item_id, "values")
-            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
-            self.tree2_list[role].insert("", "end", values=values)
-            self.tree2_list[role].delete(item_id)
-            self.tree2_list[role].update()
+        # 获取选中的条目
+        if role == "KP":
+            pass
+        else:
+            selected_item = self.tree_list[role].selection()
+            # 如果有选中的条目
+            if selected_item:
+                for l in selected_item:
+                    self.tree_main.insert("", "end", values=(
+                        self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
+                        self.role_entries_name[role], self.thoughts[role].get("1.0", tk.END)))
+                    print(self.tree_list[role].item(l, "values"))
+                    self.tree2_list[role].insert("", "end", values=(
+                        self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
+                        self.tree_list[role].item(l, "values")[2], "√"))
+                    self.tree_list[role].delete(l)
+                    # self.add_inference2public(l["信息来源"], "关于X的信息", "想法", role)
+                    # self.add_inference2self2("玩家1", "关于X的信息", -4, "√", role)
+                sorted_ids = sorted(self.tree2_list[role].get_children(),
+                                    key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
+                                    reverse=True)
+                # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+                for item_id in sorted_ids:
+                    values = self.tree2_list[role].item(item_id, "values")
+                    # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+                    self.tree2_list[role].insert("", "end", values=values)
+                    self.tree2_list[role].delete(item_id)
+                    self.tree2_list[role].update()
+            else:
+                list = self.tree_list[role].get_children()
+                for l in list:
+                    self.tree_main.insert("", "end", values=(
+                        self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
+                        self.role_entries_name[role], self.thoughts[role].get("1.0", tk.END)))
+                    print(self.tree_list[role].item(l, "values"))
+                    self.tree2_list[role].insert("", "end", values=(
+                        self.tree_list[role].item(l, "values")[0], self.tree_list[role].item(l, "values")[1],
+                        self.tree_list[role].item(l, "values")[2], "√"))
+                    self.tree_list[role].delete(l)
+                    # self.add_inference2public(l["信息来源"], "关于X的信息", "想法", role)
+                    # self.add_inference2self2("玩家1", "关于X的信息", -4, "√", role)
+                sorted_ids = sorted(self.tree2_list[role].get_children(),
+                                    key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
+                                    reverse=True)
+                # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+                for item_id in sorted_ids:
+                    values = self.tree2_list[role].item(item_id, "values")
+                    # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+                    self.tree2_list[role].insert("", "end", values=values)
+                    self.tree2_list[role].delete(item_id)
+                    self.tree2_list[role].update()
 
     def clear_information(self, role=None):
         if role == "KP":
@@ -4262,19 +4360,23 @@ class ChatApp:
                 clearKP_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
                 saveKP_button = tk.Button(frame, text="保\n存\n所\n有", bg="black", fg="white",
                                           command=self.on_closing_new_window)
-                saveKP_button.grid(row=0, column=2, pady=5, sticky="nsew")
+                saveKP_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
                 deleteKP_button = tk.Button(frame, text="删\n除\n信\n息",
                                             command=lambda role=role: self.delete_information(role))
-                deleteKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
+                deleteKP_button.grid(row=1, column=1, pady=5, sticky="nsew")
                 # loadKP_button = tk.Button(frame, text="读\n取", command=self.load_treeview_data)
                 # loadKP_button.grid(row=1, column=2, pady=5, sticky="nsew")
                 map_button = tk.Button(frame, text="绘\n制\n地\n图", bg="green", fg="white",
                                        command=self.open_new_window_map)
                 map_button.grid(row=0, column=1, pady=5, sticky="nsew")
                 cal_button = tk.Button(frame, text="计\n算\n器", bg="blue", fg="white", command=self.calculator)
-                cal_button.grid(row=1, column=1, pady=5, sticky="nsew")
+                cal_button.grid(row=1, column=2, pady=5, sticky="nsew")
                 # frame.grid_rowconfigure(0, weight=1)
                 # frame.grid_columnconfigure(0, weight=1)
+                add_button = tk.Button(frame, text="添\n加\n信\n息",
+                                       command=lambda role=role: self.add_information_public(role))
+                add_button.grid(row=0, column=2, pady=5, sticky="nsew")
+                self.info_add_button[role] = add_button
             else:
                 if role == "DiceBot":
                     frame = tk.LabelFrame(self.new_window, text="NPC", relief=tk.GROOVE)
@@ -4305,9 +4407,10 @@ class ChatApp:
                                          command=lambda role=role: self.clear_information(role))
                 clear_button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
 
-            expand_button = tk.Button(frame, text="展\n开\n收\n起", command=lambda role=role: self.expand_information(role))
-            expand_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-            self.info_expand_button[role] = expand_button
+                expand_button = tk.Button(frame, text="展\n开\n收\n起",
+                                          command=lambda role=role: self.expand_information(role))
+                expand_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+                self.info_expand_button[role] = expand_button
             # 使用style修改Treeview的样式
             style = ttk.Style()
             style.configure("Treeview", font=(None, 10), rowheight=12, height=5, sticky="nsew",
@@ -4391,7 +4494,7 @@ class ChatApp:
                 # 添加示例数据
                 # self.add_inference2public("玩家1", "关于X的信息", "关于X的信息")
                 if role == "DiceBot":
-                    #self.add_inference2self("xxx", "xxx的可能性", 0, role)
+                    # self.add_inference2self("xxx", "xxx的可能性", 0, role)
                     pass
                 # self.add_inference("玩家2", "关于Y的信息", 5, "√")
             # 配置可调整大小的框架
@@ -4408,7 +4511,7 @@ class ChatApp:
 
         text = self.time_log.get("1.0", tk.END).strip()
         label = tk.Label(new_window,
-                         text="地图即时使用，信息不互通，关闭即销毁: [右键]绘图/副本 | [右键角色/无图则❤]载入战斗图像 | [右键骰子图像]载入指示物 | [右键战斗图像]销毁 | [单击标签/❤]编辑 | [中键拖拽标签]缩放(仅限矩形和圆)")
+                         text="地图即时使用，信息不互通，关闭即销毁: [右键]绘图/副本 | [右键角色/无图则❤]载入战斗图像 | [右键DiceBot]载入指示物 | [右键战斗图像]销毁 | [单击标签/❤]编辑 | [中键拖拽标签]缩放(仅限矩形和圆)")
         label.pack()
 
         label2 = tk.Label(new_window,
@@ -4474,7 +4577,8 @@ class ChatApp:
                         # 显示 GIF 图片的第一帧
                         if _avatar == "DiceBot":
                             current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
-                                                                         image=frames_map[frame_Map][0],type="DiceBotImage_animate",
+                                                                         image=frames_map[frame_Map][0],
+                                                                         type="DiceBotImage_animate",
                                                                          frame=frame_Map)
                         else:
                             current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
@@ -4490,7 +4594,7 @@ class ChatApp:
                             draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, type='DiceBotImage')
                         else:
                             draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text,
-                                                        label2=label_text2, type='image')
+                                                            label2=label_text2, type='image')
                         y += 100
                         self.draggable_items[_avatar] = draggable_image
                 else:
@@ -4617,11 +4721,21 @@ class ChatApp:
         with open('AppSettings/config.ini', 'w') as configfile:
             config.write(configfile)
 
+    def quickSave(self):
+        # 退出时quicksave
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        # datestamp = datetime.now().strftime("%Y-%m-%d")
+        filename = f"QuickSaves/QuickSave_{timestamp}.txt"
+        chat_log_content = self.chat_log.get("1.0", tk.END)
+        with open(filename, "w") as file:
+            file.write(chat_log_content)
+
     def on_closing(self):
         # 在关闭窗口前保存设置
         self.save_settings()
         # 退出时保存当前角色数量
         self.save_role_count()
+        self.quickSave()
         self.root.destroy()
 
 
@@ -4736,15 +4850,17 @@ class TRPGModule:
             part_eng = pattern_user.findall(expression)
             part_combine = pattern_combine.findall(expression)
             # print(part_eng)
-            if "HP" in expression.upper() or "MP" in expression.upper():
-                print("HP/MP变化")
+            if "HP" in expression.upper() or "MP" in expression.upper() or "SAN" in expression.upper():
+                print("HP/MP/SAN变化")
                 if "HP" in expression.upper():
                     HP_MP_check = "HP"
                 elif "MP" in expression.upper():
                     HP_MP_check = "MP"
+                elif "SAN" in expression.upper():
+                    HP_MP_check = "SAN"
                 else:
                     HP_MP_check = ""
-                expression = expression.upper().replace("HP", "").replace("MP", "")
+                expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "")
             if pattern_combine.match(expression) and len(part_combine) > 1:
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 print("联合掷骰")  # 意志+斗殴+潜行
@@ -5127,6 +5243,7 @@ class TRPGModule:
                 exp = expression
                 HP = role_Chart[role].get("HP")
                 MP = role_Chart[role].get("MP")
+                SAN = role_Chart[role].get("#SAN")
                 if ("+" in expression) or ("-" in expression) or ("*" in expression) or ("/" in expression):
                     # if 有多个d 有多个符号
                     seen_letters = set()
@@ -5176,10 +5293,14 @@ class TRPGModule:
                 else:
                     result = expression
                     exp = ""
-                temp_HP_MP_check = HP_MP_check + "_"
                 if HP_MP_check == "HP":
+                    temp_HP_MP_check = HP_MP_check + "_"
                     itm = self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip()
+                elif HP_MP_check == "SAN":
+                    temp_HP_MP_check = HP_MP_check
+                    itm = self.ChatApp.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
                 else:
+                    temp_HP_MP_check = HP_MP_check + "_"
                     itm = self.ChatApp.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip()
                 if temp_HP_MP_check in role_Chart[role]:
                     if str(role_Chart[role].get(temp_HP_MP_check)) != itm:
@@ -5189,6 +5310,9 @@ class TRPGModule:
                     if HP_MP_check == "HP":
                         itm = eval(str(self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[
                                            0].strip()) + fuhao + result)
+                    elif HP_MP_check == "SAN":
+                        itm = eval(str(self.ChatApp.role_values_entry[role].get("1.0", "2.0").split("/")[
+                                           0].strip()) + fuhao + result)
                     else:
                         itm = eval(str(self.ChatApp.role_values_entry[role].get("3.0", "4.0").split("/")[
                                            0].strip()) + fuhao + result)
@@ -5197,6 +5321,10 @@ class TRPGModule:
                     self.ChatApp.role_values_entry[role].delete("2.0", "3.0")
                     self.ChatApp.role_values_entry[role].insert("2.0",
                                                                 f'{itm}/{HP}:HP\n')
+                elif HP_MP_check == "SAN":
+                    self.ChatApp.role_values_entry[role].delete("1.0", "2.0")
+                    self.ChatApp.role_values_entry[role].insert("1.0",
+                                                                f'{itm}/{SAN}:SAN\n')
                 else:
                     self.ChatApp.role_values_entry[role].delete("3.0", "4.0")
                     self.ChatApp.role_values_entry[role].insert("3.0",
@@ -5204,8 +5332,15 @@ class TRPGModule:
                 des = f"{fuhao}{exp}={result}点{HP_MP_check}".replace("-=", "减少").replace("+=", "恢复")
                 des2 = "已" + des
                 des2 = des2.replace("已+", "已恢复").replace("已-", "已减少")
-                self.ChatApp.chat_log.insert(tk.END,
-                                             f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("2.0", "4.0").strip()}\n\n')
+                if HP_MP_check == "HP":
+                    self.ChatApp.chat_log.insert(tk.END,
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("2.0", "3.0").strip()}\n\n')
+                elif HP_MP_check == "SAN":
+                    self.ChatApp.chat_log.insert(tk.END,
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
+                else:
+                    self.ChatApp.chat_log.insert(tk.END,
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("3.0", "4.0").strip()}\n\n')
                 self.ChatApp.chat_log.yview(tk.END)
                 self.ChatApp.role_entries[role].insert(tk.END, des + "。")
                 return
@@ -5753,7 +5888,7 @@ class DraggableItem:
                     self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="black")
 
     def on_resize(self, event):
-        #self.resize_anchor = event.x - 100, event.y - 50
+        # self.resize_anchor = event.x - 100, event.y - 50
         self.resize_anchor = self.canvas.coords(self.item)[:2]  # 获取图像左上角的坐标
         label_coords = self.canvas.coords(self.label_below_image_canvas)
         # self.resize_anchor = (self.resize_anchor[0] + label_coords[0], self.resize_anchor[1] + label_coords[1])
@@ -5761,7 +5896,7 @@ class DraggableItem:
 
     def on_resize_img(self, event):
         print("中键")
-        #self.resize_anchor = event.x, event.y
+        # self.resize_anchor = event.x, event.y
         self.resize_anchor = self.canvas.coords(self.item)[:2]
         label_coords = self.canvas.coords(self.label_below_image_canvas2_edit)
         # self.resize_anchor = (self.resize_anchor[0] + label_coords[0], self.resize_anchor[1] + label_coords[1])
@@ -5784,12 +5919,12 @@ class DraggableItem:
             self.width += dx
             self.height += dy
             x1, y1 = self.canvas.coords(self.item)[:2]  # 获取图像左上角的坐标
-            #self.canvas.coords(self.item, x1, y1, x1+ self.width, y1+ self.height)
-            self.canvas.scale(self.item, 0, 0, 1 + dx/self.width, 1 + dy/self.height)
-            #self.canvas.itemconfig(self.item, width=self.width, hight=self.height)
-            #self.canvas.delete(self.item)  # 删除旧的图像对象
+            # self.canvas.coords(self.item, x1, y1, x1+ self.width, y1+ self.height)
+            self.canvas.scale(self.item, 0, 0, 1 + dx / self.width, 1 + dy / self.height)
+            # self.canvas.itemconfig(self.item, width=self.width, hight=self.height)
+            # self.canvas.delete(self.item)  # 删除旧的图像对象
             # 创建一个新的图像对象，并设置新的大小
-            #self.item = self.canvas.create_image(x1, y1, image=your_image, tags="draggable")
+            # self.item = self.canvas.create_image(x1, y1, image=your_image, tags="draggable")
             self.resize_anchor = event.x, event.y
 
     def apng_to_gif(self, apng_file, gif_file):
@@ -5813,6 +5948,22 @@ class DraggableItem:
         canvas.after()
 
     def on_right_press(self, event):
+        global isOpeningFiles
+        isOpeningFiles = True
+        # self.canvas.unbind("<ButtonRelease-3>")
+        # 获取屏幕的宽度和高度
+        # screen_width, screen_height = pyautogui.size()
+        # 将鼠标指针移动到右下角
+        # pyautogui.moveTo(screen_width, screen_height)
+        # 加载user32.dll
+        user32 = ctypes.windll.user32
+        # 获取屏幕的宽度和高度
+        screen_width = user32.GetSystemMetrics(0)
+        screen_height = user32.GetSystemMetrics(1)
+        # 将鼠标移动到右下角
+        # user32.SetCursorPos(screen_width-100, screen_height-100)
+        user32.SetCursorPos(screen_width, screen_height - 500)
+
         global frame_Map
         global frames_Map
         global current_frame_map
@@ -5843,6 +5994,7 @@ class DraggableItem:
             self.canvas.delete(self.label_below_image_canvas2_edit)
         elif self.itemType == "image" or self.itemType == "text_PC" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
             # 创建武器选择变量
+            # t.sleep(1)
             avatar_path = filedialog.askopenfilename(title="为【" + self.label + "】选择战斗图片",
                                                      filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                                      initialdir="Images/BattleImages")
@@ -5902,6 +6054,7 @@ class DraggableItem:
             # self.select_weapon_button.pack()
 
         elif self.itemType == "DiceBotImage":
+            # t.sleep(1)
             avatar_path = filedialog.askopenfilename(title="载入图片",
                                                      filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                                      initialdir="Images/MapMarkers")
@@ -5937,7 +6090,8 @@ class DraggableItem:
                     # 显示 GIF 图片的第一帧
                     current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
                                                                  image=frames_map[frame_Map][0],
-                                                                 label2=labeltext, type="image_temp_animate", secret=secret,
+                                                                 label2=labeltext, type="image_temp_animate",
+                                                                 secret=secret,
                                                                  frame=frame_Map)
                     frame_Map += 1
 
@@ -5975,27 +6129,28 @@ class DraggableItem:
                                                     outline='black', label='标签', type=self.itemType)
                 Is_fill = True
 
-    #def select_weapon(self, event):
-        #weapon = self.weapon_var.get()
+        # def select_weapon(self, event):
+        # weapon = self.weapon_var.get()
 
         # 根据选择的武器加载相应的图片
-        #if weapon:
-            #if weapon == "剑":
-                # 载入剑的图片
-                #image = tk.PhotoImage(file="sword.gif")
-            #elif weapon == "盾":
-                # 载入盾的图片
-                #image = tk.PhotoImage(file="shield.gif")
-            #elif weapon == "长矛":
-                # 载入长矛的图片
-                #image = tk.PhotoImage(file="spear.gif")
-            #else:
-                # 默认情况下，载入默认图片
-                #image = tk.PhotoImage(file="default.gif")
+        # if weapon:
+        # if weapon == "剑":
+        # 载入剑的图片
+        # image = tk.PhotoImage(file="sword.gif")
+        # elif weapon == "盾":
+        # 载入盾的图片
+        # image = tk.PhotoImage(file="shield.gif")
+        # elif weapon == "长矛":
+        # 载入长矛的图片
+        # image = tk.PhotoImage(file="spear.gif")
+        # else:
+        # 默认情况下，载入默认图片
+        # image = tk.PhotoImage(file="default.gif")
 
-            # 显示图片在 Canvas 上
-            #draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label,
-                                            #label2=self.label2)
+        # 显示图片在 Canvas 上
+        # draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label,
+        # label2=self.label2)
+        isOpeningFiles = False
 
     def on_press(self, event):
         self.start_x = event.x
@@ -6191,6 +6346,51 @@ class MemoryInfoDialog(simpledialog.Dialog):
         self.result["记忆指数"] = memory_index
         self.result["评分"] = rating
         print(f"信息来源: {source}, 信息内容: {content}, 信任度: {trust}, 重要度: {importance}, 记忆指数: {memory_index}, 评分: {rating}")
+        return self.result
+
+
+class MemoryInfoDialog_public(simpledialog.Dialog):
+    def __init__(self, parent, title, role):
+        # self.ChatApp = chat_app_instance
+        super().__init__(parent, title)
+
+    def body(self, master):
+        tk.Label(master, text="信息来源：").grid(row=0, sticky="e")
+        tk.Label(master, text="信息内容：").grid(row=1, sticky="e")
+        tk.Label(master, text="共享人(代号)：").grid(row=2, sticky="e")
+        tk.Label(master, text="评论：").grid(row=3, sticky="e")
+
+        self.source_var = tk.StringVar()
+        self.content_var = tk.StringVar()
+        self.person_var = tk.StringVar()
+        self.comment_var = tk.StringVar()
+
+        self.source_entry = tk.Entry(master, textvariable=self.source_var)
+        self.content_entry = tk.Entry(master, textvariable=self.content_var)
+        self.person_entry = tk.Entry(master, textvariable=self.person_var)
+        # 在 Entry 中显示默认值
+        self.person_entry.insert(0, "KP")
+        self.comment_entry = tk.Entry(master, textvariable=self.comment_var)
+
+        self.source_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.content_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.person_entry.grid(row=2, column=1, padx=5, pady=5)
+        self.comment_entry.grid(row=3, column=1, padx=5, pady=5)
+
+    def apply(self):
+        self.result = {}
+        source = self.source_var.get()
+        content = self.content_var.get()
+        person = self.person_var.get()
+        comment = self.comment_var.get()
+
+        self.result["信息来源"] = source
+        self.result["信息内容"] = content
+        self.result["共享人"] = person
+        if comment:
+            self.result["评论"] = comment
+        else:
+            self.result["评论"] = "HO共同信息"
         return self.result
 
 
