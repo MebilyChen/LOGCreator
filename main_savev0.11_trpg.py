@@ -4391,7 +4391,8 @@ class ChatApp:
                 # 添加示例数据
                 # self.add_inference2public("玩家1", "关于X的信息", "关于X的信息")
                 if role == "DiceBot":
-                    self.add_inference2self("xxx", "xxx的可能性", 0, role)
+                    #self.add_inference2self("xxx", "xxx的可能性", 0, role)
+                    pass
                 # self.add_inference("玩家2", "关于Y的信息", 5, "√")
             # 配置可调整大小的框架
             # 绑定关闭事件
@@ -5601,7 +5602,7 @@ class DraggableItem:
                                                                         fill="white",
                                                                         tags="draggable")
                     self.label_below_image_canvas2_edit = canvas.create_text(x, y + 30, text="___", font=("Arial", 10),
-                                                                             fill="white",
+                                                                             fill="black",
                                                                              tags="draggable")
                 else:
                     self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
@@ -5610,6 +5611,8 @@ class DraggableItem:
                     self.label_below_image_canvas2_edit = canvas.create_text(x, y + 30, text="___", font=("Arial", 10),
                                                                              fill="black",
                                                                              tags="draggable")
+                self.canvas.tag_bind(self.label_below_image_canvas2_edit, "<ButtonPress-2>", self.on_resize_img)
+                self.canvas.tag_bind(self.label_below_image_canvas2_edit, "<B2-Motion>", self.on_right_drag_img)
 
             else:
                 self.label_below_image_canvas = None
@@ -5729,8 +5732,9 @@ class DraggableItem:
         else:
             intiText = "标签"
         new_text = simpledialog.askstring("Input", "Enter new text:", initialvalue=intiText)
-        secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
+        secret = "n"
         if new_text:
+            secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
             if self.itemType == "text":
                 if secret == "y":
                     self.canvas.itemconfig(self.item, text=new_text, fill="white")
@@ -5749,8 +5753,17 @@ class DraggableItem:
                     self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="black")
 
     def on_resize(self, event):
-        self.resize_anchor = event.x - 100, event.y - 50
+        #self.resize_anchor = event.x - 100, event.y - 50
+        self.resize_anchor = self.canvas.coords(self.item)[:2]  # 获取图像左上角的坐标
         label_coords = self.canvas.coords(self.label_below_image_canvas)
+        # self.resize_anchor = (self.resize_anchor[0] + label_coords[0], self.resize_anchor[1] + label_coords[1])
+        pass
+
+    def on_resize_img(self, event):
+        print("中键")
+        #self.resize_anchor = event.x, event.y
+        self.resize_anchor = self.canvas.coords(self.item)[:2]
+        label_coords = self.canvas.coords(self.label_below_image_canvas2_edit)
         # self.resize_anchor = (self.resize_anchor[0] + label_coords[0], self.resize_anchor[1] + label_coords[1])
         pass
 
@@ -5762,6 +5775,21 @@ class DraggableItem:
             self.height += dy
             self.canvas.coords(self.item, self.canvas.coords(self.item)[0],
                                self.canvas.coords(self.item)[1], self.width, self.height)
+            self.resize_anchor = event.x, event.y
+
+    def on_right_drag_img(self, event):
+        if self.resize_anchor:
+            dx = event.x - self.resize_anchor[0]
+            dy = event.y - self.resize_anchor[1]
+            self.width += dx
+            self.height += dy
+            x1, y1 = self.canvas.coords(self.item)[:2]  # 获取图像左上角的坐标
+            #self.canvas.coords(self.item, x1, y1, x1+ self.width, y1+ self.height)
+            self.canvas.scale(self.item, 0, 0, 1 + dx/self.width, 1 + dy/self.height)
+            #self.canvas.itemconfig(self.item, width=self.width, hight=self.height)
+            #self.canvas.delete(self.item)  # 删除旧的图像对象
+            # 创建一个新的图像对象，并设置新的大小
+            #self.item = self.canvas.create_image(x1, y1, image=your_image, tags="draggable")
             self.resize_anchor = event.x, event.y
 
     def apng_to_gif(self, apng_file, gif_file):
@@ -5879,7 +5907,9 @@ class DraggableItem:
                                                      initialdir="Images/MapMarkers")
             if avatar_path:
                 labeltext = simpledialog.askstring("图片标签", "输入标签文字（可留空）:", initialvalue="")
-                secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
+                secret = "n"
+                if labeltext:
+                    secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
                 suofang = int(simpledialog.askstring("大小", "输入图片大小阈值（可留空，默认50）:", initialvalue="50"))
                 _, extension = os.path.splitext(avatar_path)
                 filename, dot = os.path.splitext(os.path.basename(avatar_path))
