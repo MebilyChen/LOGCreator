@@ -47,7 +47,8 @@ Is_fill = False
 Is_square = False
 Cards_list = {}
 isOpeningFiles = False
-
+Is_Opened = False
+log_file_last_name = ""
 
 def play_audio(file_path, name, loops=-1):
     if file_path:
@@ -1412,8 +1413,8 @@ class ChatApp:
         self.chat_log.insert(tk.END, initial_text)
 
         # 创建按钮，点击按钮时调用 open_new_window 函数
-        new_window_button = tk.Button(root, text="推理信息", command=self.open_new_window)
-        new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
+        self.new_window_button = tk.Button(root, text="推理信息", command=self.open_new_window)
+        self.new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
         # 创建按钮，点击按钮时调用 add_NPC 函数
         load_NPC_button = tk.Button(root, text="装载NPC至栏位", command=self.Add_NPC)
@@ -3054,9 +3055,11 @@ class ChatApp:
         self.new_window_infoCanvas.destroy()
 
     def output_chat_log(self):
+        global log_file_last_name
         new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字/回声):", initialvalue="QQ")
         if new_text:
-            name_text = simpledialog.askstring("输入文件名称", "请输入LOG保存名称(可留空):", initialvalue="")
+            name_text = simpledialog.askstring("输入文件名称", "请输入LOG保存名称(可留空):", initialvalue=log_file_last_name)
+            log_file_last_name = name_text
             # 搜索包含 "===以上可删除===" 的行的起始索引
             start_index = "1.0"
             match_index = self.chat_log.search("===以上可删除===", start_index, tk.END)
@@ -3381,6 +3384,7 @@ class ChatApp:
                         lines[index-1] = lines[index-1] + "{" + line + "}"
                 chat_log_content = "\n".join(lines)
                 chat_log_content = chat_log_content.replace("【等待】", "<wait>:")
+                chat_log_content = chat_log_content.replace("【更换样式】", "<bubble>:")
                 chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【背景】纯黑", "<background>:black")
                 chat_log_content = chat_log_content.replace("【BGM】", "<BGM>:")
@@ -4707,6 +4711,10 @@ class ChatApp:
         # self.new_window.destroy()
 
     def on_closing_new_window_close(self):
+        global Is_Opened
+        Is_Opened = False
+        self.new_window_button = tk.Button(root, text="调查模块", command=self.open_new_window)
+        self.new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
         with open('GameSaves/Deduction_infos_base.json', 'w', encoding='utf-8') as file:
             data = {}
             for role in self.roles:
@@ -4735,6 +4743,10 @@ class ChatApp:
 
     # 新窗口
     def open_new_window(self):
+        global Is_Opened
+        if Is_Opened:
+            messagebox.showinfo("调查模块已开启！", "请勿重复打开以免产生BUG！")
+            return
         self.new_window = tk.Toplevel(root)
         self.new_window.title("调查模块")
 
@@ -4907,6 +4919,9 @@ class ChatApp:
             # 配置可调整大小的框架
             # 绑定关闭事件
         self.new_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_close)
+        Is_Opened = True
+        self.new_window_button = tk.Button(root, text="已开启！",background="red", command=self.open_new_window)
+        self.new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
     # 新窗口
     def open_new_window_map(self):
