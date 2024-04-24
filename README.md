@@ -96,6 +96,7 @@ Done
 初次启动因为缺文件而有BUG，如果真有人想用，来问我要初始化启动文件  
 ![目录](https://github.com/MebilyChen/LOGCreator/assets/71856534/308267dd-8902-4ee7-aacc-e59ed9b66be5)
 配合活字3使用更佳  
+更新：基本适配了回声
 
 # Updates
 优化：多轮掷骰，尤其是全体掷骰的多轮掷骰表现，多轮掷骰和全体掷骰适配活字剧本格式（;分隔）  
