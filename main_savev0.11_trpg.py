@@ -79,6 +79,7 @@ create_folder('ReplayResources')
 create_folder('ReplayResources/BG')
 create_folder('ReplayResources/BGM')
 create_folder('ReplayResources/SE')
+create_folder('ReplayResources/FX')
 create_folder('ReplayResources/HandOut')
 create_folder('CardDecks')
 create_folder('QuickSaves')
@@ -104,6 +105,42 @@ style_dice_reason_color = "因<color=#FFFF00>"  # 黄
 style_dice_pcname_color = ["<color=#FFFF00>", "</color>"]  # 黄
 # 掷骰技能
 style_dice_skillname_style = ["<弹跳><color=#FFFFFF>", "</color></弹跳>"]  # 白，弹跳
+
+### 部分回声文字特效编辑HardCoding，开启富文本有效
+# 震惊
+style_shock_echo = ["[fg:#FFFFFF][b][bg:#FF0000]", "[/bg][/b][/fg]"]  # 黄加粗，弹跳，保留【】
+# 弱化
+style_weaken_echo = ["[fg:#FFFFFF70]", "[/fg]"]  # 黄加粗，弹跳，保留（）
+# 高亮
+style_highlight_style_echo = ["[fg:#000000][bg:#FFFF00][b]【", "】[/b][/bg][/fg]"]  # 黄加粗，弹跳，保留【】
+# 弱高亮
+style_highlight_weak_style_echo = ["[fg:#FFFF00][b][", "][/b][/fg]"]  # 黄加粗，保留[]
+# 弱高亮2
+style_highlight_weak_style2_echo = ["[fg:#FFFF00][b]", "[/b][/fg]"]  # 黄加粗，不保留[]
+# 掷骰原因（只接受color，除非同步修改掷骰角色）
+style_dice_reason_color_echo = "因[fg:#FFFF00]"  # 黄
+# 掷骰角色
+style_dice_pcname_color_echo = ["[fg:#FFFF00]", "[/fg]"]  # 黄
+# 掷骰技能
+style_dice_skillname_style_echo = ["[fg:#FFFFFF][bg:#000000]", "[/bg][/fg]"]  # 白，弹跳
+
+# 部分回声文字特效编辑标签
+# 震惊
+# style_shock_echo = ["[震惊]", "[/震惊]"]  # 黄加粗，弹跳，保留【】
+# 弱化
+# style_weaken_echo = ["[弱化]", "[/弱化]"]  # 黄加粗，弹跳，保留（）
+# 高亮
+# style_highlight_style_echo = ["[高亮]【", "】[/高亮]"]  # 黄加粗，弹跳，保留【】
+# 弱高亮
+# style_highlight_weak_style_echo = ["[", "]"]  # 黄加粗，保留[]
+# 弱高亮2
+# style_highlight_weak_style2_echo = ["[", "]"]  # 黄加粗，不保留[]
+# 掷骰原因（只接受color，除非同步修改掷骰角色）
+# style_dice_reason_color_echo = "因[角色]"  # 黄
+# 掷骰角色
+# style_dice_pcname_color_echo = ["[角色]", "[/角色]"]  # 黄
+# 掷骰技能
+# style_dice_skillname_style_echo = ["[技能]", "[/技能]"]  # 白，弹跳
 
 # timer计算
 place = "某地"
@@ -1482,6 +1519,41 @@ class ChatApp:
             # canvas_HO.bind("<Configure>", lambda event: self.resize_image(canvas_HO, tk_image))
             new_window_HO.protocol("WM_DELETE_WINDOW", lambda: self.on_kill_image(new_window_HO, text, name))
 
+    def display_FX(self, file_path, text):
+        if file_path:
+            new_window_FX = tk.Toplevel(root)
+            new_window_FX.title("FX展示：" + text)
+            _, extension = os.path.splitext(file_path)
+            filename, dot = os.path.splitext(os.path.basename(file_path))
+            if extension == ".apng" or extension == ".APNG":
+                avatar_path = self.apng_to_gif(file_path, _ + ".gif")
+            elif extension == ".gif" or extension == ".GIF":
+                image = Image.open(file_path)
+                # 获取图像的宽和高
+                width, height = image.size
+                self.canvas_animate_FX = tk.Canvas(new_window_FX, width=width, height=height)
+                self.canvas_animate_FX.pack(fill=tk.BOTH, expand=True)
+                self.frames_FX = [ImageTk.PhotoImage(frame.resize((width, height), Image.LANCZOS)) for frame in
+                                              ImageSequence.Iterator(image)]
+                # 显示 GIF 图片的第一帧
+                self.current_frame_FX = self.canvas_animate_FX.create_image(0, 0, anchor=tk.NW,image=self.frames_FX[0])
+                # 播放 GIF 动画
+                self.animate(0, self.canvas_animate_FX, self.current_frame_FX, self.frames_FX)
+            else:
+                # 创建 Canvas 组件
+                image = Image.open(file_path)
+                # 获取图像的宽和高
+                width, height = image.size
+                canvas_w = int(width / 3)
+                canvas_h = int(height / 3)
+                canvas_FX = tk.Canvas(new_window_FX, width=canvas_w, height=canvas_h, bg="white")
+                canvas_FX.pack(fill=tk.BOTH, expand=True)
+                image = image.resize((canvas_w, canvas_h), Image.LANCZOS)  # 调整头像大小
+                tk_image = ImageTk.PhotoImage(image)
+                canvas_FX.create_image(canvas_w / 2, canvas_h / 2, image=tk_image, tags="image")
+                canvas_FX.image = tk_image
+            new_window_FX.protocol("WM_DELETE_WINDOW", lambda: self.on_kill_image(new_window_FX, "FX", text))
+
     def resize_image(self, canvas, tk_image):
         canvas.delete("image")  # 删除之前的图片
         width = canvas.winfo_width()  # 获取Canvas的新宽度
@@ -1491,7 +1563,30 @@ class ChatApp:
         canvas.image = resized_image  # 更新图片引用
 
     def on_kill_image(self, window, type, name):
-        if type == "HandOut":
+        if type == "FX":
+            if name in self.NowEffect:
+                self.NowEffect.remove(name)
+                content = f"【高级特效】结束{name}"
+                # 搜索包含 ">>>" 的行的起始索引
+                start_index = "1.0"
+                while True:
+                    match_index = self.chat_log.search(">>>", start_index, tk.END)
+                    if not match_index:
+                        break
+                    # 删除包含 ">>>" 的行
+                    line_start = self.chat_log.index(match_index)
+                    line_end = self.chat_log.index(match_index + " lineend")
+                    self.chat_log.delete(line_start, line_end)
+                    # 更新搜索的起始位置
+                    start_index = line_end
+
+                self.chat_log.insert(tk.END,
+                                     f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【等待】0.2\n\n')
+                self.chat_log.insert(tk.END,
+                                     f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
+                # self.chat_log_huozi = self.chat_log_huozi + f"{content}\n\n"
+                self.chat_log.yview(tk.END)
+        elif type == "HandOut":
             if name in self.NowImage:
                 self.NowImage.remove(name)
                 content = f"【撤除图片】{name}"
@@ -2535,8 +2630,9 @@ class ChatApp:
             pass
         elif role == "env":
             env_text = self.time_log.get("1.0", tk.END).strip()
-            self.chat_log.insert(tk.END,
-                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+            #self.chat_log.insert(tk.END,
+                                 #f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+            self.chat_log.insert(tk.END,f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
             self.chat_log.yview(tk.END)
             self.time_log.delete("1.0", tk.END)
             self.time_log.insert("1.0", env_text)
@@ -2787,11 +2883,28 @@ class ChatApp:
                 print("没有使用中的图片！")
                 content = f"【撤除图片】[+(HandOut名称)]"
         elif "【高级特效】开始" in content_:
-            _list = ["---环境---", "下雨", "下雪", "暴风雪", "大雾", "水下", "---设备---", "监控录像", "胶卷", "黑白电视", "彩色电视", "黑白电影",
+            _list = ["[自定义...]","---环境---", "下雨", "下雪", "暴风雪", "大雾", "水下", "---设备---", "监控录像", "胶卷", "黑白电视", "彩色电视", "黑白电影",
                      "---故障---", "轻微故障", "中等故障", "严重故障", "---漫画---", "黑色集中线", "白色集中线", "---事件---", "幻觉", "血迹", "直面古神"]
             self.create_dropdown(role, _list, "请选择要使用的高级特效：")
             content_ = self.content_
             if content_:
+                if content_ == "[自定义...]":
+                    avatar_path = filedialog.askopenfilename(
+                        title="选择【特效】图片文件名",
+                        filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.apng")],
+                        initialdir="ReplayResources/FX")
+                    if avatar_path:
+                        filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
+                        if os.path.exists(
+                                'ReplayResources/FX/' + filename_ + dotextension):
+                            pass
+                        else:
+                            shutil.copyfile(avatar_path,
+                                            'ReplayResources/FX/' + filename_ + dotextension)
+                        content_ = filename_
+                        self.display_FX(avatar_path, filename_)
+                else:
+                    pass
                 content = f"【高级特效】开始{content_}"
                 self.NowEffect.append(content_)
             else:
@@ -2941,150 +3054,441 @@ class ChatApp:
         self.new_window_infoCanvas.destroy()
 
     def output_chat_log(self):
-        new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字):", initialvalue="QQ")
-        name_text = simpledialog.askstring("输入文件名称", "请输入LOG保存名称(可留空):", initialvalue="")
-        # 搜索包含 "===以上可删除===" 的行的起始索引
-        start_index = "1.0"
-        while True:
+        new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字/回声):", initialvalue="QQ")
+        if new_text:
+            name_text = simpledialog.askstring("输入文件名称", "请输入LOG保存名称(可留空):", initialvalue="")
+            # 搜索包含 "===以上可删除===" 的行的起始索引
+            start_index = "1.0"
             match_index = self.chat_log.search("===以上可删除===", start_index, tk.END)
-            if not match_index:
-                break
-            # 删除之前的所有行
-            # line_start = self.chat_log.index(match_index)
-            line_end = self.chat_log.index(match_index + " lineend")
-            self.chat_log.delete("0.0", line_end)
-            # 更新搜索的起始位置
-            start_index = line_end
-        self.chat_log.delete("0.0", "2.0")
-        self.chat_log.delete("0.0", "2.0")
-        if new_text == "QQ":
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            filename = f"(QQ)_{timestamp}.txt"
-            chat_log_content = self.chat_log.get("1.0", tk.END)
-        elif new_text == "活字":
-            chat_log_content_ = ""
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            filename = f"(活字)_{timestamp}.txt"
-            chat_log_content = self.chat_log.get("1.0", tk.END)
-            chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
+            if match_index:
+                while True:
+                    match_index = self.chat_log.search("===以上可删除===", start_index, tk.END)
+                    if not match_index:
+                        break
+                    # 删除之前的所有行
+                    # line_start = self.chat_log.index(match_index)
+                    line_end = self.chat_log.index(match_index + " lineend")
+                    self.chat_log.delete("1.0", line_end)
+                    # 更新搜索的起始位置
+                    start_index = line_end
+                self.chat_log.delete("0.0", "4.0")
+                #self.chat_log.delete("0.0", "2.0")
+            if new_text == "QQ":
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"(QQ)_{timestamp}.txt"
+                chat_log_content = self.chat_log.get("1.0", tk.END)
+            elif new_text == "活字":
+                chat_log_content_ = ""
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"(活字)_{timestamp}.txt"
+                chat_log_content = self.chat_log.get("1.0", tk.END)
+                chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
 
-            # pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n(.*?)\n\n'
-            pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
-            # pattern =  r'[\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2}'
-            matches = re.findall(pattern, chat_log_content)
-            # 输出转换后的格式
-            for match in matches:
-                name = match[0]
-                timestamp = match[1]
-                content = match[2]
-                # print(name)
-                # print(timestamp)
-                # print(content)
-                chat_log_content_ = chat_log_content_ + f"<{name}>{content}\n"
-            chat_log_content = chat_log_content_
-            # for m in matches:
-            # regex_pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*)(\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2})'
-            # match = re.search(regex_pattern, m)
-            # if match:
-            # 获取捕获组的内容
-            # name = match.group(1)  # 括号内第一个捕获组的内容
-            # date_time = match.group(2)  # 括号内第二个捕获组的内容
-            # chat_log_content = chat_log_content.replace(m,f"<{name}>")
-            chat_log_content = chat_log_content.replace("<活字命令>", "")
-            chat_log_content = chat_log_content.replace("【差分】", "【请编辑差分】")
-            chat_log_content = chat_log_content.replace("<【骰子】>", "【骰子】")
-            # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
-            # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
-            chat_log_content = chat_log_content.replace(";\n", ";")
-            # chat_log_content = chat_log_content.replace("\n【骰子】", ";")
-            # 使用正则表达式匹配掷骰结果
-            # matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
-            matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
-            while matches:
-                # print(matches)
-                chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;', chat_log_content)
+                # pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n(.*?)\n\n'
+                pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
+                # pattern =  r'[\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2}'
+                matches = re.findall(pattern, chat_log_content)
+                # 输出转换后的格式
+                for match in matches:
+                    name = match[0]
+                    timestamp = match[1]
+                    content = match[2]
+                    # print(name)
+                    # print(timestamp)
+                    # print(content)
+                    chat_log_content_ = chat_log_content_ + f"<{name}>{content}\n"
+                chat_log_content = chat_log_content_
+                # for m in matches:
+                # regex_pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s`~!@#$%^&*()\-_+={}\[\]|;:\'",<.>/?·！￥……（）—【】、；：‘“’”《》，。？]*)(\d{1,2}\/\d{1,2}\/\d{2,4}\s\d{1,2}:\d{1,2}:\d{1,2})'
+                # match = re.search(regex_pattern, m)
+                # if match:
+                # 获取捕获组的内容
+                # name = match.group(1)  # 括号内第一个捕获组的内容
+                # date_time = match.group(2)  # 括号内第二个捕获组的内容
+                # chat_log_content = chat_log_content.replace(m,f"<{name}>")
+                chat_log_content = chat_log_content.replace("<活字命令>", "")
+                chat_log_content = chat_log_content.replace("【差分】", "【请编辑差分】")
+                chat_log_content = chat_log_content.replace("<【骰子】>", "【骰子】")
+                # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
+                # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
+                chat_log_content = chat_log_content.replace(";\n", ";")
+                # chat_log_content = chat_log_content.replace("\n【骰子】", ";")
+                # 使用正则表达式匹配掷骰结果
+                # matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
                 matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
+                while matches:
+                    # print(matches)
+                    chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;', chat_log_content)
+                    matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
 
-            # chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;\2', chat_log_content)
-            # chat_log_content = re.sub(r'(\【骰子\】).*\n\1', r'\1', chat_log_content)
-            # 对连续出现的掷骰结果进行合并
-            # merged_text = "；".join(matches)
-            # 将无说话人的行变更为上一个说话人
-            matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
-            while matches:
-                # matches_lastline = re.findall(r'^(?![【<])[^\\n]*$(?<=<([^>]*)>)', chat_log_content, re.MULTILINE)
-                # chat_log_content = re.sub(r'^(?![【<])[^\\n]*$', "<"+matches_lastline + ">" + r'\1', chat_log_content)
-                # 将文本按行拆分成列表
-                lines = chat_log_content.split('\n')
-                # 用于存放行号的列表
-                # line_numbers = []
-                # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
-                for i, line in enumerate(lines):
-                    if not re.match(r'^[【<]', line):
-                        if line == "":
-                            lines.pop(i)
-                            break
-                        else:
-                            # line_numbers.append(i + 1)  # 行号从1开始
-                            j = 0
-                            for k, l in enumerate(lines):
-                                last_line = re.findall(r'<([^>]*)>', lines[i - 1 - j], re.MULTILINE)
-                                if last_line:
-                                    lines[i] = f"<{last_line[0]}>{lines[i]}"
-                                    break
-                                elif i - 1 - j < 0:
-                                    print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
-                                    lines = []
-                                    matches = []
-                                    return
-                                j += 1
-                # chat_log_content = chat_log_content.replace("","")
-                chat_log_content = "\n".join(lines)
+                # chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;\2', chat_log_content)
+                # chat_log_content = re.sub(r'(\【骰子\】).*\n\1', r'\1', chat_log_content)
+                # 对连续出现的掷骰结果进行合并
+                # merged_text = "；".join(matches)
+                # 将无说话人的行变更为上一个说话人
                 matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
+                while matches:
+                    # matches_lastline = re.findall(r'^(?![【<])[^\\n]*$(?<=<([^>]*)>)', chat_log_content, re.MULTILINE)
+                    # chat_log_content = re.sub(r'^(?![【<])[^\\n]*$', "<"+matches_lastline + ">" + r'\1', chat_log_content)
+                    # 将文本按行拆分成列表
+                    lines = chat_log_content.split('\n')
+                    # 用于存放行号的列表
+                    # line_numbers = []
+                    # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
+                    for i, line in enumerate(lines):
+                        if not re.match(r'^[【<]', line):
+                            if line == "":
+                                lines.pop(i)
+                                break
+                            else:
+                                # line_numbers.append(i + 1)  # 行号从1开始
+                                j = 0
+                                for k, l in enumerate(lines):
+                                    last_line = re.findall(r'<([^>]*)>', lines[i - 1 - j], re.MULTILINE)
+                                    if last_line:
+                                        lines[i] = f"<{last_line[0]}>{lines[i]}"
+                                        break
+                                    elif i - 1 - j < 0:
+                                        print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                        lines = []
+                                        matches = []
+                                        return
+                                    j += 1
+                    # chat_log_content = chat_log_content.replace("","")
+                    chat_log_content = "\n".join(lines)
+                    matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
 
-            # 高亮文字效果
-            chat_log_content = chat_log_content.replace("<【多轮掷骰】>", "【骰子】")
-            lines = chat_log_content.split('\n')
-            for index, line in enumerate(lines):
+                # 高亮文字效果
+                chat_log_content = chat_log_content.replace("<【多轮掷骰】>", "【骰子】")
+                lines = chat_log_content.split('\n')
                 global style_highlight_style
                 global style_highlight_weak_style
                 global style_highlight_weak_style2
                 global style_dice_reason_color
                 global style_dice_pcname_color
                 global style_dice_skillname_style
-                if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
-                    name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
-                    if name:
-                        content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace(
-                            "【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（",
-                                                                                                       "<color=#FFFFFF70>（").replace(
-                            "）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【",
-                                                                                                                   style_highlight_style[
-                                                                                                                       0]).replace(
-                            "】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]",
-                                                                                                               style_highlight_weak_style[
-                                                                                                                   1]).replace(
-                            "@", f"{style_highlight_weak_style2[0]}@{style_highlight_weak_style2[1]}")
-                        lines[index] = f"<{name[0]}>{content}"
-                if (line[0] == "【") and ("【骰子】" in line):
-                    # 把两个=简化成一个
-                    content = line.replace("【骰子】", "")
-                    content = re.sub(r'=([^;=]+)=', '=', content)
-                    content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[
-                        0]).replace("】", style_dice_pcname_color[1]).replace("{",
-                                                                             style_dice_skillname_style[0]).replace("}",
-                                                                                                                    style_dice_skillname_style[
-                                                                                                                        1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
-                    lines[index] = f"【骰子】{content}"
-            chat_log_content = "\n".join(lines)
+                for index, line in enumerate(lines):
+                    if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
+                        name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
+                        if name:
+                            title = re.findall(r'【([^】]*)】', name[0])
+                            if title:
+                                name[0] = name[0].replace(f"【{title[0]}】", f"{title[0]}_")
+                                line = line.replace(f"【{title[0]}】", f"{title[0]}_")
+                            if "【【" in line:
+                                title = re.findall(r'【【([^】]*)】', line)
+                                line = line.replace(f"【{title[0]}】", f"{title[0]}_")
+                            content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace(
+                                "【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（",
+                                                                                                           "<color=#FFFFFF70>（").replace(
+                                "）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【",
+                                                                                                                       style_highlight_style[
+                                                                                                                           0]).replace(
+                                "】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]",
+                                                                                                                   style_highlight_weak_style[
+                                                                                                                       1]).replace(
+                                "@", f"{style_highlight_weak_style2[0]}@{style_highlight_weak_style2[1]}")
+                            lines[index] = f"<{name[0]}>{content}"
+                    if (line[0] == "【") and ("【骰子】" in line):
+                        # 把两个=简化成一个
+                        content = line.replace("【骰子】", "")
+                        content = re.sub(r'=([^;=]+)=', '=', content)
+                        content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[
+                            0]).replace("】", style_dice_pcname_color[1]).replace("{",
+                                                                                 style_dice_skillname_style[0]).replace("}",
+                                                                                                                        style_dice_skillname_style[
+                                                                                                                            1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                        lines[index] = f"【骰子】{content}"
+                chat_log_content = "\n".join(lines)
 
-        else:
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            filename = f"(QQ)_{timestamp}.txt"
-            chat_log_content = self.chat_log.get("1.0", tk.END)
-        filename = "【" + name_text + "】" + filename
-        with open(filename, "w") as file:
-            file.write(chat_log_content)
+            elif new_text == "回声":
+                chat_log_content_ = ""
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"(回声)_{timestamp}.txt"
+                chat_log_content = self.chat_log.get("1.0", tk.END)
+                chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
+                pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
+                matches = re.findall(pattern, chat_log_content)
+                # 输出转换后的格式
+                for match in matches:
+                    name = match[0]
+                    content = match[2]
+                    chat_log_content_ = chat_log_content_ + f"<{name}>{content}\n"
+                chat_log_content = chat_log_content_
+                # 获取捕获组的内容
+                chat_log_content = chat_log_content.replace("<活字命令>", "")
+                chat_log_content = chat_log_content.replace("【差分】", "【请编辑差分：格式：[说话人.差分]】")
+                chat_log_content = chat_log_content.replace("<【骰子】>", "【骰子】")
+                # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
+                # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
+                chat_log_content = chat_log_content.replace(";\n", ";")
+                # chat_log_content = chat_log_content.replace("\n【骰子】", ";")
+                # 使用正则表达式匹配掷骰结果
+                # matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
+                matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
+                while matches:
+                    # print(matches)
+                    chat_log_content = re.sub(r'(\【骰子】.*?)\n(\【骰子】)', r'\1;', chat_log_content)
+                    matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
+                # 对连续出现的掷骰结果进行合并
+                # 将无说话人的行变更为上一个说话人
+                matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
+                while matches:
+                    # 将文本按行拆分成列表
+                    lines = chat_log_content.split('\n')
+                    # 用于存放行号的列表
+                    # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
+                    for i, line in enumerate(lines):
+                        if not re.match(r'^[【<]', line):
+                            if line == "":
+                                lines.pop(i)
+                                break
+                            else:
+                                j = 0
+                                for k, l in enumerate(lines):
+                                    last_line = re.findall(r'<([^>]*)>', lines[i - 1 - j], re.MULTILINE)
+                                    if last_line:
+                                        lines[i] = f"<{last_line[0]}>{lines[i]}"
+                                        break
+                                    elif i - 1 - j < 0:
+                                        print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                        return
+                                    j += 1
+                    chat_log_content = "\n".join(lines)
+                    matches = re.findall(r'^(?![【<])[^\\n]*$', chat_log_content, re.MULTILINE)
+
+                # 高亮文字效果
+                chat_log_content = chat_log_content.replace("<【多轮掷骰】>", "【骰子】")
+                lines = chat_log_content.split('\n')
+                global style_shock_echo
+                global style_weaken_echo
+                global style_highlight_style_echo
+                global style_highlight_weak_style_echo
+                global style_highlight_weak_style2_echo
+                global style_dice_reason_color_echo
+                global style_dice_pcname_color_echo
+                global style_dice_skillname_style_echo
+                for index, line in enumerate(lines):
+
+                    if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
+                        name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
+                        title = re.findall(r'【([^】]*)】', name[0])
+                        if title:
+                            name[0] = name[0].replace(f"【{title[0]}】", f"{title[0]}_")
+                            line = line.replace(f"【{title[0]}】", f"{title[0]}_")
+                        if "【【" in line:
+                            title = re.findall(r'【【([^】]*)】', line)
+                            line = line.replace(f"【{title[0]}】", f"{title[0]}_")
+                        if name:
+                            content = line.replace(f"<{name[0]}>", "").replace("[", style_highlight_weak_style_echo[0]).replace("]",style_highlight_weak_style_echo[1]).replace("【【【", "【【").replace("】】】", "】】").replace(
+                                "【【", style_shock_echo[0]).replace("】】", style_shock_echo[1]).replace("（", f"{style_weaken_echo[0]}（").replace(
+                                "）", f"）{style_weaken_echo[1]}").replace("(", f"{style_weaken_echo[0]}(").replace(")", f"){style_weaken_echo[1]}").replace("【",style_highlight_style_echo[0]).replace(
+                                "】", style_highlight_style_echo[1]).replace("@", f"{style_highlight_weak_style2_echo[0]}@{style_highlight_weak_style2_echo[1]}")
+                            lines[index] = f"[{name[0].replace('【','').replace('】','_')}]:{content}"
+                    if (line[0] == "【") and ("【骰子】" in line):
+                        # 把两个=简化成一个
+                        content = line.replace("【骰子】", "")
+                        if "SAN CHECK" in content:
+                            sc_result = re.findall(r'=([^=]*)=', content, re.MULTILINE)
+                            content = re.sub(r'=([^;=]+)=', '=', content)
+                            if sc_result:
+                                content = re.sub(r'=([^;=]+);?', "="+sc_result[0], content)
+                        else:
+                            content = re.sub(r'=([^;=]+)=', '=', content)
+                        content = content.replace("因【", style_dice_reason_color_echo).replace("【", style_dice_pcname_color_echo[
+                            0]).replace("】", style_dice_pcname_color_echo[1]).replace("{",
+                                                                                 style_dice_skillname_style_echo[0]).replace("}",style_dice_skillname_style_echo[1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                        # 分解骰子语句格式：(理由)[结果]公式=投出值/鉴定值;(理由)[结果]公式=投出值;(理由)公式=投出值 → 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
+                        content_parse = content.replace(style_dice_reason_color_echo, "因").replace(style_dice_skillname_style_echo[0],"{").replace(style_dice_skillname_style_echo[1],"}").replace(style_dice_pcname_color_echo[0],"").replace(style_dice_pcname_color_echo[1],"")
+                        if ";" in content_parse:
+                            # 多个合并骰子
+                            exp_ = []
+                            EchoDice_ = []
+                            dicelines = content_parse.split(';')
+                            for dice in dicelines:
+                                reason = re.findall(r'\(([^)]*)\)', dice, re.MULTILINE)
+                                if reason is None:
+                                    reason = [" "]
+                                if "{" in reason[0]:
+                                    skillname = re.findall(r'\{([^}]*)}', reason[0], re.MULTILINE)[0]
+                                else:
+                                    skillname = " "
+                                result = dice.split('=')[1]
+                                if "/" in result:
+                                    result = result.split('/')[0]
+                                else:
+                                    pass
+                                comment = re.findall(r'\[(.*?)\]', dice, re.MULTILINE)
+                                if comment:
+                                    expression = re.findall(r']([^=]*)=', dice, re.MULTILINE)
+                                else:
+                                    expression = re.findall(r'\)([^=]*)=', dice, re.MULTILINE)
+                                    comment = [" "]
+                                exp_number = str(eval(expression[0].replace("D", "*")))
+                                if "/" in dice.split('=')[1]:
+                                    objective = dice.split('=')[1].split('/')[1]
+                                else:
+                                    objective = exp_number
+                                #print(reason[0] + "\n" + expression[0] + "\n" + comment[0] + "\n" + result + "\n" + objective + skillname)
+                                dicebot_name = self.role_entries_name["DiceBot"]
+                                exp_.append(f"<table:{dicebot_name}.Reason>:{reason[0]}\n<table:{dicebot_name}.Expression>:{expression[0]}\n<table:{dicebot_name}.Comment>:{comment[0]}\n<table:{dicebot_name}.Result>:{result}\n<table:{dicebot_name}.Objective>:{objective}\n<table:{dicebot_name}.Skillname>:{skillname}\n")
+                                # 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
+                                EchoDice_.append(f"({reason[0]},{exp_number},{objective},{result})")
+                            #exp = f"[{self.role_entries_name['DiceBot']}]掷骰中...\n".join(exp_)
+                            exp = (f"==={self.role_entries_name['DiceBot']}===:掷骰中..."+"{掷骰}\n").join(exp_)
+                            # 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
+                            EchoDice = "<dice>:" + ",".join(EchoDice_)
+                        else:
+                            # 单个骰子
+                            reason = re.findall(r'\(([^)]*)\)', content_parse, re.MULTILINE)
+                            if reason is None:
+                                reason = [" "]
+                            if "{" in reason[0]:
+                                skillname = re.findall(r'\{([^}]*)}', reason[0], re.MULTILINE)[0]
+                            else:
+                                skillname = " "
+                            comment = re.findall(r'\[(.*?)\]', content_parse, re.MULTILINE)
+                            if comment:
+                                expression = re.findall(r']([^=]*)=', content_parse, re.MULTILINE)
+                            else:
+                                expression = re.findall(r'\)([^=]*)=', content_parse, re.MULTILINE)
+                                comment = [" "]
+                            exp_number = str(eval(expression[0].replace("D", "*")))
+                            result = content_parse.split('=')[1]
+                            if "/" in result:
+                                result = result.split('/')[0]
+                            else:
+                                pass
+                            if "/" in content_parse.split('=')[1]:
+                                objective = content_parse.split('=')[1].split('/')[1]
+                            else:
+                                objective = exp_number
+                            #print(reason[0] + "\n" + expression[0] + "\n" + comment[0] + "\n" + result + "\n" +objective + "\n" + skillname)
+                            dicebot_name = self.role_entries_name["DiceBot"]
+                            exp = f"<table:{dicebot_name}.Reason>:{reason[0]}\n<table:{dicebot_name}.Expression>:{expression[0]}\n<table:{dicebot_name}.Comment>:{comment[0]}\n<table:{dicebot_name}.Result>:{result}\n<table:{dicebot_name}.Objective>:{objective}\n<table:{dicebot_name}.Skillname>:{skillname}\n"
+                            EchoDice = f"<dice>:({reason[0]},{exp_number},{objective},{result})"
+                        #lines[index] = exp + f"[dice]:{content.replace(';',',')} + {EchoDice}"
+                        lines[index] = exp + f"[{self.role_entries_name['DiceBot']}]:掷骰中..."+"{掷骰}\n"+ EchoDice.replace("{", " ").replace("}", "").replace("SAN CHECK", "SC").replace("掷骰", "")
+                    if lines[index][0] == "<" and ("<dice>:" not in lines[index]):
+                        name = re.findall(r'<([^>]*)>', lines[index], re.MULTILINE)
+                        content = lines[index].replace(f"<{name[0]}>", "")
+                        lines[index] = f"[{name[0]}]:{content}"
+                    if "【停止BGM】" in line:
+                        lines[index] = "<BGM>:stop"
+                    if "【高级特效】结束" in line or "【撤除图片】" in line:
+                        lines[index] = "<animation>:NA"
+                    if "【音效】" in line:
+                        lines[index-1] = lines[index-1] + "{" + line + "}"
+                chat_log_content = "\n".join(lines)
+                chat_log_content = chat_log_content.replace("【等待】", "<wait>:")
+                chat_log_content = chat_log_content.replace("【背景】", "<background>:")
+                chat_log_content = chat_log_content.replace("【背景】纯黑", "<background>:black")
+                chat_log_content = chat_log_content.replace("【BGM】", "<BGM>:")
+                chat_log_content = chat_log_content.replace("【高级特效】开始", "<animation>:")
+                chat_log_content = chat_log_content.replace("【特效】", "<animation>:")
+                #多个说出相同台词的说话人可合并 [a]aaa [b]aaa → [a,b]aaa
+                # 多个连续展示图片可合并
+                lines = chat_log_content.split('\n')
+                # 用于存放行号的列表
+                # 遍历每一行，查找开头是 "[" 的行、查找开头是【展示图片】的行
+                merged_speak = []
+                speak_content = ""
+                last_speak_content = ""
+                merged_speak_del = []
+                for i, line in enumerate(lines):
+                    if line[0] == "[":
+                        name = re.findall(r'\[([^\]]*)\]', line, re.MULTILINE)
+                        last_speak_content = speak_content
+                        speak_content = line.replace(f"[{name[0]}]", "")
+                        if speak_content != last_speak_content:
+                            if len(merged_speak) >= 1:
+                                merged_speak.append(re.findall(r'\[([^\]]*)\]', lines[i], re.MULTILINE)[0])
+                                tempname = merged_speak[len(merged_speak)-1]
+                                merged_speak[len(merged_speak)-1] = merged_speak[0]
+                                merged_speak[0] = tempname
+                                startpoint = merged_speak_del[0]-1
+                                for j in merged_speak_del:
+                                    lines[j] = "===删除行==="
+                                lines[startpoint] = f"[{','.join(merged_speak)}]{last_speak_content}"
+                            merged_speak_del.clear()
+                            merged_speak.clear()
+                        else:
+                            merged_speak.append(name[0])
+                            merged_speak_del.append(i)
+                chat_log_content = "\n".join(lines)
+                chat_log_content = chat_log_content.replace(f"==={self.role_entries_name['DiceBot']}===", f"[{self.role_entries_name['DiceBot']}]")
+                lines = chat_log_content.split('\n')
+                merged_showImg = []
+                merged_showImg_del = []
+                for i, line in enumerate(lines):
+                    if "【展示图片】" not in line:
+                        if len(merged_showImg) > 1:
+                            startpoint = merged_showImg_del.pop(0)
+                            for j in merged_showImg_del:
+                                lines[j] = "===删除行==="
+                            lines[startpoint] = f"【展示图片】({','.join(merged_showImg)})"
+                        merged_showImg_del.clear()
+                        merged_showImg.clear()
+                    else:
+                        # 匹配连续多个"【展示图片】"开头的文字内容
+                        merged_showImg.append(line.replace("【展示图片】", ""))
+                        merged_showImg_del.append(i)
+                chat_log_content = "\n".join(lines)
+                chat_log_content = chat_log_content.replace("【展示图片】", "<animation>:")
+
+                # 搜索包含 "===删除行===" 的行的起始索引
+                start_index = 0
+                match_index = chat_log_content.find("===删除行===", start_index)
+                if match_index:
+                    while True:
+                        match_index = chat_log_content.find("===删除行===", start_index)
+                        if match_index == -1:
+                            break
+                        line_start = chat_log_content.rfind("\n", 0, match_index) + 1
+                        line_end = chat_log_content.find("\n", match_index)
+                        chat_log_content = chat_log_content[:line_start] + chat_log_content[line_end+1:]
+                        # 更新搜索的起始位置
+                        start_index = line_start
+
+                #处理状态变化：【xxx】的状态[已减少1点HP]：11/12:HP → <table:角色.HP>:50/50
+                lines = chat_log_content.split('\n')
+                for i, line in enumerate(lines):
+                    exp = ""
+                    if "的状态[" in line:
+                        name = re.findall(r'【([^】]*)】', line, re.MULTILINE)[0]
+                        item = re.search(r':([^:]+)$', line)
+                        if item:
+                            item = item.group(1)
+                        value = re.findall(r'：([^:]*):', line, re.MULTILINE)[0]
+                        exp = f"<table:{name}.{item}>:{value}"
+                    if exp:
+                        lines[i] = exp + "\n" + lines[i]
+                chat_log_content = "\n".join(lines)
+                # 处理时空状态变化：【时间】02:54【地点】多伦多大学【天气】阴【日期】2024/03/01 Friday → <table:时空广播.Time>、.Place .Date .Weather
+                lines = chat_log_content.split('\n')
+                for i, line in enumerate(lines):
+                    exp = ""
+                    if "【时间】" in line and "【地点】" in line and "【天气】" in line and "【日期】" in line:
+                        time_info = line.replace("[时空广播]", "").replace(style_highlight_style_echo[0],"【").replace(style_highlight_style_echo[1],"】")
+                        time_info = time_info.split("【时间】")[1]
+                        date = time_info.split("【日期】")[1]
+                        time = time_info.split("【地点】")[0]
+                        time_info = time_info.split("【地点】")[1]
+                        place = time_info.split("【天气】")[0]
+                        time_info = time_info.split("【天气】")[1]
+                        weather = time_info.split("【日期】")[0]
+                        exp = f"<table:时空广播.Time>:{time}\n<table:时空广播.Place>:{place}\n<table:时空广播.Date>:{date}\n<table:时空广播.Weather>:{weather}"
+                    if exp:
+                        lines[i] = exp + "\n" + lines[i]
+                chat_log_content = "\n".join(lines)
+
+            else:
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"(QQ)_{timestamp}.txt"
+                chat_log_content = self.chat_log.get("1.0", tk.END)
+            filename = "【" + name_text + "】" + filename
+            with open(filename, "w") as file:
+                file.write(chat_log_content)
 
     def output_html_log(self):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -3097,11 +3501,11 @@ class ChatApp:
         avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择状态Icon文件",
                                                  filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                                  initialdir="Images/IconImages")
-        _, extension = os.path.splitext(avatar_path)
-        filename, dot = os.path.splitext(os.path.basename(avatar_path))
-        if extension == ".apng" or extension == ".APNG":
-            avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
         if avatar_path:
+            _, extension = os.path.splitext(avatar_path)
+            filename, dot = os.path.splitext(os.path.basename(avatar_path))
+            if extension == ".apng" or extension == ".APNG":
+                avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
             if os.path.exists('Images/IconImages/' + filename + extension):
                 pass
             else:
@@ -3294,6 +3698,9 @@ class ChatApp:
         else:
             # self.Icon_on_avatar[role] = ""
             self.load_and_display_icon_on_avatar(role, frame)
+            _path = self.role_Icon_paths[role]
+            filename, dot = os.path.splitext(os.path.basename(_path))
+            self.role_entries[role].insert(tk.END, f"[{filename}]")
 
     def load_and_display_icon_on_avatar(self, role, frame):
         if role not in self.Icon_on_avatar:
@@ -4031,19 +4438,18 @@ class ChatApp:
                     # self.tree_list[role].item(selected_item, tags=('red_background'))
                     self.tree_main.delete(l)
         else:
-            selected_item = self.tree2_list[role].selection()
-            if selected_item is None:
-                selected_item = self.tree_list[role].selection()
-                # 如果有选中的条目
-                if selected_item:
-                    for l in selected_item:
-                        # 更改选中条目的背景色为红色
-                        # self.tree2_list[role].item(selected_item, tags=('red_background'))
-                        self.tree_list[role].delete(l)
+            selected_item = self.tree_list[role].selection()
             if selected_item:
                 for l in selected_item:
                     # 更改选中条目的背景色为红色
                     # self.tree_list[role].item(selected_item, tags=('red_background'))
+                    self.tree_list[role].delete(l)
+            selected_item = self.tree2_list[role].selection()
+                # 如果有选中的条目
+            if selected_item:
+                for l in selected_item:
+                    # 更改选中条目的背景色为红色
+                    # self.tree2_list[role].item(selected_item, tags=('red_background'))
                     self.tree2_list[role].delete(l)
 
     def on_double_click(self, event, role=None):
@@ -4851,17 +5257,19 @@ class TRPGModule:
             part_eng = pattern_user.findall(expression)
             part_combine = pattern_combine.findall(expression)
             # print(part_eng)
-            if "HP" in expression.upper() or "MP" in expression.upper() or "SAN" in expression.upper():
-                print("HP/MP/SAN变化")
+            if "HP" in expression.upper() or "MP" in expression.upper() or "SAN" in expression.upper() or "MOV" in expression.upper():
+                print("HP/MP/SAN/MOV变化")
                 if "HP" in expression.upper():
                     HP_MP_check = "HP"
                 elif "MP" in expression.upper():
                     HP_MP_check = "MP"
                 elif "SAN" in expression.upper():
                     HP_MP_check = "SAN"
+                elif "MOV" in expression.upper():
+                    HP_MP_check = "MOV"
                 else:
                     HP_MP_check = ""
-                expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "")
+                expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "").replace("MOV", "")
             if pattern_combine.match(expression) and len(part_combine) > 1:
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 print("联合掷骰")  # 意志+斗殴+潜行
@@ -5245,6 +5653,7 @@ class TRPGModule:
                 HP = role_Chart[role].get("HP")
                 MP = role_Chart[role].get("MP")
                 SAN = role_Chart[role].get("#SAN")
+                MOV = role_Chart[role].get("MOV")
                 if ("+" in expression) or ("-" in expression) or ("*" in expression) or ("/" in expression):
                     # if 有多个d 有多个符号
                     seen_letters = set()
@@ -5300,10 +5709,13 @@ class TRPGModule:
                 elif HP_MP_check == "SAN":
                     temp_HP_MP_check = HP_MP_check
                     itm = self.ChatApp.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
+                elif HP_MP_check == "MOV":
+                    temp_HP_MP_check = HP_MP_check + "_"
+                    itm = self.ChatApp.role_values_entry[role].get("4.0", "5.0").split("/")[0].strip()
                 else:
                     temp_HP_MP_check = HP_MP_check + "_"
                     itm = self.ChatApp.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip()
-                if temp_HP_MP_check in role_Chart[role]:
+                if (temp_HP_MP_check in role_Chart[role]) and HP_MP_check != "MOV":
                     if str(role_Chart[role].get(temp_HP_MP_check)) != itm:
                         role_Chart[role][temp_HP_MP_check] = itm
                     itm = eval(str(role_Chart[role].get(temp_HP_MP_check)) + fuhao + str(result))
@@ -5313,6 +5725,9 @@ class TRPGModule:
                                            0].strip()) + fuhao + result)
                     elif HP_MP_check == "SAN":
                         itm = eval(str(self.ChatApp.role_values_entry[role].get("1.0", "2.0").split("/")[
+                                           0].strip()) + fuhao + result)
+                    elif HP_MP_check == "MOV":
+                        itm = eval(str(self.ChatApp.role_values_entry[role].get("4.0", "5.0").split("/")[
                                            0].strip()) + fuhao + result)
                     else:
                         itm = eval(str(self.ChatApp.role_values_entry[role].get("3.0", "4.0").split("/")[
@@ -5326,6 +5741,10 @@ class TRPGModule:
                     self.ChatApp.role_values_entry[role].delete("1.0", "2.0")
                     self.ChatApp.role_values_entry[role].insert("1.0",
                                                                 f'{itm}/{SAN}:SAN\n')
+                elif HP_MP_check == "MOV":
+                    self.ChatApp.role_values_entry[role].delete("4.0", "5.0")
+                    self.ChatApp.role_values_entry[role].insert("4.0",
+                                                                f'{itm}/{MOV}:MOV\n')
                 else:
                     self.ChatApp.role_values_entry[role].delete("3.0", "4.0")
                     self.ChatApp.role_values_entry[role].insert("3.0",
@@ -5335,13 +5754,16 @@ class TRPGModule:
                 des2 = des2.replace("已+", "已恢复").replace("已-", "已减少")
                 if HP_MP_check == "HP":
                     self.ChatApp.chat_log.insert(tk.END,
-                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("2.0", "3.0").strip()}\n\n')
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("2.0", "3.0").strip()}\n\n')
                 elif HP_MP_check == "SAN":
                     self.ChatApp.chat_log.insert(tk.END,
-                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
+                elif HP_MP_check == "MOV":
+                    self.ChatApp.chat_log.insert(tk.END,
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("4.0", "5.0").strip()}\n\n')
                 else:
                     self.ChatApp.chat_log.insert(tk.END,
-                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：\n{self.ChatApp.role_values_entry[role].get("3.0", "4.0").strip()}\n\n')
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("3.0", "4.0").strip()}\n\n')
                 self.ChatApp.chat_log.yview(tk.END)
                 self.ChatApp.role_entries[role].insert(tk.END, des + "。")
                 return
