@@ -150,22 +150,24 @@ time = datetime.now().strftime("%H:%M")
 date = datetime.now().strftime("%Y/%m/%d %A")
 # 自动Timer计算
 _secondsTime = 0
-time_3s = ["斗殴", "闪避", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救",
-           "困难跳跃", "跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷"]
-time_1min = ["链锯", "困难急救", "极难跳跃", "极难攀爬", "困难妙手", "极难投掷", "困难潜行", "重武器", "火焰喷射器", "锁匠"]
-time_5min = ["困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "医学", "极难急救", "困难锁匠", "领航",
-             "极难妙手", "极难潜行"]
-time_10min = ["表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "极难聆听", "极难心理学", "困难恐吓", "困难说服", "困难魅惑", "困难话术",
-              "极难急救", "困难锁匠", "困难领航"]
-time_30min = ["极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "图书馆", "计算机", "电脑", "困难会计", "木匠", "厨艺", "雕塑", "伪造", "陶艺", "极难侦查"]
+# 角色语速（字/秒）
+_speechspeed = 5
+
+time_1s = ["语", "法律", "历史", "司法科学", "地质学", "估价", "人类学", "考古学", "天文学", "生物学", "植物学", "化学", "密码学", "克苏鲁神话", "数学", "气象学", "博物学", "神秘学", "药学", "物理", "读唇", "骑术", "生存", "动物学"]
+time_3s = ["心理学", "聆听", "侦查", "斗殴", "闪避", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救",
+           "困难跳跃", "跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷", "炮术", "爆破"]
+time_1min = ["困难骑术","困难法律", "驾驶", "会计", "困难侦查", "困难聆听", "困难心理学","恐吓", "说服", "魅惑", "话术", "链锯", "困难急救", "极难跳跃", "极难攀爬", "困难妙手", "极难投掷", "困难潜行", "重武器", "火焰喷射器", "锁匠"]
+time_5min = ["极难骑术", "重型机械", "极难法律", "潜水", "乔装", "医学", "极难急救", "困难锁匠", "领航", "伪造", "极难妙手", "极难潜行", "极难聆听", "极难心理学"]
+time_10min = ["困难乔装","表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "困难恐吓", "困难说服", "图书馆", "计算机", "电脑","困难会计", "困难魅惑", "困难话术", "极难急救", "困难锁匠", "困难领航"]
+time_30min = ["极难乔装","极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "木匠", "厨艺", "雕塑", "陶艺", "极难侦查"]
 time_1h = ["困难表演", "困难美术", "困难写作", "困难书法", "困难舞蹈", "困难歌剧", "困难声乐", "困难摄影", "困难电气维修", "困难电子学", "困难机械维修", "极难锁匠",
-           "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计"]
+           "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计", "困难伪造"]
 time_3h = ["极难表演", "极难书法", "极难舞蹈", "极难歌剧", "极难声乐", "极难摄影", "极难电子学", "极难电气维修", "极难医学", "极难精神分析", "极难追踪", "极难计算机", "极难电脑",
-           "困难雕塑", "困难伪造", "困难陶艺", "困难木匠", "困难厨艺"]
-time_12h = ["极难图书馆", "极难美术", "极难写作", "极难木匠", "极难厨艺", "极难雕塑", "极难伪造", "极难陶艺"]
+           "困难雕塑", "困难陶艺", "困难木匠", "困难厨艺", "极难伪造"]
+time_12h = ["极难图书馆", "极难美术", "极难写作", "极难木匠", "极难厨艺", "极难雕塑", "极难陶艺"]
 time_1d = []
 time_1w = []
-time_skill = {"time_3s": time_3s, "time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min,
+time_skill = {"time_1s": time_1s, "time_3s": time_3s, "time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min,
               "time_30min": time_30min,
               "time_1h": time_1h, "time_3h": time_3h, "time_12h": time_12h, "time_1d": time_1d,
               "time_1w": time_1w}
@@ -1780,7 +1782,7 @@ class ChatApp:
 
     def send_message(self, role):
         global role_Chart_at_name
-
+        global _speechspeed
         role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
@@ -2066,6 +2068,27 @@ class ChatApp:
                 # 滚动到最底部
                 self.chat_log.yview(tk.END)
                 self.role_entries[role].delete("1.0", tk.END)
+
+                # 计算字数加至时间，不计括号内的文字
+                matches = re.findall(r'\(([^)]*)\)', message)
+                if matches:
+                    for m in matches:
+                        message = message.replace(f"({m})", "")
+                matches = re.findall(r'（([^）]*)）', message)
+                if matches:
+                    for m in matches:
+                        message = message.replace(f"（{m}）", "")
+                if 0 < len(message) < _speechspeed:
+                    seconds = 1
+                else:
+                    seconds = int(len(message)/_speechspeed)
+                if seconds > 0:
+                    global _secondsTime
+                    _secondsTime += seconds
+                    while _secondsTime >= 60:
+                        self.trpg_module.add_time_1min()
+                        _secondsTime -= 60
+                    print(f"秒表：{_secondsTime}秒")
 
     def drawcard(self, message, role):
         message = message.replace("alldraw", "draw").replace("drawall", "draw")
@@ -3380,13 +3403,15 @@ class ChatApp:
                         lines[index] = "<BGM>:stop"
                     if "【高级特效】结束" in line or "【撤除图片】" in line:
                         lines[index] = "<animation>:NA"
+                    if line == "【更换样式】":
+                        lines[index] = "<bubble>:NA"
                     if "【音效】" in line:
                         lines[index-1] = lines[index-1] + "{" + line + "}"
                 chat_log_content = "\n".join(lines)
                 chat_log_content = chat_log_content.replace("【等待】", "<wait>:")
                 chat_log_content = chat_log_content.replace("【更换样式】", "<bubble>:")
-                chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【背景】纯黑", "<background>:black")
+                chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【BGM】", "<BGM>:")
                 chat_log_content = chat_log_content.replace("【高级特效】开始", "<animation>:")
                 chat_log_content = chat_log_content.replace("【特效】", "<animation>:")
@@ -5412,7 +5437,7 @@ class TRPGModule:
                         for skillname in timerlist:
                             if a == skillname:
                                 if allin:
-                                    if (timer == "time_3s") or (timer == "time_1min"):
+                                    if (timer == "time_1s") or (timer == "time_3s") or (timer == "time_1min"):
                                         self.move_time_forward(timer)
                                     elif timer == "time_5min":
                                         self.move_time_forward("time_1min")
@@ -5522,7 +5547,7 @@ class TRPGModule:
                     for skillname in timerlist:
                         if expression == skillname:
                             if allin:
-                                if (timer == "time_3s") or (timer == "time_1min"):
+                                if (timer == "time_1s") or(timer == "time_3s") or (timer == "time_1min"):
                                     self.move_time_forward(timer)
                                 elif timer == "time_5min":
                                     self.move_time_forward("time_1min")
@@ -5907,6 +5932,7 @@ class TRPGModule:
 
     def move_time_forward(self, timer):
         switch_dict = {
+            "time_1s": self.add_time_1sec,
             "time_3s": self.add_time_3sec,
             "time_1min": self.add_time_1min,
             "time_5min": self.add_time_5min,
@@ -5923,15 +5949,23 @@ class TRPGModule:
         # 执行函数
         time_function()
 
+    def add_time_1sec(self):
+        # 添加处理 time_1s 的代码
+        global _secondsTime
+        _secondsTime += 1
+        while _secondsTime >= 60:
+            self.add_time_1min()
+            _secondsTime -= 60
+        print(f"秒表：{_secondsTime}秒")
+
     def add_time_3sec(self):
         # 添加处理 time_3s 的代码
         global _secondsTime
-        if _secondsTime >= 60:
+        _secondsTime += random.randint(1, 3)
+        while _secondsTime >= 60:
             self.add_time_1min()
             _secondsTime -= 60
-        else:
-            _secondsTime += random.randint(1, 3)
-            print(f"秒表：{_secondsTime}秒")
+        print(f"秒表：{_secondsTime}秒")
         # global time
         # time_format = "%H:%M"
         # base_time = datetime.strptime(time, time_format)
