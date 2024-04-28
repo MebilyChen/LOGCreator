@@ -50,6 +50,7 @@ isOpeningFiles = False
 Is_Opened = False
 log_file_last_name = ""
 
+
 def play_audio(file_path, name, loops=-1):
     if file_path:
         pygame.mixer.init()
@@ -86,14 +87,25 @@ create_folder('CardDecks')
 create_folder('QuickSaves')
 
 # 便于直接编辑的一系列字符串
-string_list_Critical_Success = ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]
-string_list_Extreme_Success = ["（深呼吸）...极难成功！恭喜您！", "极难成功！恭喜您。"]
-string_list_Hard_Success = ["困难成功！"]
-string_list_Success = ["检定成功，期待您的表现。", "检定成功，请多加利用/微笑"]
-string_list_Failure = ["失败了，请您不要灰心..."]
-string_list_Fumble = ["嗯...抱歉，看起来是大失败呢..."]
+string_list_Critical_Success = {"通用": ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]}
+string_list_Extreme_Success = {"通用": ["（深呼吸）...极难成功！恭喜您！", "极难成功！恭喜您。"]}
+string_list_Hard_Success = {"通用": ["困难成功！"]}
+string_list_Success = {"通用": ["检定成功，期待您的表现。", "检定成功，请多加利用/微笑"]}
+string_list_Failure = {"通用": ["失败了，请您不要灰心..."]}
+string_list_Fumble = {"通用": ["嗯...抱歉，看起来是大失败呢..."]}
+# 便于直接编辑的一系列字符串 - 妙语模块
+mav_words = {"_mav_prob": 0.01, "通用": ["陛下所言甚是.../陶醉"], "沃姆": ["陛下所言甚是.../陶醉"]}
+mav_prob = mav_words["_mav_prob"] # 妙语概率
 
-# 部分活字文字特效编辑
+# 星期文字翻译规范
+datenamelist_ = {0: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+                 1: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+                 2: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "3": ["月", "火", "水", "木", "金", "土", "日"],
+                 4: ["月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日", "日曜日"],
+                 5: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+datenamelist = datenamelist_[1]
+style_dice_icon = ["♡", "▣", "◈", "†", "‡"]
+# 部分活字文字特效编辑 ♡▣◈†‡ xxx→因y掷骰◈技能
 # 高亮
 style_highlight_style = ["<color=#FFFF00><b><弹跳>【", "】</弹跳></b></color>"]  # 黄加粗，弹跳，保留【】
 # 弱高亮
@@ -101,12 +113,14 @@ style_highlight_weak_style = ["<color=#FFFF00><b>[", "]</b></color>"]  # 黄加�
 # 弱高亮2
 style_highlight_weak_style2 = ["<color=#FFFF00><b>", "</b></color>"]  # 黄加粗，不保留[]
 # 掷骰原因（只接受color，除非同步修改掷骰角色）
-style_dice_reason_color = "因<color=#FFFF00>"  # 黄
+style_dice_reason_color = "→因<color=#FFFF00>"  # 黄
 # 掷骰角色
 style_dice_pcname_color = ["<color=#FFFF00>", "</color>"]  # 黄
 # 掷骰技能
-style_dice_skillname_style = ["<弹跳><color=#FFFFFF>", "</color></弹跳>"]  # 白，弹跳
+style_dice_skillname_style = [f"{style_dice_icon[2]}<弹跳><color=#FFFFFF>", "</color></弹跳>"]  # 白，弹跳
 
+### 回声自动换行符（“#”）换行字数
+EnterCharacters = 30
 ### 部分回声文字特效编辑HardCoding，开启富文本有效
 # 震惊
 style_shock_echo = ["[fg:#FFFFFF][b][bg:#FF0000]", "[/bg][/b][/fg]"]  # 黄加粗，弹跳，保留【】
@@ -119,11 +133,11 @@ style_highlight_weak_style_echo = ["[fg:#FFFF00][b][", "][/b][/fg]"]  # 黄加�
 # 弱高亮2
 style_highlight_weak_style2_echo = ["[fg:#FFFF00][b]", "[/b][/fg]"]  # 黄加粗，不保留[]
 # 掷骰原因（只接受color，除非同步修改掷骰角色）
-style_dice_reason_color_echo = "因[fg:#FFFF00]"  # 黄
+style_dice_reason_color_echo = "→因[fg:#FFFF00]"  # 黄
 # 掷骰角色
 style_dice_pcname_color_echo = ["[fg:#FFFF00]", "[/fg]"]  # 黄
 # 掷骰技能
-style_dice_skillname_style_echo = ["[fg:#FFFFFF][bg:#000000]", "[/bg][/fg]"]  # 白，弹跳
+style_dice_skillname_style_echo = [f"{style_dice_icon[2]}[fg:#FFFFFF][bg:#000000]", "[/bg][/fg]"]  # 白，弹跳
 
 # 部分回声文字特效编辑标签
 # 震惊
@@ -153,13 +167,17 @@ _secondsTime = 0
 # 角色语速（字/秒）
 _speechspeed = 5
 
-time_1s = ["语", "法律", "历史", "司法科学", "地质学", "估价", "人类学", "考古学", "天文学", "生物学", "植物学", "化学", "密码学", "克苏鲁神话", "数学", "气象学", "博物学", "神秘学", "药学", "物理", "读唇", "骑术", "生存", "动物学"]
-time_3s = ["心理学", "聆听", "侦查", "斗殴", "闪避", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪", "急救",
+time_1s = ["语", "法律", "历史", "司法科学", "地质学", "估价", "人类学", "考古学", "天文学", "生物学", "植物学", "化学", "密码学", "克苏鲁神话", "数学", "气象学",
+           "博物学", "神秘学", "药学", "物理", "读唇", "骑术", "生存", "动物学"]
+time_3s = ["心理学", "聆听", "侦查", "斗殴", "闪避", "斧头", "连枷", "矛", "剑", "鞭子", "弓", "手枪", "机枪", "步枪", "霰弹枪", "步枪/霰弹枪", "冲锋枪",
+           "急救",
            "困难跳跃", "跳跃", "攀爬", "困难攀爬", "妙手", "投掷", "困难投掷", "炮术", "爆破"]
-time_1min = ["困难骑术","困难法律", "驾驶", "会计", "困难侦查", "困难聆听", "困难心理学","恐吓", "说服", "魅惑", "话术", "链锯", "困难急救", "极难跳跃", "极难攀爬", "困难妙手", "极难投掷", "困难潜行", "重武器", "火焰喷射器", "锁匠"]
+time_1min = ["困难骑术", "困难法律", "驾驶", "会计", "困难侦查", "困难聆听", "困难心理学", "恐吓", "说服", "魅惑", "话术", "链锯", "困难急救", "极难跳跃", "极难攀爬",
+             "困难妙手", "极难投掷", "困难潜行", "重武器", "火焰喷射器", "锁匠"]
 time_5min = ["极难骑术", "重型机械", "极难法律", "潜水", "乔装", "医学", "极难急救", "困难锁匠", "领航", "伪造", "极难妙手", "极难潜行", "极难聆听", "极难心理学"]
-time_10min = ["困难乔装","表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "困难恐吓", "困难说服", "图书馆", "计算机", "电脑","困难会计", "困难魅惑", "困难话术", "极难急救", "困难锁匠", "困难领航"]
-time_30min = ["极难乔装","极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "木匠", "厨艺", "雕塑", "陶艺", "极难侦查"]
+time_10min = ["困难乔装", "表演", "美术", "写作", "书法", "舞蹈", "歌剧", "声乐", "摄影", "困难恐吓", "困难说服", "图书馆", "计算机", "电脑", "困难会计",
+              "困难魅惑", "困难话术", "极难急救", "困难锁匠", "困难领航"]
+time_30min = ["极难乔装", "极难话术", "困难医学", "极难领航", "精神分析", "困难追踪", "木匠", "厨艺", "雕塑", "陶艺", "极难侦查"]
 time_1h = ["困难表演", "困难美术", "困难写作", "困难书法", "困难舞蹈", "困难歌剧", "困难声乐", "困难摄影", "困难电气维修", "困难电子学", "困难机械维修", "极难锁匠",
            "困难精神分析", "困难图书馆", "困难计算机", "困难电脑", "极难会计", "困难伪造"]
 time_3h = ["极难表演", "极难书法", "极难舞蹈", "极难歌剧", "极难声乐", "极难摄影", "极难电子学", "极难电气维修", "极难医学", "极难精神分析", "极难追踪", "极难计算机", "极难电脑",
@@ -167,7 +185,8 @@ time_3h = ["极难表演", "极难书法", "极难舞蹈", "极难歌剧", "极�
 time_12h = ["极难图书馆", "极难美术", "极难写作", "极难木匠", "极难厨艺", "极难雕塑", "极难陶艺"]
 time_1d = []
 time_1w = []
-time_skill = {"time_1s": time_1s, "time_3s": time_3s, "time_1min": time_1min, "time_5min": time_5min, "time_10min": time_10min,
+time_skill = {"time_1s": time_1s, "time_3s": time_3s, "time_1min": time_1min, "time_5min": time_5min,
+              "time_10min": time_10min,
               "time_30min": time_30min,
               "time_1h": time_1h, "time_3h": time_3h, "time_12h": time_12h, "time_1d": time_1d,
               "time_1w": time_1w}
@@ -180,18 +199,30 @@ Critical_Success_SKill = 60  # 启用5以下大成功的技能水平
 bot_personality_ = {"Critical_Success": string_list_Critical_Success, "Extreme_Success": string_list_Extreme_Success,
                     "Hard_Success": string_list_Hard_Success, "Success": string_list_Success,
                     "Failure": string_list_Failure, "Fumble": string_list_Fumble,
-                    "Fumble_at_96_SKill_Level": Fumble_SKill, "Critical_at_5_SKill_Level": Critical_Success_SKill}
-
+                    "Fumble_at_96_SKill_Level": Fumble_SKill, "Critical_at_5_SKill_Level": Critical_Success_SKill,
+                    "妙语": mav_words}
+bot_personality = bot_personality_
 bot_personality_by_name_ = {"卢骰": bot_personality_, "DiceBot": bot_personality_}
+bot_personality_by_name = bot_personality_by_name_
 
-Critical_Success = random.choice(bot_personality_["Critical_Success"])
-Extreme_Success = random.choice(bot_personality_["Extreme_Success"])
-Hard_Success = random.choice(bot_personality_["Hard_Success"])
-Success = random.choice(bot_personality_["Success"])
-Failure = random.choice(bot_personality_["Failure"])
-Fumble = random.choice(bot_personality_["Fumble"])
-Fumble_SKill = bot_personality_["Fumble_at_96_SKill_Level"]
-Critical_Success_SKill = bot_personality_["Critical_at_5_SKill_Level"]
+def load_luck_by_name():
+    try:
+        # 尝试从JSON文件加载每个角色的luck(掷骰统计)
+        with open('Bots/luck_by_name.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        return {'KP': {"_luck": 0, "_fumble": 0, "_critical": 0}, 'DiceBot': 0}
+
+def load_settings_codename():
+    try:
+        # 尝试从JSON文件加载每个角色的codename
+        with open('AppSettings/codename_settings.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        print(f"文件路径[AppSettings/codename_settings.json]不存在，如需使用codename替换功能，请创建json文件！")
+        return {'_status': False, 'KP': 'KP', 'DiceBot': 'DiceBot'}
 
 
 def load_settings_avatar():
@@ -1334,7 +1365,7 @@ class ChatApp:
         root.bind("<Control-Return>", self.newline_on_ctrl_enter)
 
         # self.chat_log_huozi = ""
-
+        self.luck_by_name = {}
         self.babel_data = {}
         self.Iconcanvas = {}
         self.Icon_on_avatar = {}
@@ -1372,6 +1403,10 @@ class ChatApp:
         self.role_count = load_role_count()
         self.roles = ["KP", "DiceBot", "PL 1"]
         self.enemy_matches = {}
+        self.codename_by_name = {}
+        self.codename_by_name = load_settings_codename()
+        if "_status" not in self.codename_by_name:
+            self.codename_by_name["_status"] = True
 
         # 初始化当前聚焦的头像和文本框
         self.current_role = tk.StringVar(value=self.roles[0])
@@ -1389,6 +1424,9 @@ class ChatApp:
         global time
         global place
         global weather
+        global bot_personality
+        global bot_personality_by_name
+        global mav_prob
         # 初始化时间、地点记录栏
         self.env = load_env()
         date = self.env["Date"]
@@ -1441,6 +1479,7 @@ class ChatApp:
         self.role_values_tags_text = {}  # 新增保存的数值
 
         for role in self.roles:
+            self.luck_by_name[role] = 0
             self.role_entries_name[role] = role
             self.image_references_on_Avatar[role] = []
             self.canvas_icon_animate[role] = tk.Canvas(self.root, width=20, height=20)
@@ -1454,6 +1493,11 @@ class ChatApp:
             self.current_frame_icon_on_canvas[role] = []
             if load_settings_name() != "":
                 self.role_entries_name = load_settings_name()  # 从文件加载设置
+            if role not in self.codename_by_name:
+                if role in self.role_entries_name:
+                    self.codename_by_name[role] = self.role_entries_name[role]
+                else:
+                    self.codename_by_name[role] = role
         babel(self)
 
         self.create_role_frames()
@@ -1479,24 +1523,20 @@ class ChatApp:
 
         for names in bot_personality_by_name:
             if names == self.role_entries_name["DiceBot"]:
-                global Critical_Success
-                global Extreme_Success
-                global Hard_Success
-                global Success
-                global Failure
-                global Fumble
-                global Fumble_SKill
-                global Critical_Success_SKill
                 bot_personality = bot_personality_by_name[names]
-                Critical_Success = random.choice(bot_personality["Critical_Success"])
-                Extreme_Success = random.choice(bot_personality["Extreme_Success"])
-                Hard_Success = random.choice(bot_personality["Hard_Success"])
-                Success = random.choice(bot_personality["Success"])
-                Failure = random.choice(bot_personality["Failure"])
-                Fumble = random.choice(bot_personality["Fumble"])
-                Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
-                Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                self.trpg_module.Critical_Success = random.choice(bot_personality["Critical_Success"]["通用"])
+                self.trpg_module.Extreme_Success = random.choice(bot_personality["Extreme_Success"]["通用"])
+                self.trpg_module.Hard_Success = random.choice(bot_personality["Hard_Success"]["通用"])
+                self.trpg_module.Success = random.choice(bot_personality["Success"]["通用"])
+                self.trpg_module.Failure = random.choice(bot_personality["Failure"]["通用"])
+                self.trpg_module.Fumble = random.choice(bot_personality["Fumble"]["通用"])
+                self.trpg_module.Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
+                self.trpg_module.Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                mav_prob = bot_personality["妙语"]["_mav_prob"]  # 妙语概率
+                print("妙语概率：" + str(mav_prob))
                 self.role_entries["DiceBot"].insert("1.0", f"已录入[{names}]的性格！")
+                break
+            else:
                 break
 
     def display_image(self, file_path, text, name=None, seconds=-1):
@@ -1537,9 +1577,9 @@ class ChatApp:
                 self.canvas_animate_FX = tk.Canvas(new_window_FX, width=width, height=height)
                 self.canvas_animate_FX.pack(fill=tk.BOTH, expand=True)
                 self.frames_FX = [ImageTk.PhotoImage(frame.resize((width, height), Image.LANCZOS)) for frame in
-                                              ImageSequence.Iterator(image)]
+                                  ImageSequence.Iterator(image)]
                 # 显示 GIF 图片的第一帧
-                self.current_frame_FX = self.canvas_animate_FX.create_image(0, 0, anchor=tk.NW,image=self.frames_FX[0])
+                self.current_frame_FX = self.canvas_animate_FX.create_image(0, 0, anchor=tk.NW, image=self.frames_FX[0])
                 # 播放 GIF 动画
                 self.animate(0, self.canvas_animate_FX, self.current_frame_FX, self.frames_FX)
             else:
@@ -1783,6 +1823,8 @@ class ChatApp:
     def send_message(self, role):
         global role_Chart_at_name
         global _speechspeed
+        global bot_personality
+
         role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
@@ -1798,6 +1840,15 @@ class ChatApp:
             start_index = line_end
 
         message = self.role_entries[role].get("1.0", tk.END).strip()
+        message = message.replace(self.trpg_module.Critical_Success, "")
+        message = message.replace(self.trpg_module.Extreme_Success, "")
+        message = message.replace(self.trpg_module.Success, "")
+        message = message.replace(self.trpg_module.Hard_Success, "")
+        message = message.replace(self.trpg_module.Failure, "")
+        message = message.replace(self.trpg_module.Fumble, "")
+        if message == "":
+            return
+
         if role == "DiceBot":
             if ".draw" in message or "。draw" in message:
                 num = 1
@@ -2081,7 +2132,7 @@ class ChatApp:
                 if 0 < len(message) < _speechspeed:
                     seconds = 1
                 else:
-                    seconds = int(len(message)/_speechspeed)
+                    seconds = int(len(message) / _speechspeed)
                 if seconds > 0:
                     global _secondsTime
                     _secondsTime += seconds
@@ -2089,6 +2140,20 @@ class ChatApp:
                         self.trpg_module.add_time_1min()
                         _secondsTime -= 60
                     print(f"秒表：{_secondsTime}秒")
+        # 妙语
+        if role != "DiceBot":
+            global mav_prob
+            rand_num = random.random()  # 生成0到1之间的随机数
+            if rand_num >= 1 - mav_prob:
+                if self.role_entries_name[role] in bot_personality["妙语"]:
+                    _mav_list = []
+                    _mav_list = bot_personality["妙语"][self.role_entries_name[role]] + bot_personality["妙语"]["通用"]
+                    mav_words_ = random.choice(_mav_list)
+                else:
+                    mav_words_ = random.choice(bot_personality["妙语"]["通用"])
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
+                self.chat_log.yview(tk.END)
 
     def drawcard(self, message, role):
         message = message.replace("alldraw", "draw").replace("drawall", "draw")
@@ -2437,6 +2502,9 @@ class ChatApp:
                    lambda event, role=role, entry=entry, label=label: self.update_role_name(event, role, entry, label))
 
     def update_role_name(self, event, role, entry, label):
+        global bot_personality
+        global bot_personality_by_name
+        global mav_prob
         label.config(relief=tk.FLAT, font=("Times New Roman", 16, "bold"))
         new_name = entry.get().strip()
         if new_name and new_name != "":
@@ -2449,6 +2517,12 @@ class ChatApp:
             # if self.current_role.get() == role:
             # self.current_role.set(new_name)
 
+            # 初始化当前角色codename
+            if role in self.role_entries_name:
+                self.codename_by_name[role] = self.role_entries_name[role]
+            else:
+                self.codename_by_name[role] = role
+
             entry.grid_forget()
             label.configure(text=new_name)
 
@@ -2456,23 +2530,17 @@ class ChatApp:
                 # 按名牌加载Bot性格
                 for names in bot_personality_by_name:
                     if names == self.role_entries_name["DiceBot"]:
-                        global Critical_Success
-                        global Extreme_Success
-                        global Hard_Success
-                        global Success
-                        global Failure
-                        global Fumble
-                        global Fumble_SKill
-                        global Critical_Success_SKill
                         bot_personality = bot_personality_by_name[names]
-                        Critical_Success = random.choice(bot_personality["Critical_Success"])
-                        Extreme_Success = random.choice(bot_personality["Extreme_Success"])
-                        Hard_Success = random.choice(bot_personality["Hard_Success"])
-                        Success = random.choice(bot_personality["Success"])
-                        Failure = random.choice(bot_personality["Failure"])
-                        Fumble = random.choice(bot_personality["Fumble"])
-                        Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
-                        Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                        self.trpg_module.Critical_Success = random.choice(bot_personality["Critical_Success"]["通用"])
+                        self.trpg_module.Extreme_Success = random.choice(bot_personality["Extreme_Success"]["通用"])
+                        self.trpg_module.Hard_Success = random.choice(bot_personality["Hard_Success"]["通用"])
+                        self.trpg_module.Success = random.choice(bot_personality["Success"]["通用"])
+                        self.trpg_module.Failure = random.choice(bot_personality["Failure"]["通用"])
+                        self.trpg_module.Fumble = random.choice(bot_personality["Fumble"]["通用"])
+                        self.trpg_module.Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
+                        self.trpg_module.Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                        mav_prob = bot_personality["妙语"]["_mav_prob"]  # 妙语概率
+                        print("妙语概率：" + str(mav_prob))
                         self.role_entries["DiceBot"].insert("1.0", f"已录入[{names}]的性格！\n")
                         break
 
@@ -2520,9 +2588,13 @@ class ChatApp:
         # self.role_count = self.role_count
         new_role = f"PL {len(self.roles) - 1}"
         self.roles.append(new_role)
+        if new_role not in self.codename_by_name:
+            self.codename_by_name[new_role] = new_role
         if new_role not in self.role_entries_name:
             self.role_entries_name[new_role] = new_role
+            self.codename_by_name[new_role] = new_role
         elif self.role_entries_name[new_role] != new_role:
+            self.codename_by_name[new_role] = self.role_entries_name[new_role]
             pass
 
         num_cols = 3
@@ -2565,6 +2637,11 @@ class ChatApp:
             self.role_entries_name[new_role] = new_role
         elif self.role_entries_name[new_role] != new_role:
             pass
+        if new_role not in self.codename_by_name:
+            if new_role in self.role_entries_name:
+                self.codename_by_name[new_role] = self.role_entries_name[new_role]
+            else:
+                self.codename_by_name[new_role] = new_role
 
         num_cols = 3
         idx = len(self.roles) - 1
@@ -2650,13 +2727,59 @@ class ChatApp:
         self.highlight_role_frame_roll(role)
 
     def send_message_on_enter(self, event, role=None):
+        global datenamelist
         if role == None:
             pass
         elif role == "env":
             env_text = self.time_log.get("1.0", tk.END).strip()
-            #self.chat_log.insert(tk.END,
-                                 #f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
-            self.chat_log.insert(tk.END,f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+            # self.chat_log.insert(tk.END,
+            # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+            time_info = env_text.split("【时间】")[1]
+            date = time_info.split("【日期】")[1]
+            time = time_info.split("【地点】")[0]
+            time_info = time_info.split("【地点】")[1]
+            place = time_info.split("【天气】")[0]
+            time_info = time_info.split("【天气】")[1]
+            weather = time_info.split("【日期】")[0]
+            # 上下午
+            if int(time.split(":")[0]) > 12:
+                time_ = time + "㏘"
+            else:
+                time_ = time + "㏂"
+            # 季节
+            if 5 >= int(date.split("/")[1]) >= 3:
+                date_ = "春♧" + date
+            elif 8 >= int(date.split("/")[1]) >= 6:
+                date_ = "夏♡" + date
+            elif 11 >= int(date.split("/")[1]) >= 9:
+                date_ = "秋♤" + date
+            else:
+                date_ = "冬♢" + date
+            # 昼夜
+            if "夏" in date_:
+                if 19 >= int(time.split(":")[0]) >= 6:
+                    time_ = time_ + "昼☀"
+                else:
+                    time_ = time_ + "夜☆"
+            elif "冬" in date_:
+                if 17 >= int(time.split(":")[0]) >= 8:
+                    time_ = time_ + "昼☀"
+                else:
+                    time_ = time_ + "夜☆"
+            else:
+                if 18 >= int(time.split(":")[0]) >= 7:
+                    time_ = time_ + "昼☀"
+                else:
+                    time_ = time_ + "夜☆"
+            date_ = date_.replace("Monday", datenamelist[0]).replace("Tuesday", datenamelist[1]).replace("Wednesday",
+                                                                                                         datenamelist[
+                                                                                                             2]).replace(
+                "Thursday",
+                datenamelist[3]).replace(
+                "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
+            env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather}【日期】{date_}"
+            env_text = f"【时间】{time}【地点】{place}【天气】{weather}【日期】{date}"
+            self.chat_log.insert(tk.END, f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text_}\n\n')
             self.chat_log.yview(tk.END)
             self.time_log.delete("1.0", tk.END)
             self.time_log.insert("1.0", env_text)
@@ -2891,7 +3014,8 @@ class ChatApp:
                 else:
                     return
             else:
-                print("没有使用中的BGM！")
+                # print("没有使用中的BGM！")
+                messagebox.showwarning("警告", "没有使用中的BGM！")
                 content = f"【停止BGM】[+(BGM名称)]"
 
         elif "撤除图片" in content_:
@@ -2904,10 +3028,12 @@ class ChatApp:
                 else:
                     return
             else:
-                print("没有使用中的图片！")
+                # print("没有使用中的图片！")
+                messagebox.showwarning("警告", "没有使用中的图片！")
                 content = f"【撤除图片】[+(HandOut名称)]"
         elif "【高级特效】开始" in content_:
-            _list = ["[自定义...]","---环境---", "下雨", "下雪", "暴风雪", "大雾", "水下", "---设备---", "监控录像", "胶卷", "黑白电视", "彩色电视", "黑白电影",
+            _list = ["[自定义...]", "---环境---", "下雨", "下雪", "暴风雪", "大雾", "水下", "---设备---", "监控录像", "胶卷", "黑白电视", "彩色电视",
+                     "黑白电影",
                      "---故障---", "轻微故障", "中等故障", "严重故障", "---漫画---", "黑色集中线", "白色集中线", "---事件---", "幻觉", "血迹", "直面古神"]
             self.create_dropdown(role, _list, "请选择要使用的高级特效：")
             content_ = self.content_
@@ -2943,7 +3069,8 @@ class ChatApp:
                 else:
                     return
             else:
-                print("没有使用中的高级特效！")
+                # print("没有使用中的高级特效！")
+                messagebox.showwarning("警告", "没有使用中的高级特效！")
                 content = f"【高级特效】结束[+(特效名)]"
         elif "开始角色特效" in content_:
             _list = [f"({self.role_entries_name[role]})震动",
@@ -2970,7 +3097,8 @@ class ChatApp:
                     return
             else:
                 content = f"【角色特效】([+(角色名)])结束[+(震动/转圈/剪影)]"
-                print("没有使用中的角色特效！")
+                # print("没有使用中的角色特效！")
+                messagebox.showwarning("警告", "没有使用中的角色特效！")
         else:
             content = content_
 
@@ -3079,6 +3207,12 @@ class ChatApp:
 
     def output_chat_log(self):
         global log_file_last_name
+        for role in self.codename_by_name:
+            if role != "_status":
+                if self.codename_by_name[role] == self.role_entries_name[role]:
+                    self.codename_by_name["_status"] = False
+                else:
+                    self.codename_by_name["_status"] = True
         new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字/回声):", initialvalue="QQ")
         if new_text:
             name_text = simpledialog.askstring("输入文件名称", "请输入LOG保存名称(可留空):", initialvalue=log_file_last_name)
@@ -3095,15 +3229,19 @@ class ChatApp:
                     # line_start = self.chat_log.index(match_index)
                     line_end = self.chat_log.index(match_index + " lineend")
                     self.chat_log.delete("1.0", line_end)
+                    self.chat_log.delete("1.0", "3.0")
                     # 更新搜索的起始位置
                     start_index = line_end
-                self.chat_log.delete("0.0", "4.0")
-                #self.chat_log.delete("0.0", "2.0")
+                # self.chat_log.delete("0.0", "2.0")
             if new_text == "QQ":
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(QQ)_{timestamp}.txt"
                 chat_log_content = self.chat_log.get("1.0", tk.END)
+
             elif new_text == "活字":
+                if str(self.codename_by_name["_status"]) == "True":
+                    self.codename_by_name["_status"] = simpledialog.askstring("是否开启替换", "是否开启CodeName替换?(True/False):",
+                                                                              initialvalue=f"{self.codename_by_name['_status']}")
                 chat_log_content_ = ""
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(活字)_{timestamp}.txt"
@@ -3162,6 +3300,8 @@ class ChatApp:
                     # line_numbers = []
                     # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
                     for i, line in enumerate(lines):
+                        if "【天气】" in line and "【日期】" in line:
+                            lines[i] = "<时空广播>" + lines[i]
                         if not re.match(r'^[【<]', line):
                             if line == "":
                                 lines.pop(i)
@@ -3175,7 +3315,8 @@ class ChatApp:
                                         lines[i] = f"<{last_line[0]}>{lines[i]}"
                                         break
                                     elif i - 1 - j < 0:
-                                        print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                        # print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                        messagebox.showerror("错误！", "输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
                                         lines = []
                                         matches = []
                                         return
@@ -3203,13 +3344,15 @@ class ChatApp:
                                 line = line.replace(f"【{title[0]}】", f"{title[0]}_")
                             if "【【" in line:
                                 title = re.findall(r'【【([^】]*)】', line)
-                                line = line.replace(f"【{title[0]}】", f"{title[0]}_")
-                            content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】", "】】").replace(
+                                line = line.replace(f"【{title[0]}】", f"{title[0]}")
+                            content = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】",
+                                                                                                    "】】").replace(
                                 "【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("（",
                                                                                                            "<color=#FFFFFF70>（").replace(
-                                "）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace("【",
-                                                                                                                       style_highlight_style[
-                                                                                                                           0]).replace(
+                                "）", "）</color>").replace("(", "<color=#FFFFFF70>(").replace(")", ")</color>").replace(
+                                "【",
+                                style_highlight_style[
+                                    0]).replace(
                                 "】", style_highlight_style[1]).replace("[", style_highlight_weak_style[0]).replace("]",
                                                                                                                    style_highlight_weak_style[
                                                                                                                        1]).replace(
@@ -3221,13 +3364,36 @@ class ChatApp:
                         content = re.sub(r'=([^;=]+)=', '=', content)
                         content = content.replace("因【", style_dice_reason_color).replace("【", style_dice_pcname_color[
                             0]).replace("】", style_dice_pcname_color[1]).replace("{",
-                                                                                 style_dice_skillname_style[0]).replace("}",
-                                                                                                                        style_dice_skillname_style[
-                                                                                                                            1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                                                                                 style_dice_skillname_style[0]).replace(
+                            "}",
+                            style_dice_skillname_style[
+                                1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                        # 将理由中的“D”替换为“🎲”
+                        reason = re.findall(r'\(([^)]*)\)', content)[0]
+                        if reason:
+                            if "D" in reason or "d" in reason:
+                                reason_ = reason
+                                reason_ = reason_.replace("D", "🎲").replace("d", "🎲")
+                                content = content.replace(reason, reason_)
                         lines[index] = f"【骰子】{content}"
                 chat_log_content = "\n".join(lines)
+                # 替换codename
+                if str(self.codename_by_name["_status"]) == "True":
+                    for role in self.codename_by_name:
+                        if role != "_status":
+                            if "【" in self.codename_by_name[role]:
+                                self.codename_by_name[role] = self.codename_by_name[role].replace("【", "").replace("】",
+                                                                                                                   "_")
+                            chat_log_content = chat_log_content.replace(f"<{self.role_entries_name[role]}>",
+                                                                        f"<{self.codename_by_name[role]}>")
 
             elif new_text == "回声":
+                global EnterCharacters
+                if str(self.codename_by_name["_status"]) == "True":
+                    self.codename_by_name["_status"] = simpledialog.askstring("是否开启替换", "是否开启CodeName替换?(True/False):",
+                                                                              initialvalue=f"{self.codename_by_name['_status']}")
+                EnterCharacters = int(simpledialog.askstring("是否开启自动换行", "自动换行字数(0为不换行):",
+                                                             initialvalue="30"))
                 chat_log_content_ = ""
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(回声)_{timestamp}.txt"
@@ -3265,6 +3431,8 @@ class ChatApp:
                     # 用于存放行号的列表
                     # 遍历每一行，并查找开头不是 "【" 或 "<" 的行
                     for i, line in enumerate(lines):
+                        if "【天气】" in line and "【日期】" in line:
+                            lines[i] = "<时空广播>" + lines[i]
                         if not re.match(r'^[【<]', line):
                             if line == "":
                                 lines.pop(i)
@@ -3277,7 +3445,8 @@ class ChatApp:
                                         lines[i] = f"<{last_line[0]}>{lines[i]}"
                                         break
                                     elif i - 1 - j < 0:
-                                        print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                        # print("输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
+                                        messagebox.showerror("错误！", "输出失败，请删除LOG框内的程序提示或检查首行是否具备说话人！")
                                         return
                                     j += 1
                     chat_log_content = "\n".join(lines)
@@ -3304,13 +3473,19 @@ class ChatApp:
                             line = line.replace(f"【{title[0]}】", f"{title[0]}_")
                         if "【【" in line:
                             title = re.findall(r'【【([^】]*)】', line)
-                            line = line.replace(f"【{title[0]}】", f"{title[0]}_")
+                            line = line.replace(f"【{title[0]}】", f"{title[0]}")
                         if name:
-                            content = line.replace(f"<{name[0]}>", "").replace("[", style_highlight_weak_style_echo[0]).replace("]",style_highlight_weak_style_echo[1]).replace("【【【", "【【").replace("】】】", "】】").replace(
-                                "【【", style_shock_echo[0]).replace("】】", style_shock_echo[1]).replace("（", f"{style_weaken_echo[0]}（").replace(
-                                "）", f"）{style_weaken_echo[1]}").replace("(", f"{style_weaken_echo[0]}(").replace(")", f"){style_weaken_echo[1]}").replace("【",style_highlight_style_echo[0]).replace(
-                                "】", style_highlight_style_echo[1]).replace("@", f"{style_highlight_weak_style2_echo[0]}@{style_highlight_weak_style2_echo[1]}")
-                            lines[index] = f"[{name[0].replace('【','').replace('】','_')}]:{content}"
+                            content = line.replace(f"<{name[0]}>", "").replace("[", style_highlight_weak_style2_echo[
+                                0]).replace("]", style_highlight_weak_style2_echo[1]).replace("【【【", "【【").replace(
+                                "】】】", "】】").replace(
+                                "【【", style_shock_echo[0]).replace("】】", style_shock_echo[1]).replace("（",
+                                                                                                      f"{style_weaken_echo[0]}（").replace(
+                                "）", f"）{style_weaken_echo[1]}").replace("(", f"{style_weaken_echo[0]}(").replace(")",
+                                                                                                                  f"){style_weaken_echo[1]}").replace(
+                                "【", style_highlight_style_echo[0]).replace(
+                                "】", style_highlight_style_echo[1]).replace("@",
+                                                                            f"{style_highlight_weak_style2_echo[0]}@{style_highlight_weak_style2_echo[1]}")
+                            lines[index] = f"[{name[0].replace('【', '').replace('】', '_')}]:{content}"
                     if (line[0] == "【") and ("【骰子】" in line):
                         # 把两个=简化成一个
                         content = line.replace("【骰子】", "")
@@ -3318,25 +3493,34 @@ class ChatApp:
                             sc_result = re.findall(r'=([^=]*)=', content, re.MULTILINE)
                             content = re.sub(r'=([^;=]+)=', '=', content)
                             if sc_result:
-                                content = re.sub(r'=([^;=]+);?', "="+sc_result[0], content)
+                                content = re.sub(r'=([^;=]+);?', "=" + sc_result[0], content)
                         else:
                             content = re.sub(r'=([^;=]+)=', '=', content)
-                        content = content.replace("因【", style_dice_reason_color_echo).replace("【", style_dice_pcname_color_echo[
-                            0]).replace("】", style_dice_pcname_color_echo[1]).replace("{",
-                                                                                 style_dice_skillname_style_echo[0]).replace("}",style_dice_skillname_style_echo[1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
+                        content = content.replace("因【", style_dice_reason_color_echo).replace("【",
+                                                                                              style_dice_pcname_color_echo[
+                                                                                                  0]).replace("】",
+                                                                                                              style_dice_pcname_color_echo[
+                                                                                                                  1]).replace(
+                            "{",
+                            style_dice_skillname_style_echo[0]).replace("}", style_dice_skillname_style_echo[
+                            1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                         # 分解骰子语句格式：(理由)[结果]公式=投出值/鉴定值;(理由)[结果]公式=投出值;(理由)公式=投出值 → 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
-                        content_parse = content.replace(style_dice_reason_color_echo, "因").replace(style_dice_skillname_style_echo[0],"{").replace(style_dice_skillname_style_echo[1],"}").replace(style_dice_pcname_color_echo[0],"").replace(style_dice_pcname_color_echo[1],"")
+                        content_parse = content.replace(style_dice_reason_color_echo, "因").replace(
+                            style_dice_skillname_style_echo[0], "{").replace(style_dice_skillname_style_echo[1],
+                                                                             "}").replace(
+                            style_dice_pcname_color_echo[0], "").replace(style_dice_pcname_color_echo[1], "")
                         if ";" in content_parse:
                             # 多个合并骰子
                             exp_ = []
                             EchoDice_ = []
                             dicelines = content_parse.split(';')
                             for dice in dicelines:
-                                reason = re.findall(r'\(([^)]*)\)', dice, re.MULTILINE)
-                                if reason is None:
-                                    reason = [" "]
-                                if "{" in reason[0]:
-                                    skillname = re.findall(r'\{([^}]*)}', reason[0], re.MULTILINE)[0]
+                                if "(" in dice:
+                                    reason = re.findall(r'\(([^)]*)\)', dice, re.MULTILINE)[0]
+                                else:
+                                    reason = " "
+                                if "{" in reason:
+                                    skillname = re.findall(r'\{([^}]*)}', reason, re.MULTILINE)[0]
                                 else:
                                     skillname = " "
                                 result = dice.split('=')[1]
@@ -3355,22 +3539,24 @@ class ChatApp:
                                     objective = dice.split('=')[1].split('/')[1]
                                 else:
                                     objective = exp_number
-                                #print(reason[0] + "\n" + expression[0] + "\n" + comment[0] + "\n" + result + "\n" + objective + skillname)
+                                # print(reason[0] + "\n" + expression[0] + "\n" + comment[0] + "\n" + result + "\n" + objective + skillname)
                                 dicebot_name = self.role_entries_name["DiceBot"]
-                                exp_.append(f"<table:{dicebot_name}.Reason>:{reason[0]}\n<table:{dicebot_name}.Expression>:{expression[0]}\n<table:{dicebot_name}.Comment>:{comment[0]}\n<table:{dicebot_name}.Result>:{result}\n<table:{dicebot_name}.Objective>:{objective}\n<table:{dicebot_name}.Skillname>:{skillname}\n")
+                                exp_.append(
+                                    f"<table:{dicebot_name}.Reason>:{reason}\n<table:{dicebot_name}.Expression>:{expression[0]}\n<table:{dicebot_name}.Comment>:{comment[0]}\n<table:{dicebot_name}.Result>:{result}\n<table:{dicebot_name}.Objective>:{objective}\n<table:{dicebot_name}.Skillname>:{skillname}\n")
                                 # 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
-                                EchoDice_.append(f"({reason[0]},{exp_number},{objective},{result})")
-                            #exp = f"[{self.role_entries_name['DiceBot']}]掷骰中...\n".join(exp_)
-                            exp = (f"==={self.role_entries_name['DiceBot']}===:掷骰中..."+"{掷骰}\n").join(exp_)
+                                EchoDice_.append(f"({reason},{exp_number},{objective},{result})")
+                            # exp = f"[{self.role_entries_name['DiceBot']}]掷骰中...\n".join(exp_)
+                            exp = (f"==={self.role_entries_name['DiceBot']}===:掷骰中..." + "{掷骰}\n").join(exp_)
                             # 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
                             EchoDice = "<dice>:" + ",".join(EchoDice_)
                         else:
                             # 单个骰子
-                            reason = re.findall(r'\(([^)]*)\)', content_parse, re.MULTILINE)
-                            if reason is None:
-                                reason = [" "]
-                            if "{" in reason[0]:
-                                skillname = re.findall(r'\{([^}]*)}', reason[0], re.MULTILINE)[0]
+                            if "(" in content_parse:
+                                reason = re.findall(r'\(([^)]*)\)', content_parse, re.MULTILINE)[0]
+                            else:
+                                reason = " "
+                            if "{" in reason:
+                                skillname = re.findall(r'\{([^}]*)}', reason, re.MULTILINE)[0]
                             else:
                                 skillname = " "
                             comment = re.findall(r'\[(.*?)\]', content_parse, re.MULTILINE)
@@ -3389,12 +3575,14 @@ class ChatApp:
                                 objective = content_parse.split('=')[1].split('/')[1]
                             else:
                                 objective = exp_number
-                            #print(reason[0] + "\n" + expression[0] + "\n" + comment[0] + "\n" + result + "\n" +objective + "\n" + skillname)
+                            # print(reason + "\n" + expression[0] + "\n" + comment[0] + "\n" + result + "\n" +objective + "\n" + skillname)
                             dicebot_name = self.role_entries_name["DiceBot"]
-                            exp = f"<table:{dicebot_name}.Reason>:{reason[0]}\n<table:{dicebot_name}.Expression>:{expression[0]}\n<table:{dicebot_name}.Comment>:{comment[0]}\n<table:{dicebot_name}.Result>:{result}\n<table:{dicebot_name}.Objective>:{objective}\n<table:{dicebot_name}.Skillname>:{skillname}\n"
-                            EchoDice = f"<dice>:({reason[0]},{exp_number},{objective},{result})"
-                        #lines[index] = exp + f"[dice]:{content.replace(';',',')} + {EchoDice}"
-                        lines[index] = exp + f"[{self.role_entries_name['DiceBot']}]:掷骰中..."+"{掷骰}\n"+ EchoDice.replace("{", " ").replace("}", "").replace("SAN CHECK", "SC").replace("掷骰", "")
+                            exp = f"<table:{dicebot_name}.Reason>:{reason}\n<table:{dicebot_name}.Expression>:{expression[0]}\n<table:{dicebot_name}.Comment>:{comment[0]}\n<table:{dicebot_name}.Result>:{result}\n<table:{dicebot_name}.Objective>:{objective}\n<table:{dicebot_name}.Skillname>:{skillname}\n"
+                            EchoDice = f"<dice>:({reason},{exp_number},{objective},{result})"
+                        # lines[index] = exp + f"[dice]:{content.replace(';',',')} + {EchoDice}"
+                        lines[
+                            index] = exp + f"[{self.role_entries_name['DiceBot']}]:掷骰中..." + "{掷骰}\n" + EchoDice.replace(
+                            "{", " ").replace("}", "").replace("SAN CHECK", "SC").replace("掷骰", "")
                     if lines[index][0] == "<" and ("<dice>:" not in lines[index]):
                         name = re.findall(r'<([^>]*)>', lines[index], re.MULTILINE)
                         content = lines[index].replace(f"<{name[0]}>", "")
@@ -3406,16 +3594,17 @@ class ChatApp:
                     if line == "【更换样式】":
                         lines[index] = "<bubble>:NA"
                     if "【音效】" in line:
-                        lines[index-1] = lines[index-1] + "{" + line + "}"
+                        lines[index - 1] = lines[index - 1] + "{" + line + "}"
                 chat_log_content = "\n".join(lines)
                 chat_log_content = chat_log_content.replace("【等待】", "<wait>:")
                 chat_log_content = chat_log_content.replace("【更换样式】", "<bubble>:")
+                chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【背景】纯黑", "<background>:black")
                 chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【BGM】", "<BGM>:")
                 chat_log_content = chat_log_content.replace("【高级特效】开始", "<animation>:")
                 chat_log_content = chat_log_content.replace("【特效】", "<animation>:")
-                #多个说出相同台词的说话人可合并 [a]aaa [b]aaa → [a,b]aaa
+                # 多个说出相同台词的说话人可合并 [a]aaa [b]aaa → [a,b]aaa
                 # 多个连续展示图片可合并
                 lines = chat_log_content.split('\n')
                 # 用于存放行号的列表
@@ -3427,15 +3616,59 @@ class ChatApp:
                 for i, line in enumerate(lines):
                     if line[0] == "[":
                         name = re.findall(r'\[([^\]]*)\]', line, re.MULTILINE)
+                        # 如果说话人在角色列表，在句尾加语音合成标记"{*}"
+                        for PLindex, PLname in self.role_entries_name.items():
+                            if "【" in PLname:
+                                PLname = PLname.replace("【", "").replace("】", "_")
+                            if name[0] == PLname:
+                                # 超过设置字数，添加自动换行标记"#",且将句尾标点不置于首位
+                                if EnterCharacters > 0:
+                                    lines_ = line.replace(f"[{name[0]}]:", "")
+                                    lines_len = lines_
+                                    deletechars = re.findall(r'\[([^\]]*)\]', lines_, re.MULTILINE)
+                                    if deletechars:
+                                        for de in deletechars:
+                                            lines_len = lines_len.replace(de, "")
+                                    lines_result = ""
+                                    if len(lines_len) > EnterCharacters:
+                                        for a in range(0, len(lines_), EnterCharacters):
+                                            chunk = lines_[a:a + EnterCharacters]
+                                            if chunk.rstrip().endswith((
+                                                    " ", ",", ".", "!", "?", "。", "；", "，", ";", "”",
+                                                    "’", "、", "！", "？", "）", ")", "】", "]", "：",
+                                                    ":")):
+                                                lines_result += chunk + "#"
+                                            else:
+                                                index = -1
+                                                if any(punctuation in lines_ for punctuation in (
+                                                        " ", ",", ".", "!", "?", "。", "；", "，", ";", "”", "’", "、", "！",
+                                                        "？",
+                                                        "）", ")", "】", "]", "：",
+                                                        ":")):  # 如果 lines[i] 中包含任何一个标点符号，则执行相应的操作
+                                                    for punctuation in (
+                                                            " ", ",", ".", "!", "?", "。", "；", "，", ";", "”", "’", "、",
+                                                            "！",
+                                                            "？", "）", ")", "】", "]", "：", ":"):
+                                                        temp_index = chunk.rfind(punctuation)
+                                                        if temp_index > index:
+                                                            index = temp_index
+                                                    if index == -1:  # 如果没有空格，则直接插入
+                                                        lines_result += chunk + "#"
+                                                    else:
+                                                        lines_result += chunk[:index] + chunk[index] + "#" + chunk[
+                                                                                                             index + 1:]  # 在最后一个符号之后插入分隔符
+                                        lines[i] = f"[{name[0]}]:" + lines_result[:-1]
+                                lines[i] = lines[i] + "{*}"
+
                         last_speak_content = speak_content
                         speak_content = line.replace(f"[{name[0]}]", "")
                         if speak_content != last_speak_content:
                             if len(merged_speak) >= 1:
-                                merged_speak.append(re.findall(r'\[([^\]]*)\]', lines[i], re.MULTILINE)[0])
-                                tempname = merged_speak[len(merged_speak)-1]
-                                merged_speak[len(merged_speak)-1] = merged_speak[0]
-                                merged_speak[0] = tempname
-                                startpoint = merged_speak_del[0]-1
+                                merged_speak.append(re.findall(r'\[([^\]]*)\]:', lines[i], re.MULTILINE)[0])
+                                merged_speak.insert(0, merged_speak[len(merged_speak) - 1])
+                                merged_speak.pop(len(merged_speak) - 1)
+                                merged_speak[len(merged_speak) - 1] = merged_speak[0]
+                                startpoint = merged_speak_del[0] - 1
                                 for j in merged_speak_del:
                                     lines[j] = "===删除行==="
                                 lines[startpoint] = f"[{','.join(merged_speak)}]{last_speak_content}"
@@ -3445,7 +3678,8 @@ class ChatApp:
                             merged_speak.append(name[0])
                             merged_speak_del.append(i)
                 chat_log_content = "\n".join(lines)
-                chat_log_content = chat_log_content.replace(f"==={self.role_entries_name['DiceBot']}===", f"[{self.role_entries_name['DiceBot']}]")
+                chat_log_content = chat_log_content.replace(f"==={self.role_entries_name['DiceBot']}===",
+                                                            f"[{self.role_entries_name['DiceBot']}]")
                 lines = chat_log_content.split('\n')
                 merged_showImg = []
                 merged_showImg_del = []
@@ -3475,11 +3709,11 @@ class ChatApp:
                             break
                         line_start = chat_log_content.rfind("\n", 0, match_index) + 1
                         line_end = chat_log_content.find("\n", match_index)
-                        chat_log_content = chat_log_content[:line_start] + chat_log_content[line_end+1:]
+                        chat_log_content = chat_log_content[:line_start] + chat_log_content[line_end + 1:]
                         # 更新搜索的起始位置
                         start_index = line_start
 
-                #处理状态变化：【xxx】的状态[已减少1点HP]：11/12:HP → <table:角色.HP>:50/50
+                # 处理状态变化：【xxx】的状态[已减少1点HP]：11/12:HP → <table:角色.HP>:50/50
                 lines = chat_log_content.split('\n')
                 for i, line in enumerate(lines):
                     exp = ""
@@ -3495,35 +3729,53 @@ class ChatApp:
                 chat_log_content = "\n".join(lines)
                 # 处理时空状态变化：【时间】02:54【地点】多伦多大学【天气】阴【日期】2024/03/01 Friday → <table:时空广播.Time>、.Place .Date .Weather
                 lines = chat_log_content.split('\n')
-                for i, line in enumerate(lines):
+                for i, line in enumerate(lines):  # 白天☀ 夜晚☆ 上午㏂ 下午㏘ 春♧夏♡秋♤冬♢
                     exp = ""
-                    if "【时间】" in line and "【地点】" in line and "【天气】" in line and "【日期】" in line:
-                        time_info = line.replace("[时空广播]", "").replace(style_highlight_style_echo[0],"【").replace(style_highlight_style_echo[1],"】")
-                        time_info = time_info.split("【时间】")[1]
-                        date = time_info.split("【日期】")[1]
-                        time = time_info.split("【地点】")[0]
-                        time_info = time_info.split("【地点】")[1]
-                        place = time_info.split("【天气】")[0]
-                        time_info = time_info.split("【天气】")[1]
-                        weather = time_info.split("【日期】")[0]
-                        exp = f"<table:时空广播.Time>:{time}\n<table:时空广播.Place>:{place}\n<table:时空广播.Date>:{date}\n<table:时空广播.Weather>:{weather}"
+                    if "【时间】" in line and "【地点】" in line:
+                        time_info1 = line.replace("[时空广播]:", "").replace(style_highlight_style_echo[0], "【").replace(
+                            style_highlight_style_echo[1], "】")
+                        time_info2 = lines[i + 1].replace("[时空广播]:", "").replace(style_highlight_style_echo[0],
+                                                                                 "【").replace(
+                            style_highlight_style_echo[1], "】")
+                        time_info1 = time_info1.split("【时间】")[1]
+                        time_info2 = time_info2.split("【天气】")[1]
+                        date_ = time_info2.split("【日期】")[1]
+                        time_ = time_info1.split("【地点】")[0]
+                        place_ = time_info1.split("【地点】")[1]
+                        weather_ = time_info2.split("【日期】")[0]
+                        exp = f"<table:时空广播.Time>:{time_}\n<table:时空广播.Place>:{place_}\n<table:时空广播.Date>:{date_}\n<table:时空广播.Weather>:{weather_}"
                     if exp:
                         lines[i] = exp + "\n" + lines[i]
                 chat_log_content = "\n".join(lines)
+                # 替换codename
+                if str(self.codename_by_name["_status"]) == "True":
+                    for role in self.codename_by_name:
+                        if role != "_status":
+                            if "【" in self.codename_by_name[role]:
+                                self.codename_by_name[role] = self.codename_by_name[role].replace("【", "").replace("】",
+                                                                                                                   "_")
+                            chat_log_content = chat_log_content.replace(f"[{self.role_entries_name[role]}]:",
+                                                                        f"[{self.codename_by_name[role]}]:")
 
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(QQ)_{timestamp}.txt"
                 chat_log_content = self.chat_log.get("1.0", tk.END)
             filename = "【" + name_text + "】" + filename
-            with open(filename, "w") as file:
-                file.write(chat_log_content)
+            try:
+                # 尝试写入文件
+                with open(filename, "w", encoding='utf-8') as file:
+                    file.write(chat_log_content)
+            except:
+                # 出错则弹出警告
+                messagebox.showerror("错误！", "无法输出LOG文件！")
+                return
 
     def output_html_log(self):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"chat_log_{timestamp}.html"
         chat_log_content = self.chat_log.get("1.0", tk.END)
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding='utf-8') as file:
             file.write(f'<html><head></head><body>{chat_log_content}</body></html>')
 
     def choose_Icon(self, role):
@@ -3985,6 +4237,12 @@ class ChatApp:
             # 获取相应角色的输入框文本
             enemy_matches = None
             reason = self.role_entries[role].get("1.0", tk.END).strip()
+            reason = reason.replace(self.trpg_module.Critical_Success, "")
+            reason = reason.replace(self.trpg_module.Extreme_Success, "")
+            reason = reason.replace(self.trpg_module.Success, "")
+            reason = reason.replace(self.trpg_module.Hard_Success, "")
+            reason = reason.replace(self.trpg_module.Failure, "")
+            reason = reason.replace(self.trpg_module.Fumble, "")
             if "@" in reason:
                 print("对抗骰")
                 pattern = r"@[\w\s]+"
@@ -4474,7 +4732,7 @@ class ChatApp:
                     # self.tree_list[role].item(selected_item, tags=('red_background'))
                     self.tree_list[role].delete(l)
             selected_item = self.tree2_list[role].selection()
-                # 如果有选中的条目
+            # 如果有选中的条目
             if selected_item:
                 for l in selected_item:
                     # 更改选中条目的背景色为红色
@@ -4488,7 +4746,8 @@ class ChatApp:
             # 获取条目的值
             values = self.tree_list[role].item(item, "values")
             # 创建一个弹出对话框，让用户输入新的记忆指数
-            new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
+            new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n当前记忆指数：{values[2]}\n请输入新的记忆指数：",
+                                                       minvalue=-5,
                                                        maxvalue=100)
             if new_memory_index is not None:
                 # 更新Treeview中的值
@@ -4510,7 +4769,8 @@ class ChatApp:
             # 获取条目的值
             values = self.tree2_list[role].item(item, "values")
             # 创建一个弹出对话框，让用户输入新的记忆指数
-            new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆指数：", minvalue=-5,
+            new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆指数：",
+                                                       minvalue=-5,
                                                        maxvalue=100)
             if new_memory_index is not None:
                 # 更新Treeview中的值
@@ -4770,7 +5030,7 @@ class ChatApp:
     def open_new_window(self):
         global Is_Opened
         if Is_Opened:
-            messagebox.showinfo("调查模块已开启！", "请勿重复打开以免产生BUG！")
+            messagebox.showwarning("调查模块已开启！", "请勿重复打开以免产生BUG！")
             return
         self.new_window = tk.Toplevel(root)
         self.new_window.title("调查模块")
@@ -4945,7 +5205,7 @@ class ChatApp:
             # 绑定关闭事件
         self.new_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_close)
         Is_Opened = True
-        self.new_window_button = tk.Button(root, text="已开启！",background="red", command=self.open_new_window)
+        self.new_window_button = tk.Button(root, text="已开启！", background="red", command=self.open_new_window)
         self.new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
     # 新窗口
@@ -5089,6 +5349,10 @@ class ChatApp:
                 os.remove('GameSaves/canvas_state.json')
 
     def save_settings(self):
+        global bot_personality_by_name
+        # 将角色codename保存到JSON文件
+        with open('AppSettings/codename_settings.json', 'w', encoding='utf-8') as file:
+            json.dump(self.codename_by_name, file, ensure_ascii=False)
         # 将头像路径保存到JSON文件
         with open('AppSettings/avatar_settings.json', 'w', encoding='utf-8') as file:
             json.dump(self.role_avatar_paths, file, ensure_ascii=False)
@@ -5172,9 +5436,9 @@ class ChatApp:
         # 退出时quicksave
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # datestamp = datetime.now().strftime("%Y-%m-%d")
-        filename = f"QuickSaves/QuickSave_{timestamp}.txt"
+        filename = f"QuickSaves/{log_file_last_name}.QuickSave_{timestamp}.txt"
         chat_log_content = self.chat_log.get("1.0", tk.END)
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding='utf-8') as file:
             file.write(chat_log_content)
 
     def on_closing(self):
@@ -5192,6 +5456,7 @@ class TRPGModule:
         self.ChatApp = chat_app_instance
         self.root = root
         adv_comment = ""
+        self.skill_comment()
 
     def skill_upgrade(self, info_, skill_name, role):
         upgrade = ""
@@ -5213,31 +5478,76 @@ class TRPGModule:
                 upgrade = "[成长检定]【" + skill_name + "】技能的成长检定(1D100=" + str(result) + "/" + str(info_) + ")败北了..."
         return upgrade
 
+    def skill_comment(self, role=None, skill=None):
+        if skill and role:
+            _Critical_Success_list = []
+            _Extreme_Success_list = []
+            _Hard_Success_list = []
+            _Success_list = []
+            _Failure_list = []
+            _Fumble_list = []
+            _Critical_Success_list = bot_personality["Critical_Success"][skill] + bot_personality["Critical_Success"][role]
+            _Extreme_Success_list = bot_personality["Extreme_Success"][skill] + bot_personality["Extreme_Success"][role]
+            _Hard_Success_list = bot_personality["Hard_Success"][skill] + bot_personality["Hard_Success"][role]
+            _Success_list = bot_personality["Success"][skill] + bot_personality["Success"][role]
+            _Failure_list = bot_personality["Failure"][skill] + bot_personality["Failure"][role]
+            _Fumble_list = bot_personality["Fumble"][skill] + bot_personality["Fumble"][role]
+            self.Critical_Success = random.choice(_Critical_Success_list)
+            self.Extreme_Success = random.choice(_Extreme_Success_list)
+            self.Hard_Success = random.choice(_Hard_Success_list)
+            self.Success = random.choice(_Success_list)
+            self.Failure = random.choice(_Failure_list)
+            self.Fumble = random.choice(_Fumble_list)
+        else:
+            if skill:
+                self.Critical_Success = random.choice(bot_personality["Critical_Success"][skill])
+                self.Extreme_Success = random.choice(bot_personality["Extreme_Success"][skill])
+                self.Hard_Success = random.choice(bot_personality["Hard_Success"][skill])
+                self.Success = random.choice(bot_personality["Success"][skill])
+                self.Failure = random.choice(bot_personality["Failure"][skill])
+                self.Fumble = random.choice(bot_personality["Fumble"][skill])
+            elif role:
+                self.Critical_Success = random.choice(bot_personality["Critical_Success"][role])
+                self.Extreme_Success = random.choice(bot_personality["Extreme_Success"][role])
+                self.Hard_Success = random.choice(bot_personality["Hard_Success"][role])
+                self.Success = random.choice(bot_personality["Success"][role])
+                self.Failure = random.choice(bot_personality["Failure"][role])
+                self.Fumble = random.choice(bot_personality["Fumble"][role])
+            else:
+                self.Critical_Success = random.choice(bot_personality["Critical_Success"]["通用"])
+                self.Extreme_Success = random.choice(bot_personality["Extreme_Success"]["通用"])
+                self.Hard_Success = random.choice(bot_personality["Hard_Success"]["通用"])
+                self.Success = random.choice(bot_personality["Success"]["通用"])
+                self.Failure = random.choice(bot_personality["Failure"]["通用"])
+                self.Fumble = random.choice(bot_personality["Fumble"]["通用"])
+        self.Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
+        self.Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+
     def skill_check(self, info_, result):
         if result <= 5 and info_ >= Critical_Success_SKill:
             compare = "<"
-            comment = Critical_Success
+            comment = self.Critical_Success
         elif result == 1:
             compare = "<"
-            comment = Critical_Success
+            comment = self.Critical_Success
         elif result <= info_ // 5:
             compare = "<"
-            comment = Extreme_Success
+            comment = self.Extreme_Success
         elif result <= info_ // 2:
             compare = "<"
-            comment = Hard_Success
+            comment = self.Hard_Success
         elif result <= info_:
             compare = "<"
-            comment = Success
+            comment = self.Success
         elif result >= 96 and info_ < Fumble_SKill:
             compare = ">"
-            comment = Fumble
+            comment = self.Fumble
         elif result == 100:
             compare = ">"
-            comment = Fumble
+            comment = self.Fumble
         else:
             compare = ">"
-            comment = Failure
+            comment = self.Failure
         return comment
 
     def cal_advantage(self, result, advantage):
@@ -5309,7 +5619,8 @@ class TRPGModule:
                     HP_MP_check = "MOV"
                 else:
                     HP_MP_check = ""
-                expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "").replace("MOV", "")
+                expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "").replace("MOV",
+                                                                                                               "")
             if pattern_combine.match(expression) and len(part_combine) > 1:
                 role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 print("联合掷骰")  # 意志+斗殴+潜行
@@ -5381,35 +5692,35 @@ class TRPGModule:
             #         result, adv_comment = self.cal_advantage(result, advantage)
             #         if result <= 5 and info >= Critical_Success_SKill:
             #             compare = "<"
-            #             comment = Critical_Success
+            #             comment = self.Critical_Success
             #             upgrade = self.skill_upgrade(0, skill_name, role)
             #         elif result == 1:
             #             compare = "<"
-            #             comment = Critical_Success
+            #             comment = self.Critical_Success
             #             upgrade = self.skill_upgrade(0, skill_name, role)
             #         elif result <= info // 5:
             #             compare = "<"
-            #             comment = Extreme_Success
+            #             comment = self.Extreme_Success
             #             upgrade = self.skill_upgrade(info, skill_name, role)
             #         elif result <= info // 2:
             #             compare = "<"
-            #             comment = Hard_Success
+            #             comment = self.Hard_Success
             #             upgrade = self.skill_upgrade(info, skill_name, role)
             #         elif result <= info:
             #             compare = "<"
-            #             comment = Success
+            #             comment = self.Success
             #             upgrade = self.skill_upgrade(info, skill_name, role)
             #         elif result >= 96 and info < Fumble_SKill:
             #             compare = ">"
-            #             comment = Fumble
+            #             comment = self.Fumble
             #             upgrade = ""
             #         elif result == 100:
             #             compare = ">"
-            #             comment = Fumble
+            #             comment = self.Fumble
             #             upgrade = ""
             #         else:
             #             compare = ">"
-            #             comment = Failure
+            #             comment = self.Failure
             #             upgrade = ""
             #             # 执行算式
             #         print(f"{result}/{info}：{comment}\n\n{upgrade}")
@@ -5547,7 +5858,7 @@ class TRPGModule:
                     for skillname in timerlist:
                         if expression == skillname:
                             if allin:
-                                if (timer == "time_1s") or(timer == "time_3s") or (timer == "time_1min"):
+                                if (timer == "time_1s") or (timer == "time_3s") or (timer == "time_1min"):
                                     self.move_time_forward(timer)
                                 elif timer == "time_5min":
                                     self.move_time_forward("time_1min")
@@ -5887,35 +6198,35 @@ class TRPGModule:
                     info = None
                     if result <= 5 and info_ >= Critical_Success_SKill:
                         compare = "<"
-                        comment = Critical_Success
+                        comment = self.Critical_Success
                         upgrade = self.skill_upgrade(0, skill_name, role)
                     elif result == 1:
                         compare = "<"
-                        comment = Critical_Success
+                        comment = self.Critical_Success
                         upgrade = self.skill_upgrade(0, skill_name, role)
                     elif result <= info_ // 5:
                         compare = "<"
-                        comment = Extreme_Success
+                        comment = self.Extreme_Success
                         upgrade = self.skill_upgrade(info_, skill_name, role)
                     elif result <= info_ // 2:
                         compare = "<"
-                        comment = Hard_Success
+                        comment = self.Hard_Success
                         upgrade = self.skill_upgrade(info_, skill_name, role)
                     elif result <= info_:
                         compare = "<"
-                        comment = Success
+                        comment = self.Success
                         upgrade = self.skill_upgrade(info_, skill_name, role)
                     elif result >= 96 and info_ < Fumble_SKill:
                         compare = ">"
-                        comment = Fumble
+                        comment = self.Fumble
                         upgrade = ""
                     elif result == 100:
                         compare = ">"
-                        comment = Fumble
+                        comment = self.Fumble
                         upgrade = ""
                     else:
                         compare = ">"
-                        comment = Failure
+                        comment = self.Failure
                         upgrade = ""
                     # 执行算式
                     if num_rolls == 1:
@@ -5983,9 +6294,64 @@ class TRPGModule:
         # 滚动到最底部
         # self.ChatApp.chat_log.yview(tk.END)
 
+    def newday(self):
+        self.add_time_1d()
+        print("新的一天")
+        env_text = self.ChatApp.time_log.get("1.0", tk.END).strip()
+        # self.chat_log.insert(tk.END,
+        # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+        time_info = env_text.split("【时间】")[1]
+        date = time_info.split("【日期】")[1]
+        time = time_info.split("【地点】")[0]
+        time_info = time_info.split("【地点】")[1]
+        place = time_info.split("【天气】")[0]
+        time_info = time_info.split("【天气】")[1]
+        weather = time_info.split("【日期】")[0]
+        # 上下午
+        if int(time.split(":")[0]) > 12:
+            time_ = time + "㏘"
+        else:
+            time_ = time + "㏂"
+        # 季节
+        if 5 >= int(date.split("/")[1]) >= 3:
+            date_ = "春♧" + date
+        elif 8 >= int(date.split("/")[1]) >= 6:
+            date_ = "夏♡" + date
+        elif 11 >= int(date.split("/")[1]) >= 9:
+            date_ = "秋♤" + date
+        else:
+            date_ = "冬♢" + date
+        # 昼夜
+        if "夏" in date_:
+            if 19 >= int(time.split(":")[0]) >= 6:
+                time_ = time_ + "昼☀"
+            else:
+                time_ = time_ + "夜☆"
+        elif "冬" in date_:
+            if 17 >= int(time.split(":")[0]) >= 8:
+                time_ = time_ + "昼☀"
+            else:
+                time_ = time_ + "夜☆"
+        else:
+            if 18 >= int(time.split(":")[0]) >= 7:
+                time_ = time_ + "昼☀"
+            else:
+                time_ = time_ + "夜☆"
+        date_ = date_.replace("Monday", datenamelist[0]).replace("Tuesday", datenamelist[1]).replace("Wednesday",
+                                                                                                     datenamelist[
+                                                                                                         2]).replace(
+            "Thursday",
+            datenamelist[3]).replace(
+            "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
+        env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather}【日期】{date_}"
+        env_text = f"【时间】{time}【地点】{place}【天气】{weather}【日期】{date}"
+        self.ChatApp.chat_log.insert(tk.END, f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text_}\n\n')
+        self.ChatApp.chat_log.yview(tk.END)
+
     def add_time_1min(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(minutes=1)
@@ -5996,16 +6362,12 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 1 minute")
         if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 59:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_5min(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(minutes=5)
@@ -6016,16 +6378,12 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 5 minutes")
         if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 55:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_10min(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(minutes=10)
@@ -6036,16 +6394,12 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 10 minutes")
         if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 50:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_30min(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(minutes=30)
@@ -6056,16 +6410,12 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 30 minutes")
         if int(datetime.strftime(base_time, "%H")) == 23 and int(datetime.strftime(base_time, "%M")) >= 30:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_1h(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(hours=1)
@@ -6076,16 +6426,12 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 60 minutes")
         if int(datetime.strftime(base_time, "%H")) >= 23:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_3h(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(hours=3)
@@ -6096,16 +6442,12 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 180 minutes")
         if int(datetime.strftime(base_time, "%H")) >= 21:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_12h(self):
         # 添加处理 time_1min 的代码
         global time
+        time = str(self.ChatApp.time_log.get("1.0", tk.END).strip().split("【地点】")[0]).replace("【时间】", "")
         time_format = "%H:%M"
         base_time = datetime.strptime(time, time_format)
         time = base_time + timedelta(hours=12)
@@ -6116,12 +6458,7 @@ class TRPGModule:
         self.ChatApp.time_log.insert(tk.END, "【时间】" + time.upper() + reply)
         print("Adding 720 minutes")
         if int(datetime.strftime(base_time, "%H")) >= 12:
-            self.add_time_1d()
-            print("新的一天")
-            self.ChatApp.chat_log.insert(tk.END,
-                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...现在是{date}\n\n')
-            # 滚动到最底部
-            self.ChatApp.chat_log.yview(tk.END)
+            self.newday()
 
     def add_time_1d(self):
         # 添加处理 time_1min 的代码
@@ -6367,7 +6704,7 @@ class DraggableItem:
         pass
 
     def on_resize_img(self, event):
-        print("中键")
+        # print("中键")
         # self.resize_anchor = event.x, event.y
         self.resize_anchor = self.canvas.coords(self.item)[:2]
         label_coords = self.canvas.coords(self.label_below_image_canvas2_edit)
