@@ -14,6 +14,8 @@ import configparser
 # import imageio
 # import pyautogui
 import ctypes
+
+import numpy as np
 from PIL import Image, ImageTk, ImageSequence
 import json
 import pygame
@@ -86,7 +88,7 @@ create_folder('ReplayResources/HandOut')
 create_folder('CardDecks')
 create_folder('QuickSaves')
 
-# 便于直接编辑的一系列字符串
+# 便于直接编辑的一系列字符串 一定要包括[成功/失败]，否则无法辨认（程序、用户角度）
 string_list_Critical_Success = {"通用": ["￥.。.￥。￥.。\n是大成功！\n.￥.。.￥。.￥。", "这次是大成功！/微笑"]}
 string_list_Extreme_Success = {"通用": ["（深呼吸）...极难成功！恭喜您！", "极难成功！恭喜您。"]}
 string_list_Hard_Success = {"通用": ["困难成功！"]}
@@ -205,6 +207,16 @@ bot_personality = bot_personality_
 bot_personality_by_name_ = {"卢骰": bot_personality_, "DiceBot": bot_personality_}
 bot_personality_by_name = bot_personality_by_name_
 
+
+#成功率: 61.85%/70%[60/97]  →eval(_success/_fail+_success)/均值(_luck_exp_value)[成功/成功+失败] →_luck/_luck_exp[_success/_fail+_success]
+#排名: 2[≥73.80%]      →遍历计算 _luck排名 →排名[≥高于百分比%]
+#大成功出现率: 2.06%(2) →大成功出现率 →出现率(出现数): 大成功/成功+失败eval(_critical/_fail+_success)[_critical/_fail+_success] →_critical_rate
+#大失败出现率: 8.24%(8) →大失败出现率 →出现率(出现数): 大失败/成功+失败eval(_fumble/_fail+_success)[_critical/_fail+_success] →
+#加权成功率: 61.85%  →eval(_luck*0.5 + (_critical_rate - _fumble_rate)*0.5) →_luck_weight
+#加权排名: 2[≥73.80%]      →遍历计算 _luck_weight排名:  →加权排名[≥高于百分比%]
+#D100统计次数: 161     →掷骰总次数_d100
+#均值/期望[标准差]: 49.04/50.5[25.72%] →d100出目均值(_d100_value)/期望=50.5[标准差(_d100_value)]
+
 def load_luck_by_name():
     try:
         # 尝试从JSON文件加载每个角色的luck(掷骰统计)
@@ -212,7 +224,7 @@ def load_luck_by_name():
             return json.load(file)
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
-        return {'KP': {"_luck": 0, "_fumble": 0, "_critical": 0}, 'DiceBot': 0}
+        return {'KP': {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}, 'DiceBot': {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}}
 
 def load_settings_codename():
     try:
@@ -1351,7 +1363,7 @@ class ChatApp:
                                      "", "", "", "", ""]
         # 从列表中随机选择一个字符串
         encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v1.31" + encouragement)
+        self.root.title("自嗨团 v1.55" + encouragement)
 
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
@@ -1365,7 +1377,7 @@ class ChatApp:
         root.bind("<Control-Return>", self.newline_on_ctrl_enter)
 
         # self.chat_log_huozi = ""
-        self.luck_by_name = {}
+        self.luck_by_name = load_luck_by_name()
         self.babel_data = {}
         self.Iconcanvas = {}
         self.Icon_on_avatar = {}
@@ -1403,7 +1415,6 @@ class ChatApp:
         self.role_count = load_role_count()
         self.roles = ["KP", "DiceBot", "PL 1"]
         self.enemy_matches = {}
-        self.codename_by_name = {}
         self.codename_by_name = load_settings_codename()
         if "_status" not in self.codename_by_name:
             self.codename_by_name["_status"] = True
@@ -1479,7 +1490,6 @@ class ChatApp:
         self.role_values_tags_text = {}  # 新增保存的数值
 
         for role in self.roles:
-            self.luck_by_name[role] = 0
             self.role_entries_name[role] = role
             self.image_references_on_Avatar[role] = []
             self.canvas_icon_animate[role] = tk.Canvas(self.root, width=20, height=20)
@@ -1493,11 +1503,19 @@ class ChatApp:
             self.current_frame_icon_on_canvas[role] = []
             if load_settings_name() != "":
                 self.role_entries_name = load_settings_name()  # 从文件加载设置
-            if role not in self.codename_by_name:
-                if role in self.role_entries_name:
-                    self.codename_by_name[role] = self.role_entries_name[role]
-                else:
-                    self.codename_by_name[role] = role
+            if role in self.role_entries_name:
+                if role not in self.codename_by_name:
+                    if role in self.role_entries_name:
+                        self.codename_by_name[role] = self.role_entries_name[role]
+                    else:
+                        self.codename_by_name[role] = role
+            if role in self.role_entries_name:
+                if self.role_entries_name[role] not in self.luck_by_name:
+                    self.luck_by_name[self.role_entries_name[role]] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
+            else:
+                if role not in self.luck_by_name:
+                    self.luck_by_name[role] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
+
         babel(self)
 
         self.create_role_frames()
@@ -1952,6 +1970,9 @@ class ChatApp:
                 else:
                     print("未找到牌堆或牌堆为空！")
                     os.startfile("CardDecks")
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
                 return
             elif "。alldraw" in message or ".alldraw" in message or ".drawall" in message or "。drawall" in message:
                 message = message.replace("all", "")
@@ -1959,6 +1980,19 @@ class ChatApp:
                     if role != "DiceBot":
                         self.drawcard(message, role)
                 message = ""
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
+            elif ".jrrp" in message or "。jrrp" in message:
+                message = ""
+                for role in self.roles:
+                    if role != "DiceBot":
+                        self.jrrp(role)
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
             if ".whoabcd" in message.lower() or "。whoabcd" in message.lower() or "。who abcd" in message.lower() or ".whoabcd" in message.lower():
                 rolelist = []
                 result = ""
@@ -1976,6 +2010,9 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason}抽取幸运顺序：{result}\n\n')
                 self.chat_log.yview(tk.END)
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
                 return
             elif ".who" in message or "。who" in message:
                 rolelist = []
@@ -1989,6 +2026,9 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason}抽取幸运儿：【{self.role_entries_name[random.choice(rolelist)]}】\n\n')
                 self.chat_log.yview(tk.END)
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
                 return
             elif ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
                 message = message.lower().replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes",
@@ -2002,14 +2042,31 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{reason_}是或否：【{random.choice(list_)}】\n\n')
                 self.chat_log.yview(tk.END)
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
                 return
             elif ".draw" == message.lower() or "。draw" == message.lower() or "。全牌堆列表" == message.lower() or ".全牌堆列表" == message.lower():
                 os.startfile("CardDecks")
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
                 return
         else:
+            if ".jrrp" in message or "。jrrp" in message:
+                self.jrrp(role)
+                message = ""
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
             if ".draw" in message or "。draw" in message or "。selfdraw" in message or ".selfdraw" in message or "。drawself" in message or ".drawself" in message:
                 self.drawcard(message, role)
                 message = ""
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
             if ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
                 message = message.lower().replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes",
                                                                                                             "").replace(
@@ -2023,6 +2080,9 @@ class ChatApp:
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}{reason_}是或否：【{random.choice(list_)}】\n\n')
                 self.chat_log.yview(tk.END)
                 message = ""
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
                 return
         if message:
             timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -2047,13 +2107,14 @@ class ChatApp:
                 else:
                     new_chart = self.parse_input_skill(message.upper()).copy()
                     print(new_chart)
-                    if new_chart:
-                        self.update_skills(role_Chart[role], new_chart)
-                        # if self.role_entries_name[role] in role_Chart_at_name:
-                        role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role].copy()
+
+                    self.update_skills(role_Chart[role], new_chart)
+                    # if self.role_entries_name[role] in role_Chart_at_name:
+                    role_Chart_at_name[self.role_entries_name[role]] = role_Chart[role].copy()
+                    if role in self.role_avatar_paths:
                         role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = self.role_avatar_paths[role]
-                        self.save_role_skill_at_name()
-                        # print(role_Chart_at_name[self.role_entries_name[role]])
+                    self.save_role_skill_at_name()
+                    # print(role_Chart_at_name[self.role_entries_name[role]])
                 SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
@@ -2154,6 +2215,316 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
                 self.chat_log.yview(tk.END)
+
+    def update_jrrp(self, role):
+        if role in self.role_entries_name:
+            luck_dic = self.luck_by_name[self.role_entries_name[role]].copy()
+        else:
+            luck_dic = self.luck_by_name[role].copy()
+        if luck_dic["_success"] + luck_dic["_fail"] > 0:
+            luck_dic["_luck"] = luck_dic["_success"] / (luck_dic["_success"] + luck_dic["_fail"])
+            luck_dic["_fumble_rate"] = luck_dic["_fumble"] / (luck_dic["_success"] + luck_dic["_fail"])
+            luck_dic["_critical_rate"] = luck_dic["_critical"] / (luck_dic["_success"] + luck_dic["_fail"])
+        luck_dic["_luck_exp"] = np.mean(luck_dic["_luck_exp_value"])/100
+        if luck_dic["_critical"] > 0 or luck_dic["_fumble"] > 0:
+            luck_dic["_luck_weight"] = luck_dic["_luck"] + ((luck_dic["_critical"] - luck_dic["_fumble"])/(luck_dic["_critical"] + luck_dic["_fumble"])) * 0.1
+        else:
+            luck_dic["_luck_weight"] = luck_dic["_luck"]
+        for key, item in luck_dic.items():
+            if "_value" not in key:
+                luck_dic[key] = round(item, 4)
+        if luck_dic:
+            if role in self.role_entries_name:
+                self.luck_by_name[self.role_entries_name[role]] = luck_dic
+            else:
+                self.luck_by_name[role] = luck_dic
+
+    def jrrp(self, role):
+        self.update_jrrp(role)
+        name = ""
+        if role in self.role_entries_name:
+            luck_dic = self.luck_by_name[self.role_entries_name[role]].copy()
+            name = self.role_entries_name[role]
+        else:
+            luck_dic = self.luck_by_name[role].copy()
+            name = role
+        #print(luck_dic)
+        rank = 0
+        rank_all = 0
+        rank_weight = 0
+        rank_jrrp = 0
+        for role_, dic in self.luck_by_name.items():
+            if dic["_d100"] > 0 and (dic["_success"] > 0 or dic["_fail"] > 0):
+                rank_all += 1
+                rank += 1
+                rank_weight += 1
+                if role_ != name and luck_dic["_luck"] > dic["_luck"]:
+                    rank -= 1
+                if role_ != name and luck_dic["_luck_weight"] > dic["_luck_weight"]:
+                    rank_weight -= 1
+        rank_percentage = rank/rank_all * 100
+        rank_weight_percentage = rank_weight/rank_all * 100
+        d100_mean = round(np.mean(luck_dic["_d100_value"]), 2)
+        d100_standard = round(np.std(luck_dic["_d100_value"]), 2)
+        self.jrrp_value = {}
+        value_list = []
+        for r, dict in self.luck_by_name.items():
+            if dict["_luck_exp"] != 0:
+                self.jrrp_value[r] = int(round(dict["_luck"]/dict["_luck_exp"]*100, 0))-100
+        for r, value in self.jrrp_value.items():
+            value_list.append(value)
+        min_value = min(value_list) #0
+        max_value = max(value_list) #100
+
+        def map_to_range(value):
+            return int(round(((value - min_value) / (max_value - min_value)) * 100, 0))
+
+        self.jrrp_value = {key: map_to_range(self.jrrp_value[key]) for key in self.jrrp_value.keys()}
+        for r, value in self.jrrp_value.items():
+            rank_jrrp += 1
+            if r != name and self.jrrp_value[name] > value:
+                rank_jrrp -= 1
+        rank_jrrp_percentage = rank_jrrp / rank_all * 100
+
+        self.chat_log.insert(tk.END,f'掷骰统计 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{name}】今日人品: {self.jrrp_value[name]} ')
+        self.role_entries[role].delete("1.0", tk.END)
+        self.role_entries[role].insert(tk.END, f'今日人品: {self.jrrp_value[name]}')
+        if rank_all == 1:
+            content_string = f'人品排名: 独孤求败...\n'
+        else:
+            content_string = f'人品排名: {rank_jrrp}/{rank_all}[{rank_jrrp_percentage}%]\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        content_string = f'成功率: {round(luck_dic["_luck"]*100, 2)}%→{round(luck_dic["_luck_exp"]*100, 2)}%[{luck_dic["_success"]}/{luck_dic["_success"] + luck_dic["_fail"]}]\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        if rank_all == 1:
+            content_string = f'排名: 独孤求败...\n'
+        else:
+            content_string = f'排名: {rank}/{rank_all}[{rank_percentage}%]\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        content_string = f'大成功率: {round(luck_dic["_critical_rate"]*100, 2)}%({luck_dic["_critical"]})\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        content_string = f'大失败率: {round(luck_dic["_fumble_rate"]*100, 2)}%({luck_dic["_fumble"]})\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        content_string = f'加权成功率: {round(luck_dic["_luck_weight"]*100, 2)}%\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        if rank_all == 1:
+            content_string = f'加权排名: 独孤求败...\n'
+        else:
+            content_string = f'加权排名: {rank_weight}/{rank_all}[{rank_weight_percentage}%]\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        content_string = f'D100掷骰次数: {luck_dic["_d100"]}\n'
+        self.chat_log.insert(tk.END, f'{content_string}')
+        content_string = f'D100掷骰统计: {d100_mean}→50.50[{abs(round(d100_standard - 28.58, 2))}]\n'
+        self.chat_log.insert(tk.END, f'{content_string}\n')
+        self.chat_log.yview(tk.END)
+
+    def jrrp_record(self, role, content, tag):
+        if "###" in content:
+            conexpress = content.split("###")[1]
+            content = content.split("###")[0]
+        else:
+            conexpress = ""
+        if "\n\n[成长检定]" in content:
+            self.jrrp_record(role, content.split("\n\n[成长检定]")[1], "growth")
+            content = content.split("\n\n[成长检定]")[0]
+        if role in self.role_entries_name:
+            luck_dic = self.luck_by_name[self.role_entries_name[role]].copy()
+        else:
+            luck_dic = self.luck_by_name[role].copy()
+        if tag == "silent":
+            if "成功" in content or "失败" in content or "d100" in conexpress or "D100" in conexpress or "San Check" in content:
+                if "成功" not in content and "失败" not in content:
+                    if "=" in content:
+                        _split = content.split("=")[0]
+                        if "+" in _split:
+                            _split = _split.split("+")
+                        elif "-" in _split:
+                            _split = _split.split("-")
+                        elif "*" in _split:
+                            _split = _split.split("*")
+                        else:
+                            _split = _split.split("/")
+                        for n in _split:
+                            luck_dic["_d100_value"].append(int(n))
+                            luck_dic["_d100"] += 1
+                    else:
+                        luck_dic["_d100"] += 1
+                        luck_dic["_d100_value"].append(int(content))
+                else:
+                    luck_dic["_d100"] += 1
+                    if ":" in content:
+                        _split = content.split(":")
+                    elif "：" in content:
+                        _split = content.split("：")
+                    number = _split[0]
+                    exp_number = number.split("/")[1] #可能有多个
+                    if ", " in exp_number:
+                        exp_number = exp_number.replace("[", "").replace("]", "")
+                        exp_number = exp_number.split(", ")
+                        for n in exp_number:
+                            luck_dic["_luck_exp_value"].append(int(n))
+                    else:
+                        luck_dic["_luck_exp_value"].append(int(exp_number))
+                    number = number.split("/")[0] #只有一个
+                    luck_dic["_d100_value"].append(int(number))
+                    comment = _split[1] #只有一个
+                    if "成功" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_success"] += comment.count("成功")
+                        else:
+                            luck_dic["_success"] += 1
+                    else:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_fail"] += comment.count("失败")
+                        else:
+                            luck_dic["_fail"] += 1
+                    if "大成功" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_critical"] += comment.count("大成功")
+                        else:
+                            luck_dic["_critical"] += 1
+                    elif"大失败" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_fumble"] += comment.count("大失败")
+                        else:
+                            luck_dic["_fumble"] += 1
+        elif tag == "all":
+            if "成功" in content or "失败" in content or "d100" in conexpress or "D100" in conexpress or "San Check" in content:
+                if "成功" not in content and "失败" not in content:
+                    if "=" in content:
+                        _split = content.split("=")[0]
+                        if "+" in _split:
+                            _split = _split.split("+")
+                        elif "-" in _split:
+                            _split = _split.split("-")
+                        elif "*" in _split:
+                            _split = _split.split("*")
+                        else:
+                            _split = _split.split("/")
+                        for n in _split:
+                            luck_dic["_d100_value"].append(int(n))
+                            luck_dic["_d100"] += 1
+                    else:
+                        luck_dic["_d100"] += 1
+                        luck_dic["_d100_value"].append(int(content))
+                else:
+                    luck_dic["_d100"] += 1
+                    if ":" in content:
+                        _split = content.split(":")
+                    elif "：" in content:
+                        _split = content.split("：")
+                    number = _split[0]
+                    exp_number = number.split("/")[1] #可能有多个
+                    if ", " in exp_number:
+                        exp_number = exp_number.replace("[", "").replace("]", "")
+                        exp_number = exp_number.split(", ")
+                        for n in exp_number:
+                            luck_dic["_luck_exp_value"].append(int(n))
+                    else:
+                        luck_dic["_luck_exp_value"].append(int(exp_number))
+                    number = number.split("/")[0] #只有一个
+                    luck_dic["_d100_value"].append(int(number))
+                    comment = _split[1] #只有一个
+                    if "成功" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_success"] += comment.count("成功")
+                        else:
+                            luck_dic["_success"] += 1
+                    else:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_fail"] += comment.count("失败")
+                        else:
+                            luck_dic["_fail"] += 1
+                    if "大成功" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_critical"] += comment.count("大成功")
+                        else:
+                            luck_dic["_critical"] += 1
+                    elif"大失败" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_fumble"] += comment.count("大失败")
+                        else:
+                            luck_dic["_fumble"] += 1
+        elif tag == "solo":
+            if "成功" in content or "失败" in content or "d100" in conexpress or "D100" in conexpress or "San Check" in content:
+                if "成功" not in content and "失败" not in content:
+                    if "=" in content:
+                        _split = content.split("=")[0]
+                        if "+" in _split:
+                            _split = _split.split("+")
+                        elif "-" in _split:
+                            _split = _split.split("-")
+                        elif "*" in _split:
+                            _split = _split.split("*")
+                        else:
+                            _split = _split.split("/")
+                        for n in _split:
+                            luck_dic["_d100_value"].append(int(n))
+                            luck_dic["_d100"] += 1
+                    else:
+                        luck_dic["_d100"] += 1
+                        luck_dic["_d100_value"].append(int(content))
+                else:
+                    luck_dic["_d100"] += 1
+                    if ":" in content:
+                        _split = content.split(":")
+                    elif "：" in content:
+                        _split = content.split("：")
+                    number = _split[0]
+                    exp_number = number.split("/")[1] #可能有多个
+                    if ", " in exp_number:
+                        exp_number = exp_number.replace("[", "").replace("]", "")
+                        exp_number = exp_number.split(", ")
+                        for n in exp_number:
+                            if ":" in n:
+                                luck_dic["_luck_exp_value"].append(int(n.split(":")[0]))
+                            else:
+                                luck_dic["_luck_exp_value"].append(int(n))
+                    else:
+                        luck_dic["_luck_exp_value"].append(int(exp_number))
+                    number = number.split("/")[0] #只有一个
+                    luck_dic["_d100_value"].append(int(number))
+                    comment = _split[1] #只有一个
+                    if "成功" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_success"] += comment.count("成功")
+                        else:
+                            luck_dic["_success"] += 1
+                    else:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_fail"] += comment.count("失败")
+                        else:
+                            luck_dic["_fail"] += 1
+                    if "大成功" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_critical"] += comment.count("大成功")
+                        else:
+                            luck_dic["_critical"] += 1
+                    elif"大失败" in comment:
+                        if isinstance(exp_number, list) and len(exp_number) > 1:
+                            luck_dic["_fumble"] += comment.count("大失败")
+                        else:
+                            luck_dic["_fumble"] += 1
+        elif tag == "growth":
+            content = content.split("1D100=")[1]
+            comment = content.split(")")[1]
+            content = content.split(")")[0]
+            number = content.split("/")[0]  # 只有一个
+            luck_dic["_d100_value"].append(int(number))
+            exp_number = content.split("/")[1]  # 只有一个
+            luck_dic["_luck_exp_value"].append(int(100-int(exp_number)))
+            if "败北" in comment:
+                luck_dic["_fail"] += 1
+            else:
+                luck_dic["_success"] += 1
+        else:
+            print(content)
+        self.update_jrrp(role)
+        if luck_dic:
+            if role in self.role_entries_name:
+                self.luck_by_name[self.role_entries_name[role]] = luck_dic
+            else:
+                self.luck_by_name[role] = luck_dic
 
     def drawcard(self, message, role):
         message = message.replace("alldraw", "draw").replace("drawall", "draw")
@@ -2428,19 +2799,20 @@ class ChatApp:
         else:
             pass
         old_dict["理智"] = old_dict["SAN"]
-        if old_dict["闪避"] > int(old_dict["敏捷"] / 2):
-            pass
-        elif "闪避" in new_dict:
-            pass
-        else:
-            old_dict["闪避"] = int(old_dict["敏捷"] / 2)
-        if old_dict["母语"] != "EDU" and old_dict["母语"] > old_dict["教育"]:
-            pass
-        elif "母语" in new_dict:
-            pass
-        else:
-            old_dict["母语"] = old_dict["教育"]
-        old_dict["魅力"] = old_dict["外貌"]
+        if new_dict:
+            if old_dict["闪避"] > int(old_dict["敏捷"] / 2):
+                pass
+            elif "闪避" in new_dict:
+                pass
+            else:
+                old_dict["闪避"] = int(old_dict["敏捷"] / 2)
+            if old_dict["母语"] != "EDU" and old_dict["母语"] > old_dict["教育"]:
+                pass
+            elif "母语" in new_dict:
+                pass
+            else:
+                old_dict["母语"] = old_dict["教育"]
+            old_dict["魅力"] = old_dict["外貌"]
         old_dict["CM"] = old_dict["克苏鲁神话"]
         old_dict["克苏鲁"] = old_dict["克苏鲁神话"]
         old_dict["计算机"] = old_dict["计算机使用"]
@@ -2596,6 +2968,13 @@ class ChatApp:
         elif self.role_entries_name[new_role] != new_role:
             self.codename_by_name[new_role] = self.role_entries_name[new_role]
             pass
+        if new_role in self.role_entries_name:
+            if self.role_entries_name[new_role] not in self.luck_by_name:
+                self.luck_by_name[self.role_entries_name[new_role]] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
+        else:
+            if new_role not in self.luck_by_name:
+                self.luck_by_name[new_role] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
+
 
         num_cols = 3
         idx = len(self.roles) - 1
@@ -2642,6 +3021,12 @@ class ChatApp:
                 self.codename_by_name[new_role] = self.role_entries_name[new_role]
             else:
                 self.codename_by_name[new_role] = new_role
+        if new_role in self.role_entries_name:
+            if self.role_entries_name[new_role] not in self.luck_by_name:
+                self.luck_by_name[self.role_entries_name[new_role]] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
+        else:
+            if new_role not in self.luck_by_name:
+                self.luck_by_name[new_role] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
 
         num_cols = 3
         idx = len(self.roles) - 1
@@ -3279,6 +3664,29 @@ class ChatApp:
                 # chat_log_content = chat_log_content.replace("\n【骰子】", ";")
                 # 使用正则表达式匹配掷骰结果
                 # matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
+                lines = chat_log_content.split('\n')
+                for i, line in enumerate(lines):
+                    if line and line[0] == "【" and "【骰子】" in line:
+                        content = line.replace("【骰子】", "")
+                        reason = re.findall(r'\(([^)]*)\)', content)
+                        if reason:
+                            for r in reason:
+                                expression = content.replace("(" + r + ")", "")
+                                # 联合检定处理 (【沃姆】掷骰{潜行+意志})1D100=24/[21, 70]:失败/困难成功
+                                if "+" in r and ":" in expression and ", " in expression:
+                                    comment = expression.split(":")[1]
+                                    comment = comment.split("/")
+                                    expression_ = expression.split(":")[0].split("/[")[0]
+                                    number = expression.split(":")[0].split("/[")[1].replace("]", "").split(", ")
+                                    k = 0
+                                    combine_list = []
+                                    for n in number:
+                                        combine_ = "(" + r + ")" + "[" + comment[k] + "]" + expression_ + "/" + n
+                                        combine_list.append(combine_)
+                                        k += 1
+                                    content = ";".join(combine_list)
+                                    lines[i] = "【骰子】" + content
+                chat_log_content = "\n".join(lines)
                 matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
                 while matches:
                     # print(matches)
@@ -3335,7 +3743,7 @@ class ChatApp:
                 global style_dice_pcname_color
                 global style_dice_skillname_style
                 for index, line in enumerate(lines):
-                    if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
+                    if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line) or ("[" in line)):
                         name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
                         if name:
                             title = re.findall(r'【([^】]*)】', name[0])
@@ -3369,12 +3777,14 @@ class ChatApp:
                             style_dice_skillname_style[
                                 1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                         # 将理由中的“D”替换为“🎲”
-                        reason = re.findall(r'\(([^)]*)\)', content)[0]
+                        reason = re.findall(r'\(([^)]*)\)', content)
                         if reason:
-                            if "D" in reason or "d" in reason:
-                                reason_ = reason
-                                reason_ = reason_.replace("D", "🎲").replace("d", "🎲")
-                                content = content.replace(reason, reason_)
+                            for r in reason:
+                                expression = content.replace("(" + r + ")", "")
+                                if "D" in r or "d" in r:
+                                    reason_ = r
+                                    reason_ = reason_.replace("D", "◈").replace("d", "◈")
+                                    content = content.replace(r, reason_)
                         lines[index] = f"【骰子】{content}"
                 chat_log_content = "\n".join(lines)
                 # 替换codename
@@ -3414,9 +3824,30 @@ class ChatApp:
                 # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
                 # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
                 chat_log_content = chat_log_content.replace(";\n", ";")
-                # chat_log_content = chat_log_content.replace("\n【骰子】", ";")
                 # 使用正则表达式匹配掷骰结果
-                # matches = re.findall(r'(\【.*?\】掷骰(?:\{.*?\})?)\d+D\d+=\d+(?:/\d+)?', text)
+                lines = chat_log_content.split('\n')
+                for i, line in enumerate(lines):
+                    if line and line[0] == "【" and "【骰子】" in line:
+                        content = line.replace("【骰子】", "")
+                        reason = re.findall(r'\(([^)]*)\)', content)
+                        if reason:
+                            for r in reason:
+                                expression = content.replace("(" + r + ")", "")
+                                # 联合检定处理 (【沃姆】掷骰{潜行+意志})1D100=24/[21, 70]:失败/困难成功
+                                if "+" in r and ":" in expression and ", " in expression:
+                                    comment = expression.split(":")[1]
+                                    comment = comment.split("/")
+                                    expression_ = expression.split(":")[0].split("/[")[0]
+                                    number = expression.split(":")[0].split("/[")[1].replace("]", "").split(", ")
+                                    k = 0
+                                    combine_list = []
+                                    for n in number:
+                                        combine_ = "(" + r + ")" + "[" + comment[k] + "]" + expression_ + "/" + n
+                                        combine_list.append(combine_)
+                                        k += 1
+                                    content = ";".join(combine_list)
+                                    lines[i] = "【骰子】" + content
+                chat_log_content = "\n".join(lines)
                 matches = re.findall(r'(\【骰子】.*?)\n(\【骰子】)', chat_log_content)
                 while matches:
                     # print(matches)
@@ -3463,9 +3894,10 @@ class ChatApp:
                 global style_dice_reason_color_echo
                 global style_dice_pcname_color_echo
                 global style_dice_skillname_style_echo
+                global style_dice_icon
                 for index, line in enumerate(lines):
 
-                    if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line)):
+                    if (line[0] == "<") and (("【" in line) or ("（" in line) or ("(" in line) or ("[" in line)):
                         name = re.findall(r'<([^>]*)>', line, re.MULTILINE)
                         title = re.findall(r'【([^】]*)】', name[0])
                         if title:
@@ -3500,14 +3932,12 @@ class ChatApp:
                                                                                               style_dice_pcname_color_echo[
                                                                                                   0]).replace("】",
                                                                                                               style_dice_pcname_color_echo[
-                                                                                                                  1]).replace(
-                            "{",
+                                                                                                                  1]).replace("{",
                             style_dice_skillname_style_echo[0]).replace("}", style_dice_skillname_style_echo[
                             1])  # .replace(")", "</color>").replace("）", "</color>").replace("（", "<color=#FFFFFF70>").replace("(", "<color=#FFFFFF70>")
                         # 分解骰子语句格式：(理由)[结果]公式=投出值/鉴定值;(理由)[结果]公式=投出值;(理由)公式=投出值 → 描述，骰子总面数，检定值，投出值(伊可-智力检定,100,50,30)
-                        content_parse = content.replace(style_dice_reason_color_echo, "因").replace(
-                            style_dice_skillname_style_echo[0], "{").replace(style_dice_skillname_style_echo[1],
-                                                                             "}").replace(
+                        content_parse = content.replace(style_dice_reason_color_echo, "→因").replace(
+                            style_dice_skillname_style_echo[0], style_dice_icon[2]+"{").replace(style_dice_skillname_style_echo[1], "}").replace(
                             style_dice_pcname_color_echo[0], "").replace(style_dice_pcname_color_echo[1], "")
                         if ";" in content_parse:
                             # 多个合并骰子
@@ -3582,7 +4012,7 @@ class ChatApp:
                         # lines[index] = exp + f"[dice]:{content.replace(';',',')} + {EchoDice}"
                         lines[
                             index] = exp + f"[{self.role_entries_name['DiceBot']}]:掷骰中..." + "{掷骰}\n" + EchoDice.replace(
-                            "{", " ").replace("}", "").replace("SAN CHECK", "SC").replace("掷骰", "")
+                            "{", "").replace("}", "").replace("SAN CHECK", "SC").replace("掷骰", "")
                     if lines[index][0] == "<" and ("<dice>:" not in lines[index]):
                         name = re.findall(r'<([^>]*)>', lines[index], re.MULTILINE)
                         content = lines[index].replace(f"<{name[0]}>", "")
@@ -4310,11 +4740,11 @@ class ChatApp:
             # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
             self.role_entries[role].delete("1.0", tk.END)
         multi_num = 1
-        pattern_multi = re.compile(r'[\d+]\*[\u4e00-\u9fa5a-zA-Z]+')
+        pattern_multi = re.compile(r'\d+\*[\u4e00-\u9fa5a-zA-Z]+')
         if pattern_multi.match(expression):
             multi_num = int(expression.split("*")[0])
             expression = expression.split("*")[1]
-            print("多轮掷骰" + str(multi_num))
+            print("多轮掷骰:" + str(multi_num))
             is_multiDice = True
         else:
             is_multiDice = False
@@ -4331,6 +4761,7 @@ class ChatApp:
                 for roles in self.roles:
                     if roles != "DiceBot":
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
+                        self.jrrp_record(roles, result_+"###"+expression, "all")
                         if ("HP" in expression.upper()) or ("MP" in expression.upper()):
                             expression = ""
                             reason = ""
@@ -4446,6 +4877,7 @@ class ChatApp:
                     pass
                 else:
                     result_ = self.trpg_module.roll(expression, role)
+                    self.jrrp_record(role, result_+ "###" + expression, "solo")
                     if ("HP" in expression.upper()) or ("MP" in expression.upper()):
                         expression = ""
                         reason = ""
@@ -4631,11 +5063,13 @@ class ChatApp:
                 message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}进行了一次{SANC}暗骰。\n\n'
             else:
                 message = f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【暗骰】{self.role_entries_name[role]}因{reason}进行了一次{SANC}暗骰。\n\n'
+            self.chat_log.insert(tk.END, message)
             self.chat_log.insert(tk.END,
                                  f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【音效】掷骰\n\n')
-            self.chat_log.insert(tk.END, message)
             self.chat_log.yview(tk.END)
             result = self.trpg_module.roll(expression, role)
+            # jrrp录入
+            self.jrrp_record(role, result + "###" + expression, "silent")
             self.role_entries[role].insert(tk.END, result)
             multi_num -= 1
 
@@ -5350,6 +5784,9 @@ class ChatApp:
 
     def save_settings(self):
         global bot_personality_by_name
+        # 将角色luck统计保存到JSON文件
+        with open('Bots/luck_by_name.json', 'w', encoding='utf-8') as file:
+            json.dump(self.luck_by_name, file, ensure_ascii=False)
         # 将角色codename保存到JSON文件
         with open('AppSettings/codename_settings.json', 'w', encoding='utf-8') as file:
             json.dump(self.codename_by_name, file, ensure_ascii=False)
