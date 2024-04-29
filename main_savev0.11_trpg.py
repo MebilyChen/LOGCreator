@@ -4731,6 +4731,7 @@ class ChatApp:
                 self.roll_dice(role, expression, reason)
 
     def roll_dice(self, role, expression, reason):
+        global mav_prob
         final_words = ""
         is_multiDice = False
         if role != "全员":
@@ -4762,6 +4763,21 @@ class ChatApp:
                     if roles != "DiceBot":
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
                         self.jrrp_record(roles, result_+"###"+expression, "all")
+                        # 妙语
+                        if role != "DiceBot":
+                            rand_num = random.random()  # 生成0到1之间的随机数
+                            if rand_num >= 1 - mav_prob:
+                                if expression in bot_personality["妙语"]:
+                                    _mav_list = []
+                                    if self.role_entries_name[role] in bot_personality["妙语"]:
+                                        _mav_list = bot_personality["妙语"][expression] + \
+                                                    bot_personality["妙语"]["通用"]
+                                    else:
+                                        _mav_list = bot_personality["妙语"][expression]
+                                    mav_words_ = random.choice(_mav_list)
+                                    self.chat_log.insert(tk.END,
+                                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
+                                    self.chat_log.yview(tk.END)
                         if ("HP" in expression.upper()) or ("MP" in expression.upper()):
                             expression = ""
                             reason = ""
@@ -4878,6 +4894,21 @@ class ChatApp:
                 else:
                     result_ = self.trpg_module.roll(expression, role)
                     self.jrrp_record(role, result_+ "###" + expression, "solo")
+                    # 妙语
+                    if role != "DiceBot":
+                        rand_num = random.random()  # 生成0到1之间的随机数
+                        if rand_num >= 1 - mav_prob:
+                            if expression in bot_personality["妙语"]:
+                                _mav_list = []
+                                if self.role_entries_name[role] in bot_personality["妙语"]:
+                                    _mav_list = bot_personality["妙语"][expression] + \
+                                                bot_personality["妙语"]["通用"]
+                                else:
+                                    _mav_list = bot_personality["妙语"][expression]
+                                mav_words_ = random.choice(_mav_list)
+                                self.chat_log.insert(tk.END,
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
+                                self.chat_log.yview(tk.END)
                     if ("HP" in expression.upper()) or ("MP" in expression.upper()):
                         expression = ""
                         reason = ""
@@ -7193,7 +7224,7 @@ class DraggableItem:
         # canvas.itemconfig(label, image=frames[frame_index])
         canvas.after()
 
-    def on_right_press(self, event):
+    def move_cursor_to_avoid(self):
         global isOpeningFiles
         isOpeningFiles = True
         # self.canvas.unbind("<ButtonRelease-3>")
@@ -7210,6 +7241,8 @@ class DraggableItem:
         # user32.SetCursorPos(screen_width-100, screen_height-100)
         user32.SetCursorPos(screen_width, screen_height - 500)
 
+    def on_right_press(self, event):
+        global isOpeningFiles
         global frame_Map
         global frames_Map
         global current_frame_map
@@ -7239,6 +7272,7 @@ class DraggableItem:
             self.canvas.delete(self.label_below_image_canvas)
             self.canvas.delete(self.label_below_image_canvas2_edit)
         elif self.itemType == "image" or self.itemType == "text_PC" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
+            self.move_cursor_to_avoid()
             # 创建武器选择变量
             # t.sleep(1)
             avatar_path = filedialog.askopenfilename(title="为【" + self.label + "】选择战斗图片",
@@ -7298,8 +7332,10 @@ class DraggableItem:
             # 创建按钮，用于确认选择
             # self.select_weapon_button = tk.Button(root, text="选择", command=self.select_weapon)
             # self.select_weapon_button.pack()
+            isOpeningFiles = False
 
         elif self.itemType == "DiceBotImage":
+            self.move_cursor_to_avoid()
             # t.sleep(1)
             avatar_path = filedialog.askopenfilename(title="载入图片",
                                                      filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
@@ -7363,6 +7399,7 @@ class DraggableItem:
                     image = tk.PhotoImage(file=avatar_path)
                     draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
                                                     label2=labeltext, secret=secret, type="image_temp")
+            isOpeningFiles = False
         else:
             if Is_fill:
                 draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
@@ -7396,7 +7433,6 @@ class DraggableItem:
         # 显示图片在 Canvas 上
         # draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=image, label=self.label,
         # label2=self.label2)
-        isOpeningFiles = False
 
     def on_press(self, event):
         self.start_x = event.x
