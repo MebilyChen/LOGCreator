@@ -6957,7 +6957,7 @@ class TRPGModule:
 
 class DraggableItem:
     def __init__(self, canvas, x, y, width, height, fill=None, image=None, outline=None, label=None, label2=None,
-                 type=None, frame=None, secret=None):
+                 type=None, frame=None, secret=None, tuceng = None):
         global frame_Map
         global frames_Map
         global current_frame_map
@@ -6977,7 +6977,14 @@ class DraggableItem:
         self.frame = frame
 
         if image:
-            self.item = canvas.create_image(x, y, image=image, tags="draggable")
+            if tuceng:
+                if tuceng == "y":
+                    self.item = canvas.create_image(x, y, image=image, tags="draggable")
+                    self.canvas.tag_lower(self.item)
+                else:
+                    self.item = canvas.create_image(x, y, image=image, tags="draggable")
+            else:
+                self.item = canvas.create_image(x, y, image=image, tags="draggable")
             if self.itemType == "image_animate" or self.itemType == "image_temp_animate" or self.itemType == "DiceBotImage_animate":
                 # 播放 GIF 动画
                 # print(current_frame_map)
@@ -7010,8 +7017,7 @@ class DraggableItem:
                 self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image,
                                                                           anchor=tk.NW)
                 if secret == "y":
-                    self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
-                                                                        fill="white",
+                    self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10), fill="",
                                                                         tags="draggable")
                     self.label_below_image_canvas2_edit = canvas.create_text(x, y + 30, text="___", font=("Arial", 10),
                                                                              fill="black",
@@ -7142,25 +7148,32 @@ class DraggableItem:
         if self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
             intiText = self.label2
         else:
-            intiText = "标签"
+            if self.itemType == "text":
+                text = self.canvas.itemcget(self.item, "text")
+            else:
+                text = self.canvas.itemcget(self.label_below_image_canvas, "text")
+            if text:
+                intiText = text
+            else:
+                intiText = "标签"
         new_text = simpledialog.askstring("Input", "Enter new text:", initialvalue=intiText)
         secret = "n"
         if new_text:
             secret = simpledialog.askstring("隐藏？", "是否隐藏标签文字（y/n）:", initialvalue="n")
             if self.itemType == "text":
                 if secret == "y":
-                    self.canvas.itemconfig(self.item, text=new_text, fill="white")
+                    self.canvas.itemconfig(self.item, text=new_text, fill="")
                 else:
                     self.canvas.itemconfig(self.item, text=new_text, fill="black")
             elif self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
                 if secret == "y":
-                    self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text, fill="white")
+                    self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text, fill="")
                 else:
                     self.canvas.itemconfig(self.label_below_image_canvas2, text=new_text, fill="black")
                 self.label2 = new_text
             else:
                 if secret == "y":
-                    self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="white")
+                    self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="")
                 else:
                     self.canvas.itemconfig(self.label_below_image_canvas, text=new_text, fill="black")
 
@@ -7180,14 +7193,32 @@ class DraggableItem:
         pass
 
     def on_right_drag(self, event):
-        if self.resize_anchor:
-            dx = event.x - self.resize_anchor[0]
-            dy = event.y - self.resize_anchor[1]
-            self.width += dx
-            self.height += dy
-            self.canvas.coords(self.item, self.canvas.coords(self.item)[0],
-                               self.canvas.coords(self.item)[1], self.width, self.height)
+        if self.itemType == "text" or self.itemType == "text_PC":
+            delta_x = event.x - self.start_x
+            delta_y = event.y - self.start_y
+            self.canvas.move(self.item, delta_x, delta_y)
+            if self.label_below_image_canvas is not None:
+                self.canvas.move(self.label_below_image_canvas, delta_x, delta_y)
+                if self.label_below_image_canvas2 != None:
+                    self.canvas.move(self.label_below_image_canvas2, delta_x, delta_y)
+                    if self.label_below_image_canvas2_edit != None:
+                        self.canvas.move(self.label_below_image_canvas2_edit, delta_x, delta_y)
+            self.start_x = event.x
+            self.start_y = event.y
+            # dx = event.x - self.anchor[0]
+            # dy = event.y - self.anchor[1]
+            # self.canvas.move(self.item, dx, dy)
+            self.anchor = event.x, event.y
             self.resize_anchor = event.x, event.y
+        else:
+            if self.resize_anchor:
+                dx = event.x - self.resize_anchor[0]
+                dy = event.y - self.resize_anchor[1]
+                self.width += dx
+                self.height += dy
+                self.canvas.coords(self.item, self.canvas.coords(self.item)[0],
+                                   self.canvas.coords(self.item)[1], self.width, self.height)
+                self.resize_anchor = event.x, event.y
 
     def on_right_drag_img(self, event):
         if self.resize_anchor:
@@ -7365,16 +7396,27 @@ class DraggableItem:
                         percentage = min(percentage_w, percentage_h)
                         image = image.resize((int(width * percentage), int(height * percentage)), Image.LANCZOS)
                         width, height = image.size
+                    if max([width, height]) >= 500:
+                        tuceng = simpledialog.askstring("图层", "是否置于底层（y/n）:", initialvalue="y")
+                    else:
+                        tuceng = "n"
                     frames_map[frame_Map] = [
                         ImageTk.PhotoImage(frame.resize((int(width * 0.8), int(height * 0.8)), Image.LANCZOS))
                         for frame
                         in ImageSequence.Iterator(image)]
                     # 显示 GIF 图片的第一帧
-                    current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
-                                                                 image=frames_map[frame_Map][0],
-                                                                 label2=labeltext, type="image_temp_animate",
-                                                                 secret=secret,
-                                                                 frame=frame_Map)
+                    if tuceng == "y":
+                        current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
+                                                                     image=frames_map[frame_Map][0],
+                                                                     label2=labeltext, type="image_temp_animate",
+                                                                     secret=secret,
+                                                                     frame=frame_Map, tuceng="y")
+                    else:
+                        current_frame_map[frame_Map] = DraggableItem(self.canvas, event.x, event.y, 10, 10,
+                                                                     image=frames_map[frame_Map][0],
+                                                                     label2=labeltext, type="image_temp_animate",
+                                                                     secret=secret,
+                                                                     frame=frame_Map)
                     frame_Map += 1
 
                 else:
@@ -7387,6 +7429,10 @@ class DraggableItem:
                             percentage = min(percentage_w, percentage_h)
                             image = image.resize((int(width * percentage), int(height * percentage)), Image.LANCZOS)
                             width, height = image.size
+                        if max([width, height]) >= 500:
+                            tuceng = simpledialog.askstring("图层", "是否置于底层（y/n）:", initialvalue="y")
+                        else:
+                            tuceng = "n"
                         image = image.resize((int(width * 0.8), int(height * 0.8)), Image.LANCZOS)
                         photo = ImageTk.PhotoImage(image)
                         # circle = self.canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill='', outline="black", width=2)
@@ -7397,8 +7443,12 @@ class DraggableItem:
                         self.image_references.append(photo)
                         # Create draggable image
                     image = tk.PhotoImage(file=avatar_path)
-                    draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
-                                                    label2=labeltext, secret=secret, type="image_temp")
+                    if tuceng == "y":
+                        draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
+                                                    label2=labeltext, secret=secret, type="image_temp", tuceng="y")
+                    else:
+                        draggable_image = DraggableItem(self.canvas, event.x, event.y, 10, 10, image=photo,
+                                                        label2=labeltext, secret=secret, type="image_temp")
             isOpeningFiles = False
         else:
             if Is_fill:
