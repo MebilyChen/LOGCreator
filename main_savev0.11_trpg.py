@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 # import threading
+from collections import defaultdict
 from random import random
 import random
 # import time as t
@@ -319,7 +320,6 @@ def load_CardDeck(name):
         # 如果文件不存在，返回默认设置
         return {}
 
-
 def load_icon_data():
     try:
         # 尝试加载角色状态icon路径
@@ -328,6 +328,16 @@ def load_icon_data():
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
         return {}
+
+def load_role_skill_menu():
+    try:
+        # 尝试加载角色状态icon路径
+        with open('GameSaves/skill_menu_by_name.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        print("不存在GameSaves/skill_menu_by_name.json 无法使用快捷技能列表功能！")
+        return {'KP': {'技能名[鉴定](要求)效果公式：描述': "skill", '法术名[效果公式](消费)：描述': "spell", '战技/特技名:效果[鉴定](要求)公式': "maneuver"}}
 
 
 def undo(event, text_box):
@@ -1400,6 +1410,8 @@ class ChatApp:
 
         self.role_Icon_paths = load_icon_data()
 
+        self.role_skill_menu = load_role_skill_menu()
+
         self.NowBGM = ["全部"]
         self.NowImage = []
         self.NowEffect = []
@@ -1453,6 +1465,7 @@ class ChatApp:
         # 初始化聊天LOG
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20, undo=True)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
+        self.chat_log.bind("<Button-3>", lambda event, r="chatlog": self.add_menu(event, r))
         # 在 Text 组件中插入初始文本
         initial_text = "Updates/Todo：详情见readme" \
                        "\nTips:\n.st HP、MP时均修改的是上限，修改实时hp/mp需使用掷骰栏掷骰，或者直接修改\n使用 .st#斗殴@1D3+5 " \
@@ -1504,6 +1517,8 @@ class ChatApp:
             if load_settings_name() != "":
                 self.role_entries_name = load_settings_name()  # 从文件加载设置
             if role in self.role_entries_name:
+                if self.role_entries_name[role] not in self.role_skill_menu:
+                    self.role_skill_menu[self.role_entries_name[role]] = {'技能名[鉴定](要求)效果公式：描述': "skill", '法术名[效果公式](消费)：描述': "spell", '战技/特技名:效果[鉴定](要求)公式': "maneuver"}
                 if role not in self.codename_by_name:
                     if role in self.role_entries_name:
                         self.codename_by_name[role] = self.role_entries_name[role]
@@ -1715,6 +1730,7 @@ class ChatApp:
         # 每个角色的消息框
         entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3, undo=True)
         entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+        entry.bind("<Button-3>", lambda event, r=role: self.add_menu(event, role))
         self.role_entries[role] = entry
         # 加载并显示头像
         self.load_and_display_avatar(role, frame)
@@ -1806,6 +1822,7 @@ class ChatApp:
         # 添加掷骰按钮和面数输入框
         entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1, undo=True)
         entry_roll.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
+        entry_roll.bind("<Button-3>", lambda event, r=role: self.add_menu_skills(event, role))
         self.role_entries_roll[role] = entry_roll
         roll_button = tk.Button(frame, text="掷骰", command=lambda r=role: self.get_and_roll(r))
         roll_button.grid(row=2, column=2, padx=5, pady=5)
@@ -1822,6 +1839,328 @@ class ChatApp:
     def save_info(self, event, role):
         self.role_values_tags_text[role] = self.role_values_entry[role].get("1.0", tk.END).strip()
         # print(self.role_values_entry[role].get("1.0", tk.END).strip())
+
+    def show_menu(self, event, menu):
+        menu.post(event.x_root, event.y_root)
+
+    def insert_text_to_Bot(self, text, send=None):
+        self.role_entries["DiceBot"].insert("1.0", text)
+        if send:
+            self.send_message("DiceBot")
+            if self.role_entries["DiceBot"].get("1.0", tk.END).strip() == text:
+                self.role_entries["DiceBot"].delete("1.0", tk.END)
+            else:
+                temp_ = self.role_entries["DiceBot"].get("1.0", tk.END).strip().replace(text, "")
+                self.role_entries["DiceBot"].delete("1.0", tk.END)
+                self.role_entries["DiceBot"].insert("1.0", temp_)
+        else:
+            pass
+
+    def insert_text_to_PC(self, text, role, send=None):
+        self.role_entries[role].insert("1.0", text)
+        if send:
+            self.send_message(role)
+            if self.role_entries[role].get("1.0", tk.END).strip() == text:
+                self.role_entries[role].delete("1.0", tk.END)
+            else:
+                temp_ = self.role_entries[role].get("1.0", tk.END).strip().replace(text, "")
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", temp_)
+        else:
+            pass
+
+    def insert_roll_to_PC(self, text, role, send=None):
+        self.role_entries_roll[role].delete("1.0", tk.END)
+        self.role_entries_roll[role].insert("1.0", text)
+        if send:
+            self.get_and_roll(role)
+            if self.role_entries_roll[role].get("1.0", tk.END).strip() == text:
+                self.role_entries_roll[role].delete("1.0", tk.END)
+            else:
+                temp_ = self.role_entries_roll[role].get("1.0", tk.END).strip().replace(text, "")
+                self.role_entries_roll[role].delete("1.0", tk.END)
+                self.role_entries_roll[role].insert("1.0", temp_)
+        else:
+            pass
+
+    def list_carddecks(self, event, role, command=None):
+        menu = tk.Menu(root, tearoff=1, title=f"【{self.role_entries_name[role]}】的[{command}]牌堆列表")
+        files = os.listdir("CardDecks")
+        # 输出文件名
+        if not command:
+            command = ""
+        if "*" in command:
+            for file in files:
+                if role == "Dicebot":
+                    menu.add_command(label=os.path.splitext(file)[0], command=lambda
+                        text=command.replace("*", "") + " " + os.path.splitext(file)[0] + "*": self.insert_text_to_Bot(text))
+                else:
+                    menu.add_command(label=os.path.splitext(file)[0],
+                                     command=lambda text=command.replace("*", "") + " " + os.path.splitext(file)[0] + "*",
+                                                    role=role: self.insert_text_to_PC(text, role))
+        else:
+            for file in files:
+                if role == "Dicebot":
+                    menu.add_command(label=os.path.splitext(file)[0], command=lambda text=command + " " + os.path.splitext(file)[0]: self.insert_text_to_Bot(text, send=True))
+                else:
+                    menu.add_command(label=os.path.splitext(file)[0], command=lambda text=command + " " + os.path.splitext(file)[0], role=role: self.insert_text_to_PC(text,role, send=True))
+        self.show_menu(event, menu)
+
+    def add_menu(self, event, role):
+        menu = tk.Menu(root, tearoff=0)
+        menu.delete(0, tk.END)  # 清空菜单
+        if role == "DiceBot":
+            menu.add_command(label="活字命令", command=lambda text="text": self.insert_text_to_Bot(text))
+            menu.add_command(label="全体明抽公共牌堆",command=lambda text=".alldraw", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体明抽公共牌堆(不放回)",
+                             command=lambda text=".alldraw?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体明抽公共牌堆(多次)",
+                             command=lambda text=".alldraw*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽公共牌堆",
+                             command=lambda text=".alldraw_", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽公共牌堆(多次)",
+                             command=lambda text=".alldraw_*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽公共牌堆(不放回)",
+                             command=lambda text=".alldraw_?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="抽取幸运儿", command=lambda text=".who", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="抽取幸运顺序",
+                             command=lambda text=".whoabcd", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="全体今日人品", command=lambda text=".jrrp", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="全体明抽个人牌堆",
+                             command=lambda text=".alldrawself", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体明抽个人牌堆(不放回)",
+                             command=lambda text=".alldrawself?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽个人牌堆",
+                             command=lambda text=".alldrawself_", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽个人牌堆(不放回)",
+                             command=lambda text=".allrawself_?", role=role: self.list_carddecks(event, role, text))
+        elif role == "chatlog":
+            menu.add_command(label="活字命令", command=lambda role=role: self.on_at_right_click(role))
+            menu.add_command(label="抽取幸运儿", command=lambda text=".who", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="抽取幸运顺序", command=lambda text=".whoabcd", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="是与否", command=lambda text=".yesno", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="全体今日人品",
+                             command=lambda text=".jrrp", role=role: self.insert_text_to_Bot(text, send=True))
+        else:
+            menu.add_command(label="活字命令", command=lambda role=role: self.on_at_right_click(role))
+            menu.add_command(label="明抽公共牌堆", command=lambda text=".draw", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="明抽公共牌堆(多次)",
+                             command=lambda text=".draw*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="明抽公共牌堆(不放回)", command=lambda text=".draw?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽公共牌堆", command=lambda text=".draw_", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽公共牌堆(多次)",
+                             command=lambda text=".draw_*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽公共牌堆(不放回)", command=lambda text=".draw_?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="抽取幸运儿", command=lambda text=".who", role=role: self.insert_text_to_PC(text, role))
+            menu.add_command(label="抽取幸运顺序", command=lambda text=".whoabcd", role=role: self.insert_text_to_PC(text, role))
+            menu.add_command(label="是与否", command=lambda text=".yesno", role=role: self.insert_text_to_PC(text, role))
+            menu.add_command(label="今日人品", command=lambda text=".jrrp", role=role: self.insert_text_to_PC(text, role, send=True))
+            menu.add_command(label="明抽个人牌堆",
+                             command=lambda text=".drawself", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="明抽个人牌堆(不放回)",
+                             command=lambda text=".drawself?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽个人牌堆",
+                             command=lambda text=".drawself_", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽个人牌堆(不放回)",
+                             command=lambda text=".drawself_?", role=role: self.list_carddecks(event, role, text))
+        self.show_menu(event, menu)
+
+    def add_menu_skills(self, event, role):
+        menu = tk.Menu(root, tearoff=1, title=f"【{self.role_entries_name[role]}】的技能列表")
+        menu.delete(0, tk.END)  # 清空菜单
+        # 创建一个值为列表的字典
+        sorted_dict = defaultdict(list)
+        # 遍历原始字典，将具有相同值的键添加到相应的列表中
+        for key, value in self.role_skill_menu[self.role_entries_name[role]].items():
+            sorted_dict[value].append(key)
+        # 根据字典的键的顺序构建一个新的字典
+        result_dict = {}
+        for value, keys in sorted(sorted_dict.items()):
+            for key in keys:
+                result_dict[key] = value
+        self.role_skill_menu[self.role_entries_name[role]] = result_dict.copy()
+
+        for skill_, type_ in self.role_skill_menu[self.role_entries_name[role]].items():
+            menu.add_command(label=skill_,
+                             command=lambda skill=skill_, role=role,
+                                            type=type_: self.parse_menu_skills(role, skill, type))
+        #menu.bind("<Motion>", lambda event=event, menu=menu:self.on_hover_menu_skills(event, menu))
+        self.show_menu(event, menu)
+
+    def parse_menu_skills(self, role, skill, type):
+        if type == "skill": #技能名[鉴定](要求)效果公式：描述 →要求r鉴定→鉴定技能   小刀穿刺[斗殴](小刀)1D3：针对一个敌人穿刺
+            require = ""
+            expression = ""
+            des = skill.split("：")[1]
+            skill = skill.split("：")[0]
+            name = skill.split("[")[0]
+            check = skill.split("[")[1].split("]")[0]
+            if "(" in skill:
+                require = skill.split("(")[1].split(")")[0]
+                if len(skill.split("(")[1].split(")")) > 1:
+                    expression = skill.split(")")[1].replace(")", "")
+            text = "以" + require + "使用" + name + "，" + des
+            self.insert_text_to_PC(text, role)
+            text = check
+            self.insert_roll_to_PC(text, role, send=True)
+            if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                self.insert_roll_to_PC(expression, role)
+
+        elif type == "spell": #法术名[效果公式](消费)：描述  →计算消费  →作用 ：描述   →描述  御风术[HP-1D3](M1 S1D3+1)：扬起飞沙  恢复术[HP+1D3](M3)：绿色光晕，吟唱1回合，1天仅一次  魅惑术[心理学-20](M1+? S?) ←输入?：目标心理学-20%*M  高级魅惑术(M? S?)  ←输入?：目标心理学默然，持续M回合
+            cost = ""
+            expression = ""
+            des = skill.split("：")[1]
+            skill = skill.split("：")[0]
+            name = skill.split("[")[0]
+            expression = skill.split("[")[1].split("]")[0]
+            mp_cost = 0
+            hp_cost = 0
+            san_cost = 0
+            other_cost = {}
+            if "(" in skill:
+                cost = skill.split("(")[1].split(")")[0].replace("P", "").replace("AN", "")
+            if " " in skill:
+                cost = cost.split(" ")
+                for c in cost:
+                    if "M" in c:
+                        mp_cost = int(self.cost_parse(c, "M"))
+                    elif "S" in c:
+                        san_cost = int(self.cost_parse(c, "S"))
+                    elif "H" in c:
+                        hp_cost = int(self.cost_parse(c, "H"))
+            else:
+                if "M" in cost:
+                    mp_cost = int(self.cost_parse(cost, "M"))
+                elif "S" in cost:
+                    san_cost = int(self.cost_parse(cost, "S"))
+                elif "H" in cost:
+                    hp_cost = int(self.cost_parse(cost, "H"))
+                else:
+                    for char in cost:
+                        if char.isalpha() and char != "D":
+                            other_cost[char] += 1
+                            pass
+            _SAN = int(self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip())
+            _HP = int(self.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip())
+            _MP = int(self.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip())
+            _OtherDic = role_Chart.get(role, {}).copy()
+            for key, value in other_cost.items():
+                if key in _OtherDic:
+                    if _OtherDic[key] >= value:
+                        role_Chart[role][key] -= value
+                        pass
+                    else:
+                        pass
+            if mp_cost != 0 or hp_cost != 0 or san_cost != 0:
+                if mp_cost != 0:
+                    if mp_cost <= _MP:
+                        self.insert_roll_to_PC(f"MP-{mp_cost}", role, send=True)
+                        self.role_entries[role].delete("1.0", tk.END)
+                        text = self.role_entries_name[role] + "使用了" + name + "，" + des
+                        self.insert_text_to_PC(text, role)
+                        text = expression
+                        self.insert_roll_to_PC(text, role)
+                        if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                            self.insert_roll_to_PC(expression, role)
+                    else:
+                        self.insert_text_to_PC("MP不足!", role)
+                if hp_cost != 0:
+                    if hp_cost <= _HP:
+                        self.insert_roll_to_PC(f"HP-{hp_cost}", role, send=True)
+                        self.role_entries[role].delete("1.0", tk.END)
+                        text = self.role_entries_name[role] + "使用了" + name + "，" + des
+                        self.insert_text_to_PC(text, role)
+                        text = expression
+                        self.insert_roll_to_PC(text, role)
+                        if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                            self.insert_roll_to_PC(expression, role)
+                    else:
+                        self.insert_text_to_PC("HP不足!", role)
+                if san_cost != 0:
+                    if san_cost <= _SAN:
+                        self.insert_roll_to_PC(f"SAN-{san_cost}", role, send=True)
+                        self.role_entries[role].delete("1.0", tk.END)
+                        text = self.role_entries_name[role] + "使用了" + name + "，" + des
+                        self.insert_text_to_PC(text, role)
+                        text = expression
+                        self.insert_roll_to_PC(text, role)
+                        if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                            self.insert_roll_to_PC(expression, role)
+                    else:
+                        self.insert_text_to_PC("SAN不足!", role)
+            else:
+                text = self.role_entries_name[role]  + "使用了" + name + "，" + des
+                self.role_entries[role].delete("1.0", tk.END)
+                self.insert_text_to_PC(text, role)
+                text = expression
+                self.insert_roll_to_PC(text, role)
+                if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                    self.insert_roll_to_PC(expression, role)
+
+        elif type == "maneuver": #战技/特技名:效果[鉴定](要求)公式  →鉴定  →要求 使 效果  义肢护甲:ARMOR+2(声明左臂格挡)  擒抱:缴械2回合[斗殴](体格大于等于1)
+            require = ""
+            expression = ""
+            check = ""
+            if "：" in skill:
+                des = skill.split("：")[1]
+            else:
+                des = ""
+            skill = skill.split("：")[0]
+            name = skill.split(":")[0]
+            skill = skill.split(":")[1]
+            effect = skill
+            if "[" in skill:
+                effect = skill.split("[")[0]
+                check = skill.split("[")[1].split("]")[0]
+            if "(" in skill:
+                require = skill.split("(")[1].split(")")[0]
+                if len(skill.split("(")[1].split(")")) > 1:
+                    expression = skill.split(")")[1].replace(")", "")
+                if "[" not in skill:
+                    effect = skill.split("(")[0]
+            text = self.role_entries_name[role] + "以" + require + "声明" + name + "，" + des + "，" + effect
+            self.insert_text_to_PC(text, role)
+            text = check
+            self.insert_roll_to_PC(text, role)
+            if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                self.insert_roll_to_PC(expression, role)
+        else: # other
+            pass
+
+    def cost_parse(self, cost, type):
+        cost = cost.replace(type, "")
+        if "D" in cost:
+            result = 0
+            matches = re.findall(r'\b\dD\d\b', cost)
+            for m in matches:
+                count = m.split("D")[0]
+                dice = m.split("D")[1]
+                result += count * random.randint(1, dice)
+                cost = cost.replace(m, "")
+            cost += "+" + str(result)
+        if "?" in cost or "？" in cost:
+            __c = ""
+            for char in cost:
+                if char == "？" or char == "?":
+                    if type == "S":
+                        _c = str(simpledialog.askinteger(f"SAN消费", f"输入消费的SAN:", initialvalue=1))
+                    else:
+                        _c = str(simpledialog.askinteger(f"{type}P消费", f"输入消费的{type}P:", initialvalue=1))
+                    __c += "+" + _c
+                else:
+                    __c += char
+        cost = eval(cost)
+        return cost
+
+    def on_hover_menu_skills(self, event, menu):
+        label = tk.Toplevel(root)
+        hovered_item = menu.index(tk.CURRENT)
+        label.config(text=f"Hovering over {menu.entrycget(hovered_item, 'label')}")
+        label.geometry(f"+{event.x_root}+{event.y_root}")
+        menu.bind("<Leave>", lambda label=label:self.hide_hover_menu_skills(label))
+
+    def hide_hover_menu_skills(self, label):
+        label.destory()
 
     def toggle_trpg(self):
         # 展开或缩进掷骰按钮和信息面板
@@ -2068,9 +2407,7 @@ class ChatApp:
                 self.role_entries[role].insert("1.0", _role_entry)
                 return
             if ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
-                message = message.lower().replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes",
-                                                                                                            "").replace(
-                    "。yesno", "").replace(".yesno", "").strip()
+                message = message.lower().replace("。yesno", "").replace(".yesno", "").replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes","").strip()
                 if message != "":
                     reason_ = "由于[" + message + "]的"
                 else:
@@ -2969,6 +3306,10 @@ class ChatApp:
             self.codename_by_name[new_role] = self.role_entries_name[new_role]
             pass
         if new_role in self.role_entries_name:
+            if self.role_entries_name[new_role] not in self.role_skill_menu:
+                self.role_skill_menu[self.role_entries_name[new_role]] = {'技能名[鉴定](要求)效果公式：描述': "skill",
+                                                                      '法术名[效果公式](消费)：描述': "spell",
+                                                                      '战技/特技名:效果[鉴定](要求)公式': "maneuver"}
             if self.role_entries_name[new_role] not in self.luck_by_name:
                 self.luck_by_name[self.role_entries_name[new_role]] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
         else:
@@ -3022,6 +3363,10 @@ class ChatApp:
             else:
                 self.codename_by_name[new_role] = new_role
         if new_role in self.role_entries_name:
+            if self.role_entries_name[new_role] not in self.role_skill_menu:
+                self.role_skill_menu[self.role_entries_name[new_role]] = {'技能名[鉴定](要求)效果公式：描述': "skill",
+                                                                      '法术名[效果公式](消费)：描述': "spell",
+                                                                      '战技/特技名:效果[鉴定](要求)公式': "maneuver"}
             if self.role_entries_name[new_role] not in self.luck_by_name:
                 self.luck_by_name[self.role_entries_name[new_role]] = {"_d100": 0, "_luck": 0, "_luck_weight": 0, "_luck_exp": 0, "_success": 0, "_fail": 0, "_fumble": 0, "_fumble_rate": 0, "_critical": 0, "_critical_rate": 0, "_d100_value": [], "_luck_exp_value": []}
         else:
@@ -3242,6 +3587,8 @@ class ChatApp:
         filename_ = ""
         avatar_path = ""
         # self.current_at_role.set(role)
+        if role == "chatlog":
+            role = "KP"
         self.avatar_click_event = role
         current_role = self.current_role.get()
         options = ["【背景】", "【背景】纯黑", "【BGM】", "【停止BGM】", "【音效】", "【展示图片】", "【撤除图片】", "【特效】震动", "【特效】闪屏", "【高级特效】开始",
@@ -4762,7 +5109,8 @@ class ChatApp:
                 for roles in self.roles:
                     if roles != "DiceBot":
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
-                        self.jrrp_record(roles, result_+"###"+expression, "all")
+                        if result_:
+                            self.jrrp_record(roles, result_+"###"+expression, "all")
                         # 妙语
                         if role != "DiceBot":
                             rand_num = random.random()  # 生成0到1之间的随机数
@@ -4893,7 +5241,8 @@ class ChatApp:
                     pass
                 else:
                     result_ = self.trpg_module.roll(expression, role)
-                    self.jrrp_record(role, result_+ "###" + expression, "solo")
+                    if result_:
+                        self.jrrp_record(role, result_+ "###" + expression, "solo")
                     # 妙语
                     if role != "DiceBot":
                         rand_num = random.random()  # 生成0到1之间的随机数
@@ -5100,7 +5449,8 @@ class ChatApp:
             self.chat_log.yview(tk.END)
             result = self.trpg_module.roll(expression, role)
             # jrrp录入
-            self.jrrp_record(role, result + "###" + expression, "silent")
+            if result:
+                self.jrrp_record(role, result + "###" + expression, "silent")
             self.role_entries[role].insert(tk.END, result)
             multi_num -= 1
 
@@ -5815,6 +6165,9 @@ class ChatApp:
 
     def save_settings(self):
         global bot_personality_by_name
+        # 将角色luck统计保存到JSON文件
+        with open('GameSaves/skill_menu_by_name.json', 'w', encoding='utf-8') as file:
+            json.dump(self.role_skill_menu, file, ensure_ascii=False)
         # 将角色luck统计保存到JSON文件
         with open('Bots/luck_by_name.json', 'w', encoding='utf-8') as file:
             json.dump(self.luck_by_name, file, ensure_ascii=False)
