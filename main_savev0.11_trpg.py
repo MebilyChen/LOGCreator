@@ -1384,9 +1384,10 @@ class ChatApp:
         # 绑定回车键和Alt+回车键
         root.bind("<Return>", lambda event: self.send_message(self.current_role.get()))
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
-        root.bind("<Control-Return>", self.newline_on_ctrl_enter)
+        root.bind("<Control-Return>", lambda: self.newline_on_ctrl_enter)
 
         # self.chat_log_huozi = ""
+        self.new_combat_windows = {}
         self.luck_by_name = load_luck_by_name()
         self.babel_data = {}
         self.Iconcanvas = {}
@@ -1481,7 +1482,7 @@ class ChatApp:
         self.new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
         # 创建按钮，点击按钮时调用 add_NPC 函数
-        load_NPC_button = tk.Button(root, text="装载NPC至栏位", command=self.Add_NPC)
+        load_NPC_button = tk.Button(root, text="装载NPC至栏位", command=self.Combat_NPC)
         load_NPC_button.grid(row=3, column=3, padx=10, pady=10, sticky="nsew")
 
         # 初始化输出聊天LOG按钮
@@ -1730,7 +1731,7 @@ class ChatApp:
         # 每个角色的消息框
         entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3, undo=True)
         entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
-        entry.bind("<Button-3>", lambda event, r=role: self.add_menu(event, role))
+        entry.bind("<Button-3>", lambda event, r=role: self.add_menu(event, r))
         self.role_entries[role] = entry
         # 加载并显示头像
         self.load_and_display_avatar(role, frame)
@@ -1788,7 +1789,7 @@ class ChatApp:
             entry2.insert(tk.END, self.role_values_tags_text[role], value_tag)
         self.role_values_entry[role] = entry2
         # 为每个文本框绑定焦点变化事件
-        entry2.bind("<FocusOut>", lambda event, r=role, t=entry2: self.save_info(event, role))
+        entry2.bind("<FocusOut>", lambda event, r=role, t=entry2: self.save_info(event, r))
 
         send_button = tk.Button(frame, text="发送", command=lambda role=role: self.send_message(role))
         send_button.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
@@ -1911,7 +1912,7 @@ class ChatApp:
         menu.delete(0, tk.END)  # 清空菜单
         if role == "DiceBot":
             menu.add_command(label="活字命令", command=lambda text="text": self.insert_text_to_Bot(text))
-            menu.add_command(label="全体明抽公共牌堆",command=lambda text=".alldraw", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体明抽公共牌堆", command=lambda text=".alldraw", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体明抽公共牌堆(不放回)",
                              command=lambda text=".alldraw?", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体明抽公共牌堆(多次)",
@@ -1941,6 +1942,8 @@ class ChatApp:
             menu.add_command(label="是与否", command=lambda text=".yesno", role=role: self.insert_text_to_Bot(text, send=True))
             menu.add_command(label="全体今日人品",
                              command=lambda text=".jrrp", role=role: self.insert_text_to_Bot(text, send=True))
+        elif "NPC_name" in role:
+            return
         else:
             menu.add_command(label="活字命令", command=lambda role=role: self.on_at_right_click(role))
             menu.add_command(label="明抽公共牌堆", command=lambda text=".draw", role=role: self.list_carddecks(event, role, text))
@@ -1966,28 +1969,56 @@ class ChatApp:
         self.show_menu(event, menu)
 
     def add_menu_skills(self, event, role):
-        menu = tk.Menu(root, tearoff=1, title=f"【{self.role_entries_name[role]}】的技能列表")
+        if "NPC_name" in role:
+            if role.split("NPC_name")[1]:
+                name_ = role.split("NPC_name")[1]
+            else:
+                name_ = "NPC"
+            menu = tk.Menu(root, tearoff=1, title=f"NPC【{name_}】的技能列表")
+        else:
+            menu = tk.Menu(root, tearoff=1, title=f"【{self.role_entries_name[role]}】的技能列表")
         menu.delete(0, tk.END)  # 清空菜单
         # 创建一个值为列表的字典
         sorted_dict = defaultdict(list)
         # 遍历原始字典，将具有相同值的键添加到相应的列表中
-        for key, value in self.role_skill_menu[self.role_entries_name[role]].items():
-            sorted_dict[value].append(key)
+        if "NPC_name" in role:
+            name_ = role.split("NPC_name")[0]
+            for key, value in self.role_skill_menu[name_].items():
+                sorted_dict[value].append(key)
+        else:
+            for key, value in self.role_skill_menu[self.role_entries_name[role]].items():
+                sorted_dict[value].append(key)
         # 根据字典的键的顺序构建一个新的字典
         result_dict = {}
         for value, keys in sorted(sorted_dict.items()):
             for key in keys:
                 result_dict[key] = value
-        self.role_skill_menu[self.role_entries_name[role]] = result_dict.copy()
+        if "NPC_name" in role:
+            name_ = role.split("NPC_name")[0]
+            self.role_skill_menu[name_] = result_dict.copy()
 
-        for skill_, type_ in self.role_skill_menu[self.role_entries_name[role]].items():
-            menu.add_command(label=skill_,
-                             command=lambda skill=skill_, role=role,
-                                            type=type_: self.parse_menu_skills(role, skill, type))
+            for skill_, type_ in self.role_skill_menu[name_].items():
+                menu.add_command(label=skill_,
+                                 command=lambda skill=skill_, role=role,
+                                                type=type_: self.parse_menu_skills(role, skill, type))
+        else:
+            self.role_skill_menu[self.role_entries_name[role]] = result_dict.copy()
+
+            for skill_, type_ in self.role_skill_menu[self.role_entries_name[role]].items():
+                menu.add_command(label=skill_,
+                                 command=lambda skill=skill_, role=role,
+                                                type=type_: self.parse_menu_skills(role, skill, type))
         #menu.bind("<Motion>", lambda event=event, menu=menu:self.on_hover_menu_skills(event, menu))
         self.show_menu(event, menu)
 
     def parse_menu_skills(self, role, skill, type):
+        target = ""
+        if "NPC_name" in role:
+            target_list = []
+            for _role in self.roles:
+                if _role != "DiceBot":
+                    target_list.append(self.role_entries_name[_role])
+            target = "PL " + str(simpledialog.askinteger("选择目标", "选择行动目标PL(0为自己):", initialvalue=random.randint(1, len(self.roles)-2)))
         if type == "skill": #技能名[鉴定](要求)效果公式：描述 →要求r鉴定→鉴定技能   小刀穿刺[斗殴](小刀)1D3：针对一个敌人穿刺
             require = ""
             expression = ""
@@ -1999,12 +2030,22 @@ class ChatApp:
                 require = skill.split("(")[1].split(")")[0]
                 if len(skill.split("(")[1].split(")")) > 1:
                     expression = skill.split(")")[1].replace(")", "")
-            text = "以" + require + "使用" + name + "，" + des
-            self.insert_text_to_PC(text, role)
-            text = check
-            self.insert_roll_to_PC(text, role, send=True)
-            if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
-                self.insert_roll_to_PC(expression, role)
+            if target != "" and target != "PL0":
+                text = "对" + self.role_entries_name[target] + "以" + require + "使用" + name
+                self.insert_text_to_PC(text, role)
+                text = des
+                self.insert_text_to_PC(text, target)
+                text = check
+                self.insert_roll_to_PC(text, role, send=True)
+                if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                    self.insert_roll_to_PC(expression, target)
+            else:
+                text = "以" + require + "使用" + name + "，" + des
+                self.insert_text_to_PC(text, role)
+                text = check
+                self.insert_roll_to_PC(text, role, send=True)
+                if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                    self.insert_roll_to_PC(expression, role)
 
         elif type == "spell": #法术名[效果公式](消费)：描述  →计算消费  →作用 ：描述   →描述  御风术[HP-1D3](M1 S1D3+1)：扬起飞沙  恢复术[HP+1D3](M3)：绿色光晕，吟唱1回合，1天仅一次  魅惑术[心理学-20](M1+? S?) ←输入?：目标心理学-20%*M  高级魅惑术(M? S?)  ←输入?：目标心理学默然，持续M回合
             cost = ""
@@ -2038,7 +2079,7 @@ class ChatApp:
                 else:
                     for char in cost:
                         if char.isalpha() and char != "D":
-                            other_cost[char] += 1
+                            #other_cost[char] += 1
                             pass
             _SAN = int(self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip())
             _HP = int(self.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip())
@@ -2056,12 +2097,32 @@ class ChatApp:
                     if mp_cost <= _MP:
                         self.insert_roll_to_PC(f"MP-{mp_cost}", role, send=True)
                         self.role_entries[role].delete("1.0", tk.END)
-                        text = self.role_entries_name[role] + "使用了" + name + "，" + des
-                        self.insert_text_to_PC(text, role)
-                        text = expression
-                        self.insert_roll_to_PC(text, role)
-                        if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
-                            self.insert_roll_to_PC(expression, role)
+                        if "NPC_name" in role:
+                            if role.split("NPC_name")[1]:
+                                name_ = role.split("NPC_name")[1]
+                            else:
+                                name_ = "NPC"
+                            if target != "" and target != "PL0":
+                                text = name_ + "对" + self.role_entries_name[target] + "使用了" + name + "，" + des
+                                self.insert_text_to_PC(text, role)
+                                text = expression
+                                self.insert_roll_to_PC(text, target)
+                                if self.role_entries_roll[target].get("1.0", tk.END).strip() != "" and expression != "":
+                                    self.insert_roll_to_PC(expression, target)
+                            else:
+                                text = name_ + "对自己使用了" + name + "，" + des
+                                self.insert_text_to_PC(text, role)
+                                text = expression
+                                self.insert_roll_to_PC(text, role)
+                                if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                                    self.insert_roll_to_PC(expression, role)
+                        else:
+                            text = self.role_entries_name[role] + "使用了" + name + "，" + des
+                            self.insert_text_to_PC(text, role)
+                            text = expression
+                            self.insert_roll_to_PC(text, role)
+                            if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                                self.insert_roll_to_PC(expression, role)
                     else:
                         self.insert_text_to_PC("MP不足!", role)
                 if hp_cost != 0:
@@ -2089,13 +2150,33 @@ class ChatApp:
                     else:
                         self.insert_text_to_PC("SAN不足!", role)
             else:
-                text = self.role_entries_name[role]  + "使用了" + name + "，" + des
-                self.role_entries[role].delete("1.0", tk.END)
-                self.insert_text_to_PC(text, role)
-                text = expression
-                self.insert_roll_to_PC(text, role)
-                if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
-                    self.insert_roll_to_PC(expression, role)
+                if "NPC_name" in role:
+                    if role.split("NPC_name")[1]:
+                        name_ = role.split("NPC_name")[1]
+                    else:
+                        name_ = "NPC"
+                    if target != "" and target != "PL0":
+                        text = name_ + "对" + self.role_entries_name[target] + "使用了" + name + "，" + des
+                        self.insert_text_to_PC(text, role)
+                        text = expression
+                        self.insert_roll_to_PC(text, target)
+                        if self.role_entries_roll[target].get("1.0", tk.END).strip() != "" and expression != "":
+                            self.insert_roll_to_PC(expression, target)
+                    else:
+                        text = name_ + "对自己使用了" + name + "，" + des
+                        self.insert_text_to_PC(text, role)
+                        text = expression
+                        self.insert_roll_to_PC(text, role)
+                        if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                            self.insert_roll_to_PC(expression, role)
+                else:
+                    text = self.role_entries_name[role]  + "使用了" + name + "，" + des
+                    self.role_entries[role].delete("1.0", tk.END)
+                    self.insert_text_to_PC(text, role)
+                    text = expression
+                    self.insert_roll_to_PC(text, role)
+                    if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                        self.insert_roll_to_PC(expression, role)
 
         elif type == "maneuver": #战技/特技名:效果[鉴定](要求)公式  →鉴定  →要求 使 效果  义肢护甲:ARMOR+2(声明左臂格挡)  擒抱:缴械2回合[斗殴](体格大于等于1)
             require = ""
@@ -2118,14 +2199,37 @@ class ChatApp:
                     expression = skill.split(")")[1].replace(")", "")
                 if "[" not in skill:
                     effect = skill.split("(")[0]
-            text = self.role_entries_name[role] + "以" + require + "声明" + name + "，" + des + "，" + effect
-            self.insert_text_to_PC(text, role)
-            text = check
-            self.insert_roll_to_PC(text, role)
-            if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
-                self.insert_roll_to_PC(expression, role)
+            if "NPC_name" in role:
+                if role.split("NPC_name")[1]:
+                    name_ = role.split("NPC_name")[1]
+                else:
+                    name_ = "NPC"
+                if target != "" and target != "PL0":
+                    text = name_ + "对" + self.role_entries_name[target] + "以" + require + "声明" + name + "，" + des
+                    self.insert_text_to_PC(text, role)
+                    text = check
+                    self.insert_roll_to_PC(text, role)
+                    text = effect
+                    self.insert_text_to_PC(text, target)
+                    if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                        self.insert_roll_to_PC(expression, target)
+                else:
+                    text = name_ + "对自己" + "以" + require + "声明" + name + "，" + des
+                    self.insert_text_to_PC(text, role)
+                    text = check
+                    self.insert_roll_to_PC(text, role)
+                    if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                        self.insert_roll_to_PC(expression, role)
+            else:
+                text = self.role_entries_name[role] + "以" + require + "声明" + name + "，" + des + "，" + effect
+                self.insert_text_to_PC(text, role)
+                text = check
+                self.insert_roll_to_PC(text, role)
+                if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
+                    self.insert_roll_to_PC(expression, role)
         else: # other
             pass
+
 
     def cost_parse(self, cost, type):
         cost = cost.replace(type, "")
@@ -2182,7 +2286,10 @@ class ChatApp:
         global _speechspeed
         global bot_personality
 
-        role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+        if "NPC_name" in role:
+            role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+        else:
+            role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
         while True:
@@ -2423,6 +2530,17 @@ class ChatApp:
                 return
         if message:
             timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+            if "NPC_name" in role:
+                if role.split("NPC_name")[1]:
+                    name_ = role.split("NPC_name")[1]
+                else:
+                    name_ = "NPC"
+                log = f"{name_} {timestamp}\n{message}\n\n"  # 不加引号
+                self.chat_log.insert(tk.END, log)
+                # 滚动到最底部
+                self.chat_log.yview(tk.END)
+                self.role_entries[role].delete("1.0", tk.END)
+                return
             log = f"{self.role_entries_name[role]} {timestamp}\n{message}\n\n"  # 不加引号
             if message.startswith(".st") or message.startswith("。st"):
                 message = message[len("st") + 1:].strip()
@@ -2539,7 +2657,7 @@ class ChatApp:
                         _secondsTime -= 60
                     print(f"秒表：{_secondsTime}秒")
         # 妙语
-        if role != "DiceBot":
+        if role != "DiceBot" and "NPC_name" not in role:
             global mav_prob
             rand_num = random.random()  # 生成0到1之间的随机数
             if rand_num >= 1 - mav_prob:
@@ -2667,6 +2785,8 @@ class ChatApp:
         if role in self.role_entries_name:
             luck_dic = self.luck_by_name[self.role_entries_name[role]].copy()
         else:
+            if "NPC_name" in role:
+                return
             luck_dic = self.luck_by_name[role].copy()
         if tag == "silent":
             if "成功" in content or "失败" in content or "d100" in conexpress or "D100" in conexpress or "San Check" in content:
@@ -3217,6 +3337,10 @@ class ChatApp:
         label.config(relief=tk.FLAT, font=("Times New Roman", 16, "bold"))
         new_name = entry.get().strip()
         if new_name and new_name != "":
+            if "NPC_name" in role:
+                entry.grid_forget()
+                label.configure(text=new_name)
+                return
             # 更新角色名
             index = self.roles.index(role)
             # self.roles[index] = new_name
@@ -3426,6 +3550,13 @@ class ChatApp:
         self.root.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
 
+    def bind_enter_to_send_message_NPC(self, event, role):
+        # 为当前文本框绑定回车键发送消息
+        self.new_combat_window = self.new_combat_windows[role]
+        self.current_role.set(role)
+        self.new_combat_window.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
+        self.highlight_role_frame(role)
+
     def env_focus(self, event):
         self.reset_focus(event)
         self.root.bind("<Return>", lambda event, role="env": self.send_message_on_enter(event, role))
@@ -3446,7 +3577,7 @@ class ChatApp:
         self.current_role.set("")
         self.root.bind("<Return>", lambda event: self.send_message_on_enter(event))
         self.chat_log.config(relief=tk.SOLID)
-        for role in self.roles:
+        for role in self.role_entries:
             self.role_entries_frame[role].config(relief=tk.GROOVE)
             self.role_entries_roll[role].config(relief=tk.GROOVE)
 
@@ -3454,6 +3585,13 @@ class ChatApp:
         # 为当前文本框绑定回车键发送消息
         self.current_role.set(role)
         self.root.bind("<Return>", lambda event, role=role: self.send_roll_on_enter(event, role))
+        self.highlight_role_frame_roll(role)
+
+    def bind_enter_to_send_roll_NPC(self, event, role):
+        # 为当前文本框绑定回车键发送消息
+        self.new_combat_window = self.new_combat_windows[role]
+        self.current_role.set(role)
+        self.new_combat_window.bind("<Return>", lambda event, role=role: self.send_roll_on_enter(event, role))
         self.highlight_role_frame_roll(role)
 
     def send_message_on_enter(self, event, role=None):
@@ -3556,9 +3694,19 @@ class ChatApp:
         current_role = self.highlighted_role.get()
         # 高亮指定角色的 Frame
         self.highlighted_role.set(role)
-        self.chat_log.insert(tk.END, ">>> " + self.role_entries_name[role] + "正在输入...")
+        if "NPC_name" in role:
+            if role.split("NPC_name")[1]:
+                name_ = role.split("NPC_name")[1]
+            else:
+                name_ = "NPC"
+            self.chat_log.insert(tk.END, ">>> 【NPC】" + name_ + "正在输入...")
+        else:
+            self.chat_log.insert(tk.END, ">>> " + self.role_entries_name[role] + "正在输入...")
         self.chat_log.yview(tk.END)
         for role in self.roles:
+            self.role_entries_frame[role].config(relief=tk.GROOVE)
+            self.role_entries_roll[role].config(relief=tk.GROOVE)
+        for role in self.new_combat_windows:
             self.role_entries_frame[role].config(relief=tk.GROOVE)
             self.role_entries_roll[role].config(relief=tk.GROOVE)
         self.role_entries_frame[self.highlighted_role.get()].config(relief=tk.SOLID)
@@ -3569,6 +3717,9 @@ class ChatApp:
         # 高亮指定角色的 Frame
         self.highlighted_role.set(role)
         for role in self.roles:
+            self.role_entries_frame[role].config(relief=tk.GROOVE)
+            self.role_entries_roll[role].config(relief=tk.GROOVE)
+        for role in self.new_combat_windows:
             self.role_entries_frame[role].config(relief=tk.GROOVE)
             self.role_entries_roll[role].config(relief=tk.GROOVE)
         self.role_entries_frame[self.highlighted_role.get()].config(relief=tk.SOLID)
@@ -3594,7 +3745,7 @@ class ChatApp:
         options = ["【背景】", "【背景】纯黑", "【BGM】", "【停止BGM】", "【音效】", "【展示图片】", "【撤除图片】", "【特效】震动", "【特效】闪屏", "【高级特效】开始",
                    "【高级特效】结束", "【改变名字】[+(之后出场角色被改成的名字, 留空为恢复)]", "【对话框特效】震动", "【隐藏/显示对话框】",
                    f"【开始角色特效】({self.role_entries_name[role]})", "【结束角色特效(连续和剪影)】", "【更换对话框样式】[+(对话框样式名, 留空为撤除样式)]",
-                   "【等待】[+(秒数)]"]
+                   "【等待】[+(秒数)]", "【角色退场】[+(角色名, 留空为清退)]"]
         # content_ = simpledialog.askstring("Select Option", "请选择下拉项：", initialvalue=options[0], options=options)
         # 创建新的顶级窗口
         self.top_ask = tk.Toplevel(root)
@@ -3831,6 +3982,8 @@ class ChatApp:
                 content = f"【角色特效】([+(角色名)])结束[+(震动/转圈/剪影)]"
                 # print("没有使用中的角色特效！")
                 messagebox.showwarning("警告", "没有使用中的角色特效！")
+        elif "角色退场" in content_:
+            content = "【角色退场】"
         else:
             content = content_
 
@@ -3882,7 +4035,16 @@ class ChatApp:
         self.avatar_click_event = role
         current_role = self.current_role.get()
         # self.role_entries[current_role].insert(tk.END, "@" + self.role_entries_name[role] + " ")
-        filename = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择简卡图片",
+        if "NPC_name" in role:
+            if role.split("NPC_name")[1]:
+                name_ = role.split("NPC_name")[1]
+            else:
+                name_ = "NPC"
+            filename = filedialog.askopenfilename(title="为【" + name_ + "】选择简卡图片",
+                                                  filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                  initialdir="Images/SheetImages")
+        else:
+            filename = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择简卡图片",
                                               filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                               initialdir="Images/SheetImages")
         _, extension = os.path.splitext(filename)
@@ -3890,29 +4052,40 @@ class ChatApp:
         if extension == ".apng" or extension == ".APNG":
             filename = self.apng_to_gif(filename, _ + ".gif")
         if filename:
-            if os.path.exists(
-                    'Images/SheetImages/' + role + '-' + self.role_entries_name[role] + "-" + filename_ + extension):
+            if "NPC_name" in role:
                 pass
             else:
-                if os.path.exists('Images/SheetImages/' + filename_ + extension):
+                if os.path.exists(
+                        'Images/SheetImages/' + role + '-' + self.role_entries_name[role] + "-" + filename_ + extension):
                     pass
                 else:
-                    shutil.copyfile(filename,
-                                    'Images/SheetImages/' + role + '-' + self.role_entries_name[
-                                        role] + '-' + filename_ + extension)
-                    shutil.copyfile(filename,
-                                    'Images/SheetImages/' + filename_ + extension)
+                    if os.path.exists('Images/SheetImages/' + filename_ + extension):
+                        pass
+                    else:
+                        shutil.copyfile(filename,
+                                        'Images/SheetImages/' + role + '-' + self.role_entries_name[
+                                            role] + '-' + filename_ + extension)
+                        shutil.copyfile(filename,
+                                        'Images/SheetImages/' + filename_ + extension)
+                if "PL " not in self.role_entries_name[role]:
+                    self.infoCanvas_data_by_name[self.role_entries_name[role]] = filename
             self.filename = filename
             self.infoCanvas_data[role] = filename
-            if "PL " not in self.role_entries_name[role]:
-                self.infoCanvas_data_by_name[self.role_entries_name[role]] = filename
+
 
     def on_Namelabel_hover(self, role):
         # print("enter"+role)
         # 头像悬停事件处理
         if role in self.infoCanvas_data and self.infoCanvas_data[role]:
             self.new_window_infoCanvas = tk.Toplevel(root)
-            self.new_window_infoCanvas.title(f"{role} - {self.role_entries_name[role]}的简图")
+            if "NPC_name" in role:
+                if role.split("NPC_name")[1]:
+                    name_ = role.split("NPC_name")[1]
+                else:
+                    name_ = "NPC"
+                self.new_window_infoCanvas.title(f"NPC - {name_}的简图")
+            else:
+                self.new_window_infoCanvas.title(f"{role} - {self.role_entries_name[role]}的简图")
             self.avatar_click_event = role
             current_role = self.current_role.get()
 
@@ -4585,7 +4758,16 @@ class ChatApp:
             initDir = self.role_dir_path[role]
         else:
             initDir = "Images/AvatarImages"
-        avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择头像文件",
+        if "NPC_name" in role:
+            if role.split("NPC_name")[1]:
+                name_ = role.split("NPC_name")[1]
+            else:
+                name_ = "NPC"
+            avatar_path = filedialog.askopenfilename(title="为【" + name_ + "】选择头像文件",
+                                                     filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
+                                                     initialdir=initDir)
+        else:
+            avatar_path = filedialog.askopenfilename(title="为【" + self.role_entries_name[role] + "】选择头像文件",
                                                  filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.apng;*.gif")],
                                                  initialdir=initDir)
         if avatar_path:
@@ -4594,6 +4776,11 @@ class ChatApp:
             self.role_dir_path[role] = os.path.dirname(avatar_path)
             if extension == ".apng" or extension == ".APNG":
                 avatar_path = self.apng_to_gif(avatar_path, _ + ".gif")
+            if "NPC_name" in role:
+                self.role_avatar_paths[role] = avatar_path
+                frame = self.role_entries[role].master
+                self.load_and_display_avatar(role, frame)
+                return
             if os.path.exists(
                     'Images/AvatarImages/' + role + '-' + self.role_entries_name[role] + '-' + filename + extension):
                 pass
@@ -4641,8 +4828,11 @@ class ChatApp:
             # 加载头像
             image_path = self.role_avatar_paths[role]
             if image_path:
-                if self.role_entries_name[role] in role_Chart_at_name:
-                    role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = image_path
+                if "NPC_name" in role:
+                    pass
+                else:
+                    if self.role_entries_name[role] in role_Chart_at_name:
+                        role_Chart_at_name[self.role_entries_name[role]]["_AvatarPath"] = image_path
                 image = Image.open(image_path)
                 image_temp = Image.open(image_path)
                 # 获取图像的宽和高
@@ -5112,7 +5302,7 @@ class ChatApp:
                         if result_:
                             self.jrrp_record(roles, result_+"###"+expression, "all")
                         # 妙语
-                        if role != "DiceBot":
+                        if role != "DiceBot" and "NPC_name" not in role:
                             rand_num = random.random()  # 生成0到1之间的随机数
                             if rand_num >= 1 - mav_prob:
                                 if expression in bot_personality["妙语"]:
@@ -5244,7 +5434,7 @@ class ChatApp:
                     if result_:
                         self.jrrp_record(role, result_+ "###" + expression, "solo")
                     # 妙语
-                    if role != "DiceBot":
+                    if role != "DiceBot" and "NOC_name" not in role:
                         rand_num = random.random()  # 生成0到1之间的随机数
                         if rand_num >= 1 - mav_prob:
                             if expression in bot_personality["妙语"]:
@@ -5300,10 +5490,20 @@ class ChatApp:
                             result = ""
                     if multi_num == 1:
                         final_words = final_words + f"{result}{expressionUPP}={parts_[0]}"
-                        if reason == "":
-                            message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){final_words}\n\n'
+                        if "NPC_name" in role:
+                            if role.split("NPC_name")[1]:
+                                name_ = role.split("NPC_name")[1]
+                            else:
+                                name_ = "NPC"
+                            if reason == "":
+                                message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{name_}】掷骰{SANC}{adv_comment}){final_words}\n\n'
+                            else:
+                                message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{name_}】因【{reason}】掷骰{SANC}{adv_comment}){final_words}\n\n'
                         else:
-                            message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){final_words}\n\n'
+                            if reason == "":
+                                message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】掷骰{SANC}{adv_comment}){final_words}\n\n'
+                            else:
+                                message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){final_words}\n\n'
                         if is_multiDice:
                             message = message.replace("【骰子】", "【多轮掷骰】")
                         self.chat_log.insert(tk.END, message)
@@ -5315,7 +5515,10 @@ class ChatApp:
                     weapon_list = {}
                     if len(parts_) > 1:
                         if parts_ and "成功" in parts_[1]:
-                            role_Chart_detail = role_Chart.get(role, {}).copy()
+                            if "NPC_name" in role:
+                                role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                            else:
+                                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                             for skill, value in role_Chart_detail.items():
                                 if "#" in skill:
                                     weapon_list[skill.replace("#", "")] = value
@@ -5454,42 +5657,175 @@ class ChatApp:
             self.role_entries[role].insert(tk.END, result)
             multi_num -= 1
 
+    def Combat_NPC(self):
+        self.new_combat_window = tk.Toplevel(root, takefocus=True)
+        self.Add_NPC()
+
     def Add_NPC(self):
         self.dialog2 = LoadNPCDialog(self.root, f"选择要加载的NPC")
         result = self.dialog2.result
         # print(result)
         if result:
             slot = result["slot"]
-            for name, value in result.items():
-                if name == "slot":
-                    pass
-                else:
-                    if value == "":
-                        value = name
-                    self.role_entries[slot].insert("1.0", f"正在使用[{name}]的属性扮演【{value}】\n===\n")
-                    if name in self.infoCanvas_data_by_name:
-                        self.infoCanvas_data[slot] = self.infoCanvas_data_by_name[name]
+            if slot != "新窗口...":
+                self.new_combat_window.destroy()
+                for name, value in result.items():
+                    if name == "slot":
+                        pass
                     else:
-                        print("该模板没有简卡图片！")
-                    # 按名牌加载设置
-                    # print(slot)
-                    role_Chart[slot] = role_Chart_at_name[name].copy()
-                    SAN = role_Chart_at_name[name].get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                    HP = role_Chart_at_name[name].get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                    MP = role_Chart_at_name[name].get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                    MOV = role_Chart_at_name[name].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
-                    POW = role_Chart_at_name[name].get("POW")
-                    DB = role_Chart_at_name[name].get("DB")
-                    if "#SAN" in role_Chart_at_name[name]:
-                        SAN_ = role_Chart_at_name[name].get("#SAN")
+                        if value == "":
+                            value = name
+                        self.role_entries[slot].insert("1.0", f"正在使用[{name}]的属性扮演【{value}】\n===\n")
+                        if name in self.infoCanvas_data_by_name:
+                            self.infoCanvas_data[slot] = self.infoCanvas_data_by_name[name]
+                        else:
+                            print("该模板没有简卡图片！")
+                        # 按名牌加载设置
+                        # print(slot)
+                        role_Chart[slot] = role_Chart_at_name[name].copy()
+                        SAN = role_Chart_at_name[name].get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        HP = role_Chart_at_name[name].get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        MP = role_Chart_at_name[name].get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        MOV = role_Chart_at_name[name].get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        POW = role_Chart_at_name[name].get("POW")
+                        DB = role_Chart_at_name[name].get("DB")
+                        if "#SAN" in role_Chart_at_name[name]:
+                            SAN_ = role_Chart_at_name[name].get("#SAN")
+                        else:
+                            SAN_ = 100
+                        self.role_values_entry[slot].insert("1.0",
+                                                            f'{SAN}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                        self.chat_log.insert(tk.END,
+                                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("1.0", "6.0").strip()}\n\n')
+                        self.chat_log.yview(tk.END)
+                    # print(result)
+            else:
+                for name, value in result.items():
+                    if name == "slot":
+                        pass
                     else:
-                        SAN_ = 100
-                    self.role_values_entry[slot].insert("1.0",
-                                                        f'{SAN}/{SAN_}:S\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
-                    self.chat_log.insert(tk.END,
-                                         f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{value}】的状态：\n{self.role_values_entry[slot].get("1.0", "6.0").strip()}\n\n')
-                    self.chat_log.yview(tk.END)
-                # print(result)
+                        if value == "":
+                            value = name
+                        if value == name:
+                            NPC_name = name + "NPC_name"
+                        else:
+                            NPC_name = name + "NPC_name" + value
+                        frame = tk.LabelFrame(self.new_combat_window, text="NPC", relief=tk.GROOVE)
+                        #self.new_combat_window.bind("<Return>", lambda event: self.send_message(self.current_role.get()))
+                        self.new_combat_window.bind("<Alt-Return>", lambda event: self.insert_newline())
+                        self.new_combat_window.bind("<Control-Return>", lambda: self.newline_on_ctrl_enter)
+                        frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+                        if NPC_name.split("NPC_name")[1] != "":
+                           pass
+                        else:
+                            NPC_name += name + "#1"
+                        if NPC_name in self.role_entries_frame:
+                            _NPC_list = []
+                            #for index, frame in self.role_entries_frame.copy().items():
+                                #if NPC_name.split("#")[0] in index:
+                                    #_NPC_list.append("frame")
+                            if NPC_name.split("NPC_name")[1] != "":
+                                NPC_name = NPC_name.split("#")[0] + "#" + str(len(self.new_combat_windows) +1)
+                            else:
+                                NPC_name = NPC_name.split("#")[0] + name + "#" + str(len(self.new_combat_windows) +1) #str(random.randint(1000, 9999))
+                        self.new_combat_window.title("【NPC】" + NPC_name.split("NPC_name")[1])
+                        self.new_combat_windows[NPC_name] = self.new_combat_window
+                        self.role_entries_frame[NPC_name] = frame
+                        #self.roles.append(NPC_name)
+                        # 每个角色的消息框
+                        entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3, undo=True)
+                        entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+                        #entry.bind("<Button-3>", lambda event, r=NPC_name: self.add_menu(event, r))
+                        self.role_entries[NPC_name] = entry
+                        role_Chart_detail = role_Chart_at_name.get(NPC_name.split("NPC_name")[0],
+                                                                   {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                        # 加载并显示头像
+                        self.role_avatar_paths[NPC_name] = role_Chart_detail["_AvatarPath"]
+                        self.load_and_display_avatar(NPC_name, self.role_entries[NPC_name].master)
+                        #self.load_and_display_icon(NPC_name.replace("NPC_name", ""), frame)
+                        # 创建数值tag，显示数值
+                        SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        POW = role_Chart_detail.get("POW")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        DB = role_Chart_detail.get("DB")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                        if "#SAN" in role_Chart_detail:
+                            _SAN = role_Chart_detail.get("#SAN")
+                        else:
+                            _SAN = 100
+                        entry2 = tk.Text(frame, wrap=tk.WORD, width=10, height=6, undo=True)
+                        entry2.grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
+                        value_tag = f"{NPC_name}_values_tag"
+                        entry2.tag_config(value_tag, justify=tk.LEFT)
+                        entry2.insert(tk.END, f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB',
+                                              value_tag)
+                        self.role_values_entry[NPC_name] = entry2
+                        # 为每个文本框绑定焦点变化事件
+                        #entry2.bind("<FocusOut>", lambda event, r=NPC_name, t=entry2: self.save_info(event, r))
+                        send_button = tk.Button(frame, text="发送", command=lambda role=NPC_name: self.send_message(role))
+                        send_button.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
+
+                        label = tk.Label(frame, text=value, relief=tk.FLAT,
+                                             font=("Times New Roman", 16, "bold"))  # flat, groove, raised, ridge, solid, or sunken
+                        label.grid(row=0, column=1, pady=0, sticky="nsew")
+                        label.bind("<Button-1>", lambda event, role=NPC_name, label=label: self.edit_role_name(event, role, label))
+                        label.bind("<Button-3>", lambda event, role=NPC_name: self.on_avatar_click(role))
+                        label.bind("<Enter>", lambda event, role=NPC_name: self.on_Namelabel_hover(role))
+                        label.bind("<Leave>", lambda event, role=NPC_name: self.on_Namelabel_unfocus(role))
+
+                        #label = tk.Label(frame, text="@", relief=tk.FLAT)
+                        #label.grid(row=2, column=0, pady=0, sticky="nsew")
+                        # label点击事件绑定
+                        #label.bind("<Button-1>", lambda event, role=NPC_name: self.on_at_click(role))
+                        #label.bind("<Button-3>", lambda event, role=NPC_name: self.on_at_right_click(role))
+
+                        # 添加掷骰按钮和面数输入框
+                        entry_roll = tk.Text(frame, wrap=tk.WORD, width=3, height=1, undo=True)
+                        entry_roll.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
+                        entry_roll.bind("<Button-3>", lambda event, r=NPC_name: self.add_menu_skills(event, NPC_name))
+                        self.role_entries_roll[NPC_name] = entry_roll
+                        roll_button = tk.Button(frame, text="掷骰", command=lambda r=NPC_name: self.get_and_roll(r))
+                        roll_button.grid(row=2, column=2, padx=5, pady=5)
+                        self.role_roll_button[NPC_name] = roll_button
+                        # 在 Text 组件中插入初始文本
+                        initial_text = "1d100"
+                        self.role_entries_roll[NPC_name].insert(tk.END, initial_text)
+                        entry.bind("<FocusIn>", lambda event, role=NPC_name: self.bind_enter_to_send_message_NPC(event, role))
+                        entry_roll.bind("<FocusIn>", lambda event2, role=NPC_name: self.bind_enter_to_send_roll_NPC(event2, role))
+                        self.new_combat_window.protocol("WM_DELETE_WINDOW", lambda: self.on_closing_new_NPC_window(NPC_name))
+        else:
+            self.new_combat_window.destroy()
+
+    def on_closing_new_NPC_window(self, key):
+        # 搜索包含 ">>>" 的行的起始索引
+        start_index = "1.0"
+        while True:
+            match_index = self.chat_log.search(">>>", start_index, tk.END)
+            if not match_index:
+                break
+            # 删除包含 ">>>" 的行
+            line_start = self.chat_log.index(match_index)
+            line_end = self.chat_log.index(match_index + " lineend")
+            self.chat_log.delete(line_start, line_end)
+            # 更新搜索的起始位置
+            start_index = line_end
+
+        #self.new_combat_window.destroy()
+        self.new_combat_windows.pop(key).destroy()
+        self.role_entries.pop(key)
+        if key.split("NPC_name")[1] == "":
+            name = "NPC"
+        else:
+            name = key.split("NPC_name")[1]
+        self.chat_log.insert(tk.END,
+                             f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【角色退场】{name}\n\n')
+        self.chat_log.yview(tk.END)
+        #if len(self.new_combat_windows) > 0:
+            #self.new_combat_window = self.new_combat_windows[len(self.new_combat_windows)-1]
+        #self.role_entries_frame.pop(key).destroy()
+        #self.roles.pop()
+        pass
 
     def set_start_point(self, event):
         self.start_x = event.x
@@ -6067,7 +6403,7 @@ class ChatApp:
             radius = 0.08
             x = 100
             y = 50
-            for _avatar in self.roles:
+            for _avatar in self.role_entries:
                 if os.path.exists(self.role_avatar_paths[_avatar]):
                     with open(self.role_avatar_paths[_avatar], "rb") as f:
                         image = Image.open(f)
@@ -6083,8 +6419,15 @@ class ChatApp:
                         # Create draggable image
 
                     # Add label below the image
-                    label_text = self.role_entries_name[
-                                     _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
+                    if "NPC_name" in _avatar:
+                        if _avatar.split("NPC_name")[1]:
+                            name_ = _avatar.split("NPC_name")[1]
+                        else:
+                            name_ = "NPC"
+                        label_text = name_ + "(" + "NPC" + ")"  # You can replace this with whatever text you want
+                    else:
+                        label_text = self.role_entries_name[
+                                         _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
                     label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
                     # Bind label's movement with image
                     # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
@@ -6277,9 +6620,10 @@ class TRPGModule:
         self.ChatApp = chat_app_instance
         self.root = root
         adv_comment = ""
-        self.skill_comment()
 
     def skill_upgrade(self, info_, skill_name, role):
+        if "NPC_name" in role:
+            return ""
         upgrade = ""
         if "None" not in skill_name and "教育" not in skill_name and "魅力" not in skill_name and "力量" not in skill_name and "敏捷" not in skill_name and "外貌" not in skill_name and "智力" not in skill_name and "体质" not in skill_name and "灵感" not in skill_name and "意志" not in skill_name and "体型" not in skill_name and "信用" not in skill_name and "幸运" not in skill_name and "MOV" not in skill_name and "HP" not in skill_name and "MP" not in skill_name and "SAN" not in skill_name and "克苏鲁" not in skill_name and (
                 f".st{skill_name}" not in self.ChatApp.role_values_entry[role].get("1.0",
@@ -6300,49 +6644,83 @@ class TRPGModule:
         return upgrade
 
     def skill_comment(self, role=None, skill=None):
-        if skill and role:
-            _Critical_Success_list = []
-            _Extreme_Success_list = []
-            _Hard_Success_list = []
-            _Success_list = []
-            _Failure_list = []
-            _Fumble_list = []
-            _Critical_Success_list = bot_personality["Critical_Success"][skill] + bot_personality["Critical_Success"][role]
-            _Extreme_Success_list = bot_personality["Extreme_Success"][skill] + bot_personality["Extreme_Success"][role]
-            _Hard_Success_list = bot_personality["Hard_Success"][skill] + bot_personality["Hard_Success"][role]
-            _Success_list = bot_personality["Success"][skill] + bot_personality["Success"][role]
-            _Failure_list = bot_personality["Failure"][skill] + bot_personality["Failure"][role]
-            _Fumble_list = bot_personality["Fumble"][skill] + bot_personality["Fumble"][role]
-            self.Critical_Success = random.choice(_Critical_Success_list)
-            self.Extreme_Success = random.choice(_Extreme_Success_list)
-            self.Hard_Success = random.choice(_Hard_Success_list)
-            self.Success = random.choice(_Success_list)
-            self.Failure = random.choice(_Failure_list)
-            self.Fumble = random.choice(_Fumble_list)
-        else:
-            if skill:
-                self.Critical_Success = random.choice(bot_personality["Critical_Success"][skill])
-                self.Extreme_Success = random.choice(bot_personality["Extreme_Success"][skill])
-                self.Hard_Success = random.choice(bot_personality["Hard_Success"][skill])
-                self.Success = random.choice(bot_personality["Success"][skill])
-                self.Failure = random.choice(bot_personality["Failure"][skill])
-                self.Fumble = random.choice(bot_personality["Fumble"][skill])
-            elif role:
-                self.Critical_Success = random.choice(bot_personality["Critical_Success"][role])
-                self.Extreme_Success = random.choice(bot_personality["Extreme_Success"][role])
-                self.Hard_Success = random.choice(bot_personality["Hard_Success"][role])
-                self.Success = random.choice(bot_personality["Success"][role])
-                self.Failure = random.choice(bot_personality["Failure"][role])
-                self.Fumble = random.choice(bot_personality["Fumble"][role])
+            if skill and role:
+                if "NPC_name" not in role:
+                    _Critical_Success_list = []
+                    _Extreme_Success_list = []
+                    _Hard_Success_list = []
+                    _Success_list = []
+                    _Failure_list = []
+                    _Fumble_list = []
+                    if skill in bot_personality["Critical_Success"] and role in bot_personality["Critical_Success"]:
+                        _Critical_Success_list = bot_personality["Critical_Success"][skill] + bot_personality["Critical_Success"][role]
+                    else:
+                        bot_personality["Critical_Success"][skill] = bot_personality["Critical_Success"]["通用"]
+                        bot_personality["Critical_Success"][role] = bot_personality["Critical_Success"]["通用"]
+                        _Critical_Success_list = bot_personality["Critical_Success"][skill] + \
+                                                 bot_personality["Critical_Success"][role]
+                    if skill in bot_personality["Extreme_Success"] and role in bot_personality["Extreme_Success"]:
+                        _Extreme_Success_list = bot_personality["Extreme_Success"][skill] + bot_personality["Extreme_Success"][role]
+                    else:
+                        bot_personality["Extreme_Success"][skill] = bot_personality["Extreme_Success"]["通用"]
+                        bot_personality["Extreme_Success"][role] = bot_personality["Extreme_Success"]["通用"]
+                        _Extreme_Success_list = bot_personality["Extreme_Success"][skill] + \
+                                                bot_personality["Extreme_Success"][role]
+                    if skill in bot_personality["Hard_Success"] and role in bot_personality["Hard_Success"]:
+                        _Hard_Success_list = bot_personality["Hard_Success"][skill] + bot_personality["Hard_Success"][role]
+                    else:
+                        bot_personality["Hard_Success"][skill] = bot_personality["Hard_Success"]["通用"]
+                        bot_personality["Hard_Success"][role] = bot_personality["Hard_Success"]["通用"]
+                        _Hard_Success_list = bot_personality["Hard_Success"][skill] + bot_personality["Hard_Success"][
+                            role]
+                    if skill in bot_personality["Success"] and role in bot_personality["Success"]:
+                        _Success_list = bot_personality["Success"][skill] + bot_personality["Success"][role]
+                    else:
+                        bot_personality["Success"][skill] = bot_personality["Success"]["通用"]
+                        bot_personality["Success"][role] = bot_personality["Success"]["通用"]
+                        _Success_list = bot_personality["Success"][skill] + bot_personality["Success"][role]
+                    if skill in bot_personality["Failure"] and role in bot_personality["Failure"]:
+                        _Failure_list = bot_personality["Failure"][skill] + bot_personality["Failure"][role]
+                    else:
+                        bot_personality["Failure"][skill] = bot_personality["Failure"]["通用"]
+                        bot_personality["Failure"][role] = bot_personality["Failure"]["通用"]
+                        _Failure_list = bot_personality["Failure"][skill] + bot_personality["Failure"][role]
+                    if skill in bot_personality["Fumble"] and role in bot_personality["Fumble"]:
+                        _Fumble_list = bot_personality["Fumble"][skill] + bot_personality["Fumble"][role]
+                    else:
+                        bot_personality["Fumble"][skill] = bot_personality["Fumble"]["通用"]
+                        bot_personality["Fumble"][role] = bot_personality["Fumble"]["通用"]
+                        _Fumble_list = bot_personality["Fumble"][skill] + bot_personality["Fumble"][role]
+                    self.Critical_Success = random.choice(_Critical_Success_list)
+                    self.Extreme_Success = random.choice(_Extreme_Success_list)
+                    self.Hard_Success = random.choice(_Hard_Success_list)
+                    self.Success = random.choice(_Success_list)
+                    self.Failure = random.choice(_Failure_list)
+                    self.Fumble = random.choice(_Fumble_list)
             else:
-                self.Critical_Success = random.choice(bot_personality["Critical_Success"]["通用"])
-                self.Extreme_Success = random.choice(bot_personality["Extreme_Success"]["通用"])
-                self.Hard_Success = random.choice(bot_personality["Hard_Success"]["通用"])
-                self.Success = random.choice(bot_personality["Success"]["通用"])
-                self.Failure = random.choice(bot_personality["Failure"]["通用"])
-                self.Fumble = random.choice(bot_personality["Fumble"]["通用"])
-        self.Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
-        self.Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
+                if skill:
+                    self.Critical_Success = random.choice(bot_personality["Critical_Success"][skill])
+                    self.Extreme_Success = random.choice(bot_personality["Extreme_Success"][skill])
+                    self.Hard_Success = random.choice(bot_personality["Hard_Success"][skill])
+                    self.Success = random.choice(bot_personality["Success"][skill])
+                    self.Failure = random.choice(bot_personality["Failure"][skill])
+                    self.Fumble = random.choice(bot_personality["Fumble"][skill])
+                elif role and "NPC_name" not in role:
+                    self.Critical_Success = random.choice(bot_personality["Critical_Success"][role])
+                    self.Extreme_Success = random.choice(bot_personality["Extreme_Success"][role])
+                    self.Hard_Success = random.choice(bot_personality["Hard_Success"][role])
+                    self.Success = random.choice(bot_personality["Success"][role])
+                    self.Failure = random.choice(bot_personality["Failure"][role])
+                    self.Fumble = random.choice(bot_personality["Fumble"][role])
+                else:
+                    self.Critical_Success = random.choice(bot_personality["Critical_Success"]["通用"])
+                    self.Extreme_Success = random.choice(bot_personality["Extreme_Success"]["通用"])
+                    self.Hard_Success = random.choice(bot_personality["Hard_Success"]["通用"])
+                    self.Success = random.choice(bot_personality["Success"]["通用"])
+                    self.Failure = random.choice(bot_personality["Failure"]["通用"])
+                    self.Fumble = random.choice(bot_personality["Fumble"]["通用"])
+            self.Fumble_SKill = bot_personality["Fumble_at_96_SKill_Level"]
+            self.Critical_Success_SKill = bot_personality["Critical_at_5_SKill_Level"]
 
     def skill_check(self, info_, result):
         if result <= 5 and info_ >= Critical_Success_SKill:
@@ -6420,6 +6798,7 @@ class TRPGModule:
         skill_name = ""
         advantage = {}
         multi_num = 1
+        self.skill_comment(role, expression)
         try:
             pattern = re.compile(r'[\u4e00-\u9fa5]')
             pattern_user = re.compile(r'([\u4e00-\u9fa5a-zA-Z]+)(\d+)')
@@ -6443,11 +6822,15 @@ class TRPGModule:
                 expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "").replace("MOV",
                                                                                                                "")
             if pattern_combine.match(expression) and len(part_combine) > 1:
-                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                if "NPC_name" in role:
+                    role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                else:
+                    role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 print("联合掷骰")  # 意志+斗殴+潜行
                 # print(part_combine)
                 for a in part_combine:
                     combine_infos[a] = role_Chart_detail[a]
+                #print(role_Chart_detail)
                 print(combine_infos)
                 expression = "COMBINE CHECK"
             if pattern_advantage.match(expression) and HP_MP_check == "":
@@ -6473,7 +6856,10 @@ class TRPGModule:
 
             if ("sc" or "SC" or ".sc" or "。sc") in expression:
                 print("SAN CHECK")  # sc1/1d5
-                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                if "NPC_name" in role:
+                    role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                else:
+                    role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 info = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 if info == 0:
                     info = role_Chart_detail.get("POW")
@@ -6488,7 +6874,10 @@ class TRPGModule:
                     expression = "SAN CHECK"
 
             elif ("san" or "San" or "SAN") in expression:
-                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                if "NPC_name" in role:
+                    role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                else:
+                    role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 info = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
                 if info == 0:
                     info = role_Chart_detail.get("POW")
@@ -6701,8 +7090,10 @@ class TRPGModule:
                                     self.move_time_forward("time_5min")
                             else:
                                 self.move_time_forward(timer)
-
-                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                if "NPC_name" in role:
+                    role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                else:
+                    role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                 if "困难" in expression or "极难" in expression:
                     print("困难极难")
                     print(expression)
@@ -7930,6 +8321,7 @@ class LoadNPCDialog(simpledialog.Dialog):
         role_Chart_ = load_Chart().copy()
         self.npcNames = []
         self.slots = []
+        self.slots.append("新窗口...")
         for role, chart in role_Chart_at_name_.items():
             if "PL " not in role:
                 self.npcNames.append(role)
