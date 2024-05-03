@@ -2030,11 +2030,31 @@ class ChatApp:
                 require = skill.split("(")[1].split(")")[0]
                 if len(skill.split("(")[1].split(")")) > 1:
                     expression = skill.split(")")[1].replace(")", "")
+            weapon_list = {}
+            if "NPC_name" in role:
+                role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+            else:
+                role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+            for skill, value in role_Chart_detail.items():
+                if "#" in skill:
+                    weapon_list[skill.replace("#", "")] = value
+            DB_ = role_Chart_detail["DB"]
+            DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0", "")
+            if ("D" not in DB_) and ("-" not in DB_):
+                DB_ = "+" + DB_
+            expression = expression.replace('+DB', DB_)
             if target != "" and target != "PL0":
+                if "NPC_name" in role:
+                    if role.split("NPC_name")[1]:
+                        name_ = role.split("NPC_name")[1]
+                    else:
+                        name_ = "NPC"
+                else:
+                    name_ = self.role_entries_name[role]
                 text = "对" + self.role_entries_name[target] + "以" + require + "使用" + name
                 self.insert_text_to_PC(text, role)
                 text = des
-                self.insert_text_to_PC(text, target)
+                self.insert_text_to_PC(text, role)
                 text = check
                 self.insert_roll_to_PC(text, role, send=True)
                 if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
@@ -2095,7 +2115,10 @@ class ChatApp:
             if mp_cost != 0 or hp_cost != 0 or san_cost != 0:
                 if mp_cost != 0:
                     if mp_cost <= _MP:
-                        self.insert_roll_to_PC(f"MP-{mp_cost}", role, send=True)
+                        if "NPC_name" in role:
+                            self.insert_roll_to_PC(f"MP-{mp_cost}", role)
+                        else:
+                            self.insert_roll_to_PC(f"MP-{mp_cost}", role, send=True)
                         self.role_entries[role].delete("1.0", tk.END)
                         if "NPC_name" in role:
                             if role.split("NPC_name")[1]:
@@ -2127,7 +2150,10 @@ class ChatApp:
                         self.insert_text_to_PC("MP不足!", role)
                 if hp_cost != 0:
                     if hp_cost <= _HP:
-                        self.insert_roll_to_PC(f"HP-{hp_cost}", role, send=True)
+                        if "NPC_name" in role:
+                            self.insert_roll_to_PC(f"HP-{hp_cost}", role)
+                        else:
+                            self.insert_roll_to_PC(f"HP-{hp_cost}", role, send=True)
                         self.role_entries[role].delete("1.0", tk.END)
                         text = self.role_entries_name[role] + "使用了" + name + "，" + des
                         self.insert_text_to_PC(text, role)
@@ -2139,7 +2165,10 @@ class ChatApp:
                         self.insert_text_to_PC("HP不足!", role)
                 if san_cost != 0:
                     if san_cost <= _SAN:
-                        self.insert_roll_to_PC(f"SAN-{san_cost}", role, send=True)
+                        if "NPC_name" in role:
+                            self.insert_roll_to_PC(f"SAN-{san_cost}", role)
+                        else:
+                            self.insert_roll_to_PC(f"SAN-{san_cost}", role, send=True)
                         self.role_entries[role].delete("1.0", tk.END)
                         text = self.role_entries_name[role] + "使用了" + name + "，" + des
                         self.insert_text_to_PC(text, role)
@@ -2199,17 +2228,19 @@ class ChatApp:
                     expression = skill.split(")")[1].replace(")", "")
                 if "[" not in skill:
                     effect = skill.split("(")[0]
-            if "NPC_name" in role:
-                if role.split("NPC_name")[1]:
-                    name_ = role.split("NPC_name")[1]
+                if "NPC_name" in role:
+                    if role.split("NPC_name")[1]:
+                        name_ = role.split("NPC_name")[1]
+                    else:
+                        name_ = "NPC"
                 else:
-                    name_ = "NPC"
+                    name_ = self.role_entries_name[role]
                 if target != "" and target != "PL0":
                     text = name_ + "对" + self.role_entries_name[target] + "以" + require + "声明" + name + "，" + des
                     self.insert_text_to_PC(text, role)
                     text = check
                     self.insert_roll_to_PC(text, role)
-                    text = effect
+                    text = effect + f"({name_} → {self.role_entries_name[target]})"
                     self.insert_text_to_PC(text, target)
                     if self.role_entries_roll[role].get("1.0", tk.END).strip() != "" and expression != "":
                         self.insert_roll_to_PC(expression, target)
@@ -5726,6 +5757,7 @@ class ChatApp:
                                     #_NPC_list.append("frame")
                             if NPC_name.split("NPC_name")[1] != "":
                                 NPC_name = NPC_name.split("#")[0] + "#" + str(len(self.new_combat_windows) +1)
+                                NPC_name = NPC_name.split("#")[0] + "#" + str(len(self.new_combat_windows) +1)
                             else:
                                 NPC_name = NPC_name.split("#")[0] + name + "#" + str(len(self.new_combat_windows) +1) #str(random.randint(1000, 9999))
                         self.new_combat_window.title("【NPC】" + NPC_name.split("NPC_name")[1])
@@ -6565,7 +6597,7 @@ class ChatApp:
             for role, skills in role_Chart.items():
                 txt_file.write(f"【{role}】-{self.role_entries_name[role]}\n.st")
                 for skill, value in skills.items():
-                    if skill == "_AvatarPath" or ("#" in skill) or (skill == "DB"):
+                    if skill == "_AvatarPath": #or ("#" in skill) or (skill == "DB")
                         pass
                     else:
                         txt_file.write(f"{skill}{value} ")
