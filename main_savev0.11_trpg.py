@@ -2776,6 +2776,7 @@ class ChatApp:
         self.role_statusbar_icon = {}
         self.role_sstatusbar_mp = {}
         self.image_references_PC = []
+        self.image_references_new_map = []
         self.infoCanvas_data = load_infoCanvas_data()
         self.infoCanvas_data_by_name = load_infoCanvas_data_by_name()
 
@@ -5021,7 +5022,7 @@ class ChatApp:
                 else:
                     old_dict["年龄"] = current_date_object.year - date_object.year - 1
 
-            if "_年龄" not in old_dict:  # 初始调整值
+            if "_年龄" not in old_dict and "年龄" in old_dict:  # 初始调整值
                 old_dict["_年龄"] = old_dict["年龄"]
                 if old_dict["年龄"] < 15:
                     old_dict["教育"] = (old_dict["年龄"] - 6) * 5
@@ -8906,7 +8907,7 @@ class ChatApp:
 
     def Combat_NPC(self):
         self.new_combat_window = tk.Toplevel(root, takefocus=True)
-        self.image_references = []
+        #self.image_references = []
         self.Add_NPC()
 
     def Add_NPC(self, pass_=""):
@@ -9073,7 +9074,10 @@ class ChatApp:
                             role_Chart_detail = role_Chart_at_name.get(NPC_name.split("NPC_name")[0],
                                                                        {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
                             # 加载并显示头像
-                            self.role_avatar_paths[NPC_name] = role_Chart_detail["_AvatarPath"]
+                            if "_AvatarPath" in role_Chart_detail:
+                                self.role_avatar_paths[NPC_name] = role_Chart_detail["_AvatarPath"]
+                            else:
+                                self.role_avatar_paths[NPC_name] = ""
                             self.load_and_display_avatar(NPC_name, self.role_entries[NPC_name].master)
                             # self.load_and_display_icon(NPC_name.replace("NPC_name", ""), frame)
                             # 创建数值tag，显示数值
@@ -10019,7 +10023,8 @@ class ChatApp:
     def open_new_window(self):
         global Is_Opened
         if Is_Opened:
-            messagebox.showwarning("调查模块已开启！", "请勿重复打开以免产生BUG！")
+            #messagebox.showwarning("调查模块已开启！", "请勿重复打开以免产生BUG！")
+            self.new_window.focus_set()
             return
         self.new_window = tk.Toplevel(root)
         self.new_window.title("调查模块")
@@ -10197,7 +10202,129 @@ class ChatApp:
         self.new_window_button = tk.Button(root, text="已开启！", background="red", command=self.open_new_window)
         self.new_window_button.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
-    # 新窗口
+    # update
+    def update_map(self):
+        global frame_Map
+        global role_Chart_at_name
+        self.time_label2.config(text=self.time_log.get("1.0", tk.END).strip())
+        for _avatar in self.role_entries:
+            if _avatar not in self.draggable_items:
+                radius = 0.08
+                x = 100
+                y = 50
+                if _avatar in self.role_avatar_paths and os.path.exists(self.role_avatar_paths[_avatar]):
+                    with open(self.role_avatar_paths[_avatar], "rb") as f:
+                        image = Image.open(f)
+                        width, height = image.size
+                        image = image.resize((int(width * radius), int(height * radius)), Image.LANCZOS)
+                        photo = ImageTk.PhotoImage(image)
+                        self.image_references_new_map.append(photo)
+
+                    if "NPC_name" in _avatar:
+                        if _avatar.split("NPC_name")[1]:
+                            name_ = _avatar.split("NPC_name")[1]
+                        else:
+                            name_ = "NPC"
+                        label_text = name_ + "(" + "NPC" + ")"  # You can replace this with whatever text you want
+                    else:
+                        label_text = self.role_entries_name[
+                                         _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
+                    label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
+
+                    _, extension = os.path.splitext(self.role_avatar_paths[_avatar])
+                    if extension == ".gif" or extension == ".GIF":
+                        image = Image.open(self.role_avatar_paths[_avatar])
+                        width, height = image.size
+                        frames_map[frame_Map] = [
+                            ImageTk.PhotoImage(frame.resize((int(width * 0.25), int(height * 0.25)), Image.LANCZOS))
+                            for frame
+                            in ImageSequence.Iterator(image)]
+
+                        current_frame_map[frame_Map] = DraggableItem(self.canvas, x, y, 10, 10,
+                                                                         image=frames_map[frame_Map][0],
+                                                                         label=label_text,
+                                                                         label2=label_text2, type="image_animate",
+                                                                         frame=frame_Map)
+
+                        self.draggable_items[_avatar] = current_frame_map[frame_Map]
+                        y += 100
+                        if len(self.draggable_items) != 0 and len(self.draggable_items) % 7 == 0:
+                            y = 50
+                            x += 50
+                        frame_Map += 1
+                    else:
+                        draggable_image = DraggableItem(self.canvas, x, y, 10, 10, image=photo, label=label_text,
+                                                            label2=label_text2, type='image')
+                        y += 100
+                        if len(self.draggable_items) != 0 and len(self.draggable_items) % 7 == 0:
+                            y = 50
+                            x += 50
+                        self.draggable_items[_avatar] = draggable_image
+                else:
+                    if "NPC_name" in _avatar:
+                        if _avatar.split("NPC_name")[1]:
+                            name_ = _avatar.split("NPC_name")[1]
+                        else:
+                            name_ = "NPC"
+                        label_text = name_ + "(" + "NPC" + ")"  # You can replace this with whatever text you want
+                    else:
+                        label_text = self.role_entries_name[
+                                         _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
+                    if _avatar in self.role_values_entry:
+                        label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
+                    else:
+                        label_text2 = f"H{str(role_Chart_at_name[_avatar.split('NPC_name')[0]]['HP'])} S{str(role_Chart_at_name[_avatar.split('NPC_name')[0]]['SAN'])} M{str(role_Chart_at_name[_avatar.split('NPC_name')[0]]['MOV'])}"
+
+                    draggable_image = DraggableItem(self.canvas, x, y, 50, 50, fill='', outline='black',
+                                                    label=label_text, label2=label_text2,
+                                                    type="text")
+                    y += 100
+                    self.draggable_items[_avatar] = draggable_image
+            if _avatar == "DiceBot":
+                pass
+            else:
+                if "NPC_name" in _avatar:
+                    if _avatar.split("NPC_name")[1]:
+                        name_ = _avatar.split("NPC_name")[1]
+                    else:
+                        name_ = "NPC"
+                    label_text = name_ + "(" + "NPC" + ")"  # You can replace this with whatever text you want
+                else:
+                    label_text = self.role_entries_name[_avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
+                label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
+                if "===状态===" in self.role_values_entry[_avatar].get("1.0", tk.END):
+                    status_list = self.role_values_entry[_avatar].get("1.0", tk.END).split("===状态===")[1].split("===")[0].split("\n")
+                    for s in status_list:
+                        if s.strip() != "":
+                            label_text += " †" +s
+                radius = 0.08
+                if _avatar in self.role_avatar_paths and os.path.exists(self.role_avatar_paths[_avatar]):
+                    with open(self.role_avatar_paths[_avatar], "rb") as f:
+                        image = Image.open(f)
+                        width, height = image.size
+                        image = image.resize((int(width * radius), int(height * radius)), Image.LANCZOS)
+                        photo = ImageTk.PhotoImage(image)
+                        self.image_references_new_map.append(photo)
+                        # Create draggable image
+                    _, extension = os.path.splitext(self.role_avatar_paths[_avatar])
+                    if extension == ".gif" or extension == ".GIF":
+                        image = Image.open(self.role_avatar_paths[_avatar])
+                        width, height = image.size
+                        frames_map[frame_Map] = [
+                            ImageTk.PhotoImage(frame.resize((int(width * 0.25), int(height * 0.25)), Image.LANCZOS))
+                            for frame
+                            in ImageSequence.Iterator(image)]
+                        # 显示 GIF 图片的第一帧
+                        photo = frames_map[frame_Map][0]
+                else:
+                    photo = ""
+                if _avatar in self.role_avatar_paths and os.path.exists(self.role_avatar_paths[_avatar]):
+                    self.draggable_items[_avatar].config(label=label_text, label2=label_text2, image=photo)
+                else:
+                    self.draggable_items[_avatar].config(label=label_text, label2=label_text2, image=photo)
+        self.canvas.after(500, self.update_map)
+
+    # 地图新窗口
     def open_new_window_map(self):
         global frame_Map
         new_window = tk.Toplevel(self.new_window)
@@ -10210,10 +10337,9 @@ class ChatApp:
                          text="地图即时使用，信息不互通，关闭即销毁: [右键]绘图/副本 | [右键角色/无图则❤]载入战斗图像 | [右键DiceBot]载入指示物 | [右键战斗图像]销毁 | [单击标签/❤]编辑 | [中键拖拽标签]缩放(仅限矩形和圆)")
         label.pack()
 
-        label2 = tk.Label(new_window,
+        self.time_label2 = tk.Label(new_window,
                           text=text)
-        label2.pack()
-
+        self.time_label2.pack()
         # 创建 Canvas 组件
         self.canvas = tk.Canvas(new_window, width=400, height=400, bg="white")
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -10243,7 +10369,7 @@ class ChatApp:
             y = 50
             divide_col = int(len(self.role_entries) / 8)
             for _avatar in self.role_entries:
-                if os.path.exists(self.role_avatar_paths[_avatar]):
+                if _avatar in self.role_avatar_paths and os.path.exists(self.role_avatar_paths[_avatar]):
                     with open(self.role_avatar_paths[_avatar], "rb") as f:
                         image = Image.open(f)
                         width, height = image.size
@@ -10265,9 +10391,9 @@ class ChatApp:
                             name_ = "NPC"
                         label_text = name_ + "(" + "NPC" + ")"  # You can replace this with whatever text you want
                     else:
-                        label_text = self.role_entries_name[
-                                         _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
+                        label_text = self.role_entries_name[_avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
                     label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
+
                     # Bind label's movement with image
                     # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
                     _, extension = os.path.splitext(self.role_avatar_paths[_avatar])
@@ -10309,14 +10435,20 @@ class ChatApp:
                             x += 50
                         self.draggable_items[_avatar] = draggable_image
                 else:
-                    label_text = self.role_entries_name[
-                                     _avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
+                    if "NPC_name" in _avatar:
+                        if _avatar.split("NPC_name")[1]:
+                            name_ = _avatar.split("NPC_name")[1]
+                        else:
+                            name_ = "NPC"
+                        label_text = name_ + "(" + "NPC" + ")"  # You can replace this with whatever text you want
+                    else:
+                        label_text = self.role_entries_name[_avatar] + "(" + _avatar + ")"  # You can replace this with whatever text you want
                     label_text2 = f"H{self.role_values_entry[_avatar].get('2.0', '3.0').split('/')[0].strip()} S{self.role_values_entry[_avatar].get('1.0', '2.0').split('/')[0].strip()} M{self.role_values_entry[_avatar].get('4.0', '5.0').split('/')[0].strip()}"
                     # Bind label's movement with image
                     # label_below_image_canvas = self.canvas.create_window(x-50, y+60, window=label_below_image, anchor=tk.NW)
                     draggable_image = DraggableItem(self.canvas, x, y, 50, 50, fill='', outline='black',
                                                     label=label_text, label2=label_text2,
-                                                    type='text')
+                                                    type="text")
                     y += 100
                     self.draggable_items[_avatar] = draggable_image
             # Create draggable rectangle
@@ -10342,6 +10474,7 @@ class ChatApp:
                                                 type='text')
         # 绑定关闭事件
         # new_window.protocol("WM_DELETE_WINDOW", self.on_close_map)
+        self.canvas.after(500, self.update_map)
 
     def on_close_map(self):
         if messagebox.askokcancel("储存进度？", "要保存地图State吗？"):
@@ -11742,6 +11875,7 @@ class DraggableItem:
         global frame_Map
         global frames_Map
         global current_frame_map
+
         rgba_color = "#000000"  # 黑色
         alpha = 128  # 50% 的透明度
         # self.rgba_color_with_alpha = rgba_color + "{:02x}".format(alpha)   # 添加透明度
@@ -11756,6 +11890,7 @@ class DraggableItem:
         self.itemType = type
         self.image_references = []
         self.frame = frame
+        self.image = image
 
         if image:
             if tuceng:
@@ -11772,10 +11907,10 @@ class DraggableItem:
                 self.animate_on_map(0, self.canvas, self.item,
                                     frames_map[self.frame])
             if label is not None and label2 is not None:
-                label_below_image = tk.Label(self.canvas, text=label)
+                self.label_below_image = tk.Label(self.canvas, text=label)
                 # self.label_below_image.pack()
                 # self.label_below_image.place(x=x - 50, y=y + 60)  # Adjust the position as needed
-                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image,
+                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=self.label_below_image,
                                                                           anchor=tk.NW)
 
                 # label_below_image2 = tk.Label(self.canvas, text=label2, relief=tk.SUNKEN)
@@ -11794,8 +11929,8 @@ class DraggableItem:
                 # fill="black",
                 # tags="draggable")
             elif label is None and label2 is not None:
-                label_below_image = tk.LabelFrame(self.canvas)
-                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=label_below_image,
+                self.label_below_image = tk.LabelFrame(self.canvas)
+                self.label_below_image_canvas = self.canvas.create_window(x, y - 50, window=self.label_below_image,
                                                                           anchor=tk.NW)
                 if secret == "y":
                     self.label_below_image_canvas2 = canvas.create_text(x, y + 25, text=label2, font=("Arial", 10),
@@ -11892,12 +12027,14 @@ class DraggableItem:
                 # self.label_below_image.pack()
                 # self.label_below_image.place(x=x - 50, y=y + 60)  # Adjust the position as needed
                 # self.label_below_image_canvas = self.canvas.create_window(x, y, window=label_below_image, anchor=tk.NW)
-                label_below_image2 = tk.Label(self.canvas, text=label2)
+                self.label_below_image2 = tk.Label(self.canvas, text=label2)
                 if label2 is not None:
                     self.itemType = "text_PC"
                     self.label_below_image_canvas2 = self.canvas.create_window(x + 50, y - 10,
-                                                                               window=label_below_image2,
+                                                                               window=self.label_below_image2,
                                                                                anchor=tk.NW)
+                    self.canvas.itemconfig(self.item, text=label2, fill="black")
+
                 else:
                     self.label_below_image_canvas2 = None
                 if type == "text":
@@ -11924,6 +12061,26 @@ class DraggableItem:
         if self.label_below_image_canvas2_edit != None:
             self.canvas.tag_bind(self.label_below_image_canvas2_edit, "<ButtonPress-1>", self.on_tag_press)
 
+    def config(self, **kwargs):
+        # 遍历关键字参数，设置对象的属性
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        if self.itemType == "text":
+            #self.label_below_image.config(text=self.label)
+            #self.label_below_image_canvas.config(text=self.label)
+            #self.canvas.itemconfig(self.item, text=self.label, fill="black")
+            pass
+        elif self.itemType == "image" or self.itemType == "image_temp" or self.itemType == "image_temp_animate" or self.itemType == "image_animate":
+            self.label_below_image.config(text=self.label)
+            self.canvas.itemconfig(self.label_below_image_canvas2, text=self.label2, fill="black")
+        elif self.itemType == "text_PC":
+            self.label_below_image2.config(text=self.label)
+            self.canvas.itemconfig(self.item, text=self.label2, fill="black")
+        else:
+            self.label_below_image.config(text=self.label)
+            self.canvas.itemconfig(self.label_below_image_canvas, text=self.label, fill="black")
+        self.canvas.itemconfig(self.item, image=self.image)
+
     def on_tag_press(self, event):
         # 弹出输入窗口并获取用户输入的文本
         # print("text")
@@ -11932,6 +12089,8 @@ class DraggableItem:
         else:
             if self.itemType == "text":
                 text = self.canvas.itemcget(self.item, "text")
+            elif self.itemType == "text_PC":
+                text = self.label2
             else:
                 text = self.canvas.itemcget(self.label_below_image_canvas, "text")
             if text:
@@ -12030,12 +12189,6 @@ class DraggableItem:
         # 循环播放下一帧
         frame_index = (frame_index + 1) % len(frames)
         self.after_id = canvas.after(50, self.animate_on_map, frame_index, canvas, current_frame, frames)
-
-    def update_time(self, canvas, label):
-        # print(str(frame_index)+"/" + str(len(frames)))
-        # 更新当前帧
-        # canvas.itemconfig(label, image=frames[frame_index])
-        canvas.after()
 
     def move_cursor_to_avoid(self):
         global isOpeningFiles
@@ -12613,8 +12766,8 @@ class DiceRollDialog(simpledialog.Dialog):
         tk.Label(master, text="第一次掷骰结果：").grid(row=0, column=0, sticky="e")
         tk.Label(master, text="第二次掷骰结果：").grid(row=1, column=0, sticky="e")
         tk.Label(master, text="线索名（当前无效）：").grid(row=2, column=0, sticky="e")
-        tk.Label(master, text="===信息扩散器").grid(row=3, column=0, sticky="e")
-        tk.Label(master, text="编辑===").grid(row=3, column=1, sticky="e")
+        tk.Label(master, text="===情报扩散器").grid(row=3, column=0, sticky="e")
+        tk.Label(master, text="编辑房间与情报===").grid(row=3, column=1, sticky="e")
         tk.Label(master, text="房间类型").grid(row=4, column=0, sticky="e")
         tk.Label(master, text="房间名").grid(row=5, column=0, sticky="e")
         self.roomname_var = tk.StringVar()
@@ -12624,22 +12777,22 @@ class DiceRollDialog(simpledialog.Dialog):
         self.kuosan_var = tk.StringVar()
         self.kuosan_entry = tk.Entry(master, textvariable=self.kuosan_var)
         self.kuosan_entry.grid(row=6, column=1, padx=5, pady=5)
-        tk.Label(master, text="信息类型").grid(row=7, column=0, sticky="e")
-        tk.Label(master, text="信息内容").grid(row=8, column=0, sticky="e")
+        tk.Label(master, text="情报类型").grid(row=7, column=0, sticky="e")
+        tk.Label(master, text="情报内容").grid(row=8, column=0, sticky="e")
         self.content_var = tk.StringVar()
         self.content_entry = tk.Entry(master, textvariable=self.content_var)
         self.content_entry.grid(row=8, column=1, padx=5, pady=5)
         tk.Button(master, text="房间上传", command=lambda master=master: self.upload_room(master)).grid(row=9, column=0, padx=5, pady=5, sticky="nsew")
         tk.Button(master, text="信息上传", command=self.upload_info).grid(row=9, column=1, padx=5, pady=5, sticky="nsew")
-        tk.Label(master, text="===信息扩散器").grid(row=10, column=0, sticky="e")
-        tk.Label(master, text="使用===").grid(row=10, column=1, sticky="e")
+        tk.Label(master, text="===情报扩散器").grid(row=10, column=0, sticky="e")
+        tk.Label(master, text="开始使用===").grid(row=10, column=1, sticky="e")
         tk.Label(master, text="房间").grid(row=11, column=0, sticky="e")
         tk.Label(master, text="扩散调整").grid(row=12, column=0, sticky="e")
         self.adjust_var = tk.StringVar()
         self.adjust_var.set("0")
         self.adjust_entry = tk.Entry(master, textvariable=self.adjust_var)
         self.adjust_entry.grid(row=12, column=1, padx=5, pady=5)
-        tk.Button(master, text="清空数据", command=self.clear, bg="red").grid(row=13, column=0, padx=5, pady=5, sticky="nsew")
+        tk.Button(master, text="清空情报", command=self.clear, bg="red").grid(row=13, column=0, padx=5, pady=5, sticky="nsew")
         tk.Button(master, text="开始搜查", command=self.search_room).grid(row=13, column=1, padx=5, pady=5, sticky="nsew")
         self.result_text_ = tk.Text(master, wrap=tk.WORD, width=10, height=5, undo=True)
         self.result_text_.grid(row=14, column=0, sticky="nsew", columnspan=2)
