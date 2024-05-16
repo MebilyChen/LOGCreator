@@ -3395,6 +3395,129 @@ class ChatApp:
                                                     role=role: self.insert_text_to_PC(text, role, send=True))
         self.show_menu(event, menu)
 
+    def add_new_items(self, role):
+        self.new_window_for_new_items = tk.Toplevel(root, takefocus=True)
+        if "NPC_name" in role:
+            self.new_window_for_new_items.title(f"为[NPC]{role.split('NPC_name')[1]}增加新物品（或其他）")
+            if role.split("NPC_name")[1] not in self.role_items:
+                if role.split("NPC_name")[0] in self.role_items:
+                    self.role_items[role.split("NPC_name")[1]] = self.role_items[role.split("NPC_name")[0]]
+                else:
+                    self.role_items[role.split("NPC_name")[1]] = {"物品": [], "备注": [], "其他": []}
+            _dict = self.role_items[role.split("NPC_name")[1]]
+        else:
+            self.new_window_for_new_items.title(f"为[{role}]{self.role_entries_name[role]}增加新物品（或其他）")
+            _dict = self.role_items[self.role_entries_name[role]]
+
+        # Create widgets
+        self.new_items_frame = tk.Frame(self.new_window_for_new_items)
+        self.new_items_frame.pack()
+
+        self.type_new_items_label = tk.Label(self.new_items_frame, text="列表种类:")
+        self.type_new_items_label.grid(row=0, column=0)
+
+        self.type_new_items_var = tk.StringVar()
+        type_list = []
+        for type, content in _dict.items():
+            type_list.append(type)
+        type_list.append("[新列表种类...]")
+        self.type_new_items_entry = ttk.Combobox(self.new_items_frame, textvariable=self.type_new_items_var, values=type_list)
+        self.type_new_items_entry.bind("<<ComboboxSelected>>", lambda event, r=role: self.edit_entry_for_new_items(r))
+        self.type_new_items_entry.grid(row=0, column=1, columnspan=2)
+
+        self.list_new_items_label = tk.Label(self.new_items_frame, text="列表内容:")
+        self.list_new_items_label.grid(row=1, column=0)
+
+        self.list_new_items_text = tk.Text(self.new_items_frame, height=4, width=30, undo=True)
+        self.list_new_items_text.grid(row=2, column=0, columnspan=3)
+
+        self.add_new_items_button = tk.Button(self.new_items_frame, text="新列表...", command= lambda r=role: self.add_entry_for_new_items(role))
+        self.add_new_items_button.grid(row=3, column=0)
+
+        self.edit_new_items_button = tk.Button(self.new_items_frame, text="修正旧列表?", command= lambda r=role: self.edit_entry_for_new_items(role))
+        self.edit_new_items_button.grid(row=3, column=1)
+
+        self.save_new_items_button = tk.Button(self.new_items_frame, text="保存", command= lambda r=role: self.save_json_for_new_items(role))
+        self.save_new_items_button.grid(row=3, column=2)
+
+    def add_entry_for_new_items(self, role):
+        if self.type_new_items_entry.get() != "":
+            self.save_json_for_new_items(role)
+            self.type_new_items_entry.delete(0, tk.END)
+            self.list_new_items_text.delete("1.0", tk.END)
+
+    def edit_entry_for_new_items(self, role):
+        if self.type_new_items_var.get() != "":
+            self.list_new_items_text.delete("1.0", tk.END)
+            if "NPC_name" in role:
+                if role.split("NPC_name")[1] not in self.role_items:
+                    self.role_items[role.split("NPC_name")[1]] = {"物品": [], "备注": [], "其他": []}
+                    if self.type_new_items_var.get() in self.role_items[role.split("NPC_name")[0]]:
+                        self.list_new_items_text.insert(tk.END,
+                                                    "\n".join(self.role_items[role.split("NPC_name")[0]][self.type_new_items_var.get()]))
+                elif self.type_new_items_var.get() in self.role_items[role.split("NPC_name")[1]]:
+                    self.list_new_items_text.insert(tk.END, "\n".join(self.role_items[role.split("NPC_name")[1]][self.type_new_items_var.get()]))
+                else:
+                    self.list_new_items_text.insert(tk.END, "未查找到此条目！")
+            else:
+                if self.type_new_items_var.get() in self.role_items[self.role_entries_name[role]]:
+                    self.list_new_items_text.insert(tk.END, "\n".join(self.role_items[self.role_entries_name[role]][self.type_new_items_var.get()]))
+                else:
+                    self.list_new_items_text.insert(tk.END, "未查找到此条目！")
+
+    def save_json_for_new_items(self, role):
+        if self.type_new_items_entry.get() != "":
+            content = self.list_new_items_text.get("1.0", tk.END).split("\n")
+            _type = self.type_new_items_entry.get()
+            if "NPC_name" in role:
+                if role.split("NPC_name")[1] not in self.role_items:
+                    self.role_items[role.split("NPC_name")[1]] = {"物品": [], "备注": [], "其他": []}
+                self.role_items[role.split("NPC_name")[1]][_type] = []
+                for _content in content:
+                    if _content.strip() != "":
+                        self.role_items[role.split("NPC_name")[1]][_type].append(_content.strip())
+            else:
+                self.role_items[self.role_entries_name[role]][_type] = []
+                for _content in content:
+                    if _content.strip() != "":
+                        self.role_items[self.role_entries_name[role]][_type].append(_content)
+
+            type_list = []
+            if "NPC_name" in role:
+                if role.split("NPC_name")[1] not in self.role_items:
+                    if role.split("NPC_name")[0] in self.role_items:
+                        self.role_items[role.split("NPC_name")[1]] = self.role_items[role.split("NPC_name")[0]]
+                    else:
+                        self.role_items[role.split("NPC_name")[1]] = {"物品": [], "备注": [], "其他": []}
+                _dict = self.role_items[role.split("NPC_name")[1]]
+            else:
+                _dict = self.role_items[self.role_entries_name[role]]
+            for t, c in _dict.items():
+                type_list.append(t)
+            type_list.append("[新列表种类...]")
+            self.type_new_items_entry.config(value=type_list)
+            #在self.role_values_entry[role]里添加更新
+            for t2 in type_list:
+                if t2 == "[新列表种类...]":
+                    pass
+                else:
+                    current_text = self.role_values_entry[role].get("1.0", tk.END).split("\n")
+                    if f"==={t2}===" not in current_text:
+                        self.role_values_entry[role].insert(tk.END, f"\n==={t2}===\n" + '\n'.join(_dict[t2]))
+                    else:
+                        for index, line in enumerate(current_text):
+                            if line == f"==={t2}===":
+                                insert_index = index + 2
+                                _current_text = self.role_values_entry[role].get(f"{insert_index}.0", tk.END).split("===")[0].split("\n")
+                                for itm in _dict[t2]:
+                                    if itm not in _current_text:
+                                        self.role_values_entry[role].insert(f"{insert_index}.0", f"{itm}\n")
+                                break
+
+            file_path = "GameSaves/item_settings_by_name.json"
+            with open(file_path, "w", encoding='utf-8') as file:
+                json.dump(self.role_items, file, indent=4, ensure_ascii=False)
+
     def add_menu(self, event, role):
         menu = tk.Menu(root, tearoff=0)
         menu.delete(0, tk.END)  # 清空菜单
@@ -3411,6 +3534,7 @@ class ChatApp:
                 for t in textlist:
                     t = t.strip()
                     menu.add_command(label=t, command=lambda text=t, role=role: self.insert_text_to_PC(text, role))
+                menu.add_command(label="新的...", command=lambda role=role: self.add_new_items(role))
             else:
                 menu = tk.Menu(root, tearoff=1, title=f"【{self.role_entries_name[role]}】的物品列表)")
                 menu.delete(0, tk.END)  # 清空菜单
@@ -3418,6 +3542,7 @@ class ChatApp:
                 for t in textlist:
                     t = t.strip()
                     menu.add_command(label=t, command=lambda text=t, role=role: self.insert_text_to_PC(text, role))
+                menu.add_command(label="新的...", command=lambda role=role: self.add_new_items(role))
         elif role == "timelog":
             menu.add_command(label="快进1秒钟",
                              command=lambda timer="time_1s": TRPGModule.move_time_forward(self.trpg_module, timer,
@@ -9384,8 +9509,7 @@ class ChatApp:
         if self.name_entry.get() != "":
             file_path = "GameSaves/skill_menu_by_name.json"
             for skillname, type in self.role_skills_data.items():
-                if self.name_entry.get() in skillname.split("[")[0].split(":")[
-                    0] and self.type_var.get().upper() == type.upper():
+                if self.name_entry.get() in skillname.split("[")[0].split(":")[0] and self.type_var.get().upper() == type.upper():
                     self.role_skills_data.pop(skillname)
                     break
             if self.type_var.get() == "Skill":
@@ -9975,7 +10099,7 @@ class ChatApp:
                         values = self.tree_main.item(item, 'values')
                         value_list.append(values)
                 data[role] = value_list
-            json.dump(data, file, ensure_ascii=False)
+            json.dump(data, file, indent=4,ensure_ascii=False)
         with open('GameSaves/Deduction_infos_new.json', 'w', encoding='utf-8') as file:
             data = {}
             for role in self.roles:
@@ -9985,7 +10109,7 @@ class ChatApp:
                         values = self.tree_list[role].item(item, 'values')
                         value_list.append(values)
                     data[role] = value_list
-            json.dump(data, file, ensure_ascii=False)
+            json.dump(data, file, indent=4,ensure_ascii=False)
         # self.new_window.destroy()
 
     def on_closing_new_window_close(self):
@@ -10006,7 +10130,7 @@ class ChatApp:
                         values = self.tree_main.item(item, 'values')
                         value_list.append(values)
                 data[role] = value_list
-            json.dump(data, file, ensure_ascii=False)
+            json.dump(data, file, indent=4,ensure_ascii=False)
         with open('GameSaves/Deduction_infos_new.json', 'w', encoding='utf-8') as file:
             data = {}
             for role in self.roles:
@@ -10016,7 +10140,7 @@ class ChatApp:
                         values = self.tree_list[role].item(item, 'values')
                         value_list.append(values)
                     data[role] = value_list
-            json.dump(data, file, ensure_ascii=False)
+            json.dump(data, file, indent=4,ensure_ascii=False)
         self.new_window.destroy()
 
     # 新窗口
@@ -10489,46 +10613,46 @@ class ChatApp:
         global bot_personality_by_name
         # 保存初始化状态icon注册
         with open('AppSettings/status_icon_settings.json', 'w', encoding='utf-8') as file:
-            json.dump(self.status_icon, file, ensure_ascii=False)
+            json.dump(self.status_icon, file, indent=4,ensure_ascii=False)
         # 保存初始化物品栏
         with open('GameSaves/item_settings_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_items, file, ensure_ascii=False)
+            json.dump(self.role_items, file, indent=4,ensure_ascii=False)
         # 将角色luck统计保存到JSON文件
         with open('GameSaves/skill_menu_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_skill_menu, file, ensure_ascii=False)
+            json.dump(self.role_skill_menu, file, indent=4,ensure_ascii=False)
         # 将角色luck统计保存到JSON文件
         with open('Bots/luck_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(self.luck_by_name, file, ensure_ascii=False)
+            json.dump(self.luck_by_name, file, indent=4,ensure_ascii=False)
         # 将角色codename保存到JSON文件
         with open('AppSettings/codename_settings.json', 'w', encoding='utf-8') as file:
-            json.dump(self.codename_by_name, file, ensure_ascii=False)
+            json.dump(self.codename_by_name, file, indent=4,ensure_ascii=False)
         # 将头像路径保存到JSON文件
         with open('AppSettings/avatar_settings.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_avatar_paths, file, ensure_ascii=False)
+            json.dump(self.role_avatar_paths, file, indent=4,ensure_ascii=False)
         # 将状态Icon路径保存到JSON文件
         with open('GameSaves/icon_data.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_Icon_paths, file, ensure_ascii=False)
+            json.dump(self.role_Icon_paths, file, indent=4,ensure_ascii=False)
         # 将姓名牌路径保存到JSON文件
         with open('AppSettings/name_settings.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_entries_name, file, ensure_ascii=False)
+            json.dump(self.role_entries_name, file, indent=4,ensure_ascii=False)
         # 将角色简卡路径保存到JSON文件
         with open('AppSettings/infoCanvas_data.json', 'w', encoding='utf-8') as file:
-            json.dump(self.infoCanvas_data, file, ensure_ascii=False)
+            json.dump(self.infoCanvas_data, file, indent=4,ensure_ascii=False)
         # 将差分目录路径保存到JSON文件
         with open('AppSettings/avatar_dir_path.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_dir_path, file, ensure_ascii=False)
+            json.dump(self.role_dir_path, file, indent=4,ensure_ascii=False)
         with open('AppSettings/infoCanvas_data_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(self.infoCanvas_data_by_name, file, ensure_ascii=False)
+            json.dump(self.infoCanvas_data_by_name, file, indent=4,ensure_ascii=False)
         # 将角色可变数值保存到JSON文件
         with open('GameSaves/health_data.json', 'w', encoding='utf-8') as file:
-            json.dump(self.health_data, file, ensure_ascii=False)
+            json.dump(self.health_data, file, indent=4,ensure_ascii=False)
         with open('GameSaves/health_data_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(self.health_data_by_name, file, ensure_ascii=False)
+            json.dump(self.health_data_by_name, file, indent=4,ensure_ascii=False)
         # 尝试保存自定义角色数值信息
         for role in self.roles:
             self.role_values_tags_text[role] = self.role_values_entry[role].get("1.0", tk.END).strip()
         with open('GameSaves/pl_info.json', 'w', encoding='utf-8') as file:
-            json.dump(self.role_values_tags_text, file, ensure_ascii=False)
+            json.dump(self.role_values_tags_text, file,indent=4, ensure_ascii=False)
         # 尝试保存地点时间天气信息
         with open('GameSaves/env_info.json', 'w', encoding='utf-8') as file:
             info = self.time_log.get("1.0", tk.END).strip()
@@ -10539,12 +10663,12 @@ class ChatApp:
             env["Place"] = info.split("【天气】")[0]
             info = info.split("【天气】")[1]
             env["Weather"] = info.split("【日期】")[0]
-            json.dump(env, file, ensure_ascii=False)
+            json.dump(env, file, indent=4,ensure_ascii=False)
         # 保存自定义角色数值信息
         with open('GameSaves/pl_Chart.json', 'w', encoding='utf-8') as file:
-            json.dump(role_Chart, file, ensure_ascii=False)
+            json.dump(role_Chart, file, indent=4,ensure_ascii=False)
         with open('Bots/bot_personality_by_name.json', 'w', encoding='utf-8') as file:
-            json.dump(bot_personality_by_name, file, ensure_ascii=False)
+            json.dump(bot_personality_by_name, file,indent=4, ensure_ascii=False)
         # 保存自定义角色数值信息
         with open('GameSaves/PL_Chart_Save.txt', 'w', encoding='utf-8') as txt_file:
             for role, skills in role_Chart.items():
@@ -10573,7 +10697,7 @@ class ChatApp:
                     dicSkill["_AvatarPath"] = self.role_avatar_paths[role]
                 if "PL " not in self.role_entries_name[role]:
                     dic[self.role_entries_name[role]] = dicSkill.copy()
-            json.dump(dic, file, ensure_ascii=False)
+            json.dump(dic, file, indent=4,ensure_ascii=False)
 
     def save_role_count(self):
         # 保存角色数量到配置文件
@@ -12454,7 +12578,7 @@ class CanvasSaver:
     def save_canvas_state(self, filename):
         canvas_state = self.get_canvas_state()
         with open(filename, 'w') as f:
-            json.dump(canvas_state, f)
+            json.dump(canvas_state, f, indent=4)
         # self.canvas.postscript(file=filename, colormode="color")
 
     def load_canvas_state(self, filename):
@@ -12943,7 +13067,7 @@ def babel(self):
                             data_["国籍"] = skill.replace("语", "") + "国"
             self.babel_data[self.role_entries_name[role]] = data_
         with open('GameSaves/巴别塔.json', 'w', encoding='utf-8') as file:
-            json.dump(self.babel_data, file, ensure_ascii=False)
+            json.dump(self.babel_data, file, indent=4, ensure_ascii=False)
 
 
 def fire_babel(self, role):
