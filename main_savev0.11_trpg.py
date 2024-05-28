@@ -1518,6 +1518,15 @@ def load_san_loss():
         print(f"文件路径[GameSaves/san_loss.json]不存在，已重新创建json文件！")
         return {'KP': 0, 'DiceBot': 0,
                 'PL 1': 0}
+def load_whisper_data():
+    try:
+        # 尝试从JSON文件加载小窗记录
+        with open('GameSaves/whisper_data.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        print(f"文件路径[GameSaves/whisper_data.json]不存在，已重新创建json文件！")
+        return {'KP':{}, 'DiceBot':{}}
 
 def load_items():
     try:
@@ -2710,6 +2719,7 @@ class ChatApp:
         self.votes = {}
         self.role_skill_menu = load_role_skill_menu()
         self.role_items = load_items()
+        self.whisper_data = load_whisper_data()
         self.status_icon = load_settings_status_icon()
         self.SAN_loss = {}
         self.SAN = load_san_loss()
@@ -2784,8 +2794,9 @@ class ChatApp:
         self.chat_log.insert(tk.END, initial_text)
         self.last_save_path = load_last_save()
         if self.last_save_path != "" and os.path.exists(self.last_save_path):
-            self.chat_log.insert(tk.END, f"已加载[{self.last_save_path.strip().replace('QuickSaves/', '')}]\n===以上可删除===\n\n")
-            log_file_last_name = self.last_save_path.strip().replace('QuickSaves/', '').split('.QuickSave')[0]
+            self.chat_log.insert(tk.END, f"已加载[{self.last_save_path.strip().replace('QuickSaves//', '').replace('QuickSaves/', '')}]\n===以上可删除===\n\n")
+            #log_file_last_name = self.last_save_path.strip().replace('QuickSaves//', '').replace('QuickSaves/', '').split('.QuickSave')[0]
+            log_file_last_name, dot = os.path.splitext(os.path.basename(self.last_save_path.strip().split('.QuickSave')[0]))
             with open(self.last_save_path, 'r', encoding='utf-8') as file:
                 content = file.read()
                 content = content.replace(initial_text, "")
@@ -3717,14 +3728,91 @@ class ChatApp:
             with open(file_path, "w", encoding='utf-8') as file:
                 json.dump(self.role_items, file, indent=4, ensure_ascii=False)
 
-    def voting_system(self, role, haveName=True):
+    def generate_garbled_text(self, input_str, chaos_level=1.0):
+        """
+        根据输入字符串生成独一无二的乱码，可以调整混乱度。
+
+        参数:
+        input_str (str): 输入的字符串
+        chaos_level (float): 混乱度，范围从 0.0 到 1.0
+
+        返回:
+        str: 生成的乱码字符串
+        """
+        # 将输入字符串转换为列表以便操作
+        str_list = list(input_str)
+
+        # 随机打乱字符顺序
+        random.shuffle(str_list)
+        # 根据混乱度替换一些字符
+        num_replacements = int(len(str_list) * chaos_level)
+        for _ in range(num_replacements):
+            index = random.randint(0, len(str_list) - 1)
+            random_char = chr(random.randint(33, 126))  # 生成随机字符 (ASCII 范围内的可见字符)
+            str_list[index] = random_char
+
+        # 如果字符数少于一定数量（例如 5），增加额外的随机字符
+        min_length = 5
+        while len(str_list) < min_length:
+            str_list.append(chr(random.randint(33, 126)))  # 生成并添加随机字符
+
+        # 将列表转换回字符串并返回
+        return ''.join(str_list)
+
+    def whisper_system(self, role, whisper=True):
+        global role_Chart
+        content = self.role_entries[role].get("1.0", tk.END).strip()
+        for whispered_roles, whispered_content in self.whisper_data.items():
+            for receive_roles, receive_content in whispered_content.items():
+                for receive_roles_, receive_content_ in receive_content.items():
+                    if receive_roles_ == content and (whispered_roles == self.role_entries_name[role] or receive_roles == self.role_entries_name[role]):
+                        self.role_entries[role].delete("1.0", tk.END)
+                        self.role_entries[role].insert("1.0", f"{whispered_roles}曾悄悄对{receive_roles}说...\n" + receive_content_)
+                        return True
+        if whisper:
+            if "@" in content:
+                init_name = content.split("@")[1].split(" ")[0]
+                content = content.replace(f"@{init_name} ", "")
+            else:
+                init_name = f"{self.role_entries_name[role]}"
+            whisper_name = simpledialog.askstring("小窗", "Whisper to（仅1人）:", initialvalue=init_name)
+            garbled_text = self.generate_garbled_text(content)
+            if role in self.role_entries_name:
+                if self.role_entries_name[role] not in self.whisper_data:
+                    self.whisper_data[self.role_entries_name[role]] = {whisper_name:{garbled_text:content}}
+                else:
+                    self.whisper_data[self.role_entries_name[role]][whisper_name][garbled_text] = content
+            else:
+                if role not in self.whisper_data:
+                    self.whisper_data[role] = {whisper_name:{garbled_text:content}}
+                self.whisper_data[role][whisper_name][garbled_text] = content
+            for roles in self.roles:
+                if roles != role and self.role_entries_name[roles] != whisper_name:
+                    listen = role_Chart[roles].get("聆听")
+                    garbled_text2 = self.generate_garbled_text(content, chaos_level=round((1 - listen/20), 1))
+                    self.role_entries[roles].insert(tk.END, f"【{self.role_entries_name[role]}】和【{whisper_name}】在说悄悄话，你偷听到了...\n{garbled_text2}")
+                elif self.role_entries_name[roles] == whisper_name:
+                    self.role_entries[roles].insert(tk.END, f"【{self.role_entries_name[role]}】在对你说悄悄话...\n{content}")
+                else:
+                    pass
+            self.search_and_delete_insert_symbol()
+            self.chat_log.insert(tk.END,
+                                 f'{self.role_entries_name[role]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[悄悄话]{self.role_entries_name[role]} → {whisper_name}\n【{self.role_entries_name[role]}】和【{whisper_name}】在说悄悄话...{garbled_text}\n\n')
+            self.chat_log.yview(tk.END)
+
+    def voting_system(self, role):
         if len(self.votes) == 0:
             self.vote_theme = simpledialog.askstring("投票", "投票主题:", initialvalue=f"{self.role_entries_name[role]}发起")
             self.search_and_delete_insert_symbol()
             if self.vote_theme is None:
                 return
+            self.haveName = simpledialog.askstring("记名？", "是否记名（是/否）:", initialvalue=f"是")
+            if self.haveName == "是":
+                haveName_ = ""
+            else:
+                haveName_ = "不"
             self.chat_log.insert(tk.END,
-                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}开始了{self.vote_theme}的投票！\n\n')
+                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】开始了{self.vote_theme}的{haveName_}记名投票！\n\n')
             self.chat_log.yview(tk.END)
         count = 0
         if self.role_entries[role].get("1.0", "2.0").strip() == "" and len(self.votes) != 0:
@@ -3735,7 +3823,7 @@ class ChatApp:
         self.search_and_delete_insert_symbol()
         self.votes[role] = self.role_entries[role].get("1.0", "2.0").strip()
         self.chat_log.insert(tk.END,
-                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}已完成{self.vote_theme}的投票！\n\n')
+                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】已完成{self.vote_theme}的投票！\n\n')
         self.chat_log.yview(tk.END)
         for r in self.roles:
             if r in self.votes and self.votes[r] != "":
@@ -3749,7 +3837,7 @@ class ChatApp:
                     vote_result[vote].append(self.role_entries_name[role])
             content_ = {}
             for con ,list in vote_result.items():
-                if haveName:
+                if self.haveName == "是":
                     content_[f"{con}：{len(list)}票（{'，'.join(list)}）"] = len(list)
                 else:
                     content_[f"{con}：{len(list)}票"] = len(list)
@@ -3846,12 +3934,16 @@ class ChatApp:
                              command=lambda text=".alldraw?", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体明抽公共牌堆(多次)",
                              command=lambda text=".alldraw*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体明抽公共牌堆(多次，不放回)",
+                             command=lambda text=".alldraw?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体暗抽公共牌堆",
                              command=lambda text=".alldraw_", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体暗抽公共牌堆(不放回)",
                              command=lambda text=".alldraw_?", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体暗抽公共牌堆(多次)",
                              command=lambda text=".alldraw_*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽公共牌堆(多次，不放回)",
+                             command=lambda text=".alldraw_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="抽取幸运儿",
                              command=lambda text=".who", role=role: self.insert_text_to_Bot(text, send=True))
             menu.add_command(label="抽取幸运顺序",
@@ -3864,12 +3956,16 @@ class ChatApp:
                              command=lambda text=".alldrawself?", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体明抽个人牌堆(多次)",
                              command=lambda text=".alldrawself*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体明抽个人牌堆(多次，不放回)",
+                             command=lambda text=".alldrawself?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体暗抽个人牌堆",
                              command=lambda text=".alldrawself_", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体暗抽个人牌堆(不放回)",
                              command=lambda text=".allrawself_?", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="全体暗抽个人牌堆(多次)",
                              command=lambda text=".alldrawself_*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="全体暗抽个人牌堆(多次，不放回)",
+                             command=lambda text=".alldrawself_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         elif role == "chatlog":
             menu.add_command(label="快速保存", command=lambda: self.quickSave())
@@ -3886,6 +3982,7 @@ class ChatApp:
         elif "NPC_name" in role:
             return
         else:
+            menu.add_command(label="小窗...", command=lambda role=role: self.whisper_system(role))
             menu.add_command(label="投票表决", command=lambda role=role: self.voting_system(role))
             menu.add_command(label="投票表决(不记名)", command=lambda role=role: self.voting_system(role, haveName=False))
             menu.add_command(label="活字命令", command=lambda role=role: self.on_at_right_click(role))
@@ -3895,12 +3992,16 @@ class ChatApp:
                              command=lambda text=".draw*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="明抽公共牌堆(不放回)",
                              command=lambda text=".draw?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="明抽公共牌堆(多次，不放回)",
+                             command=lambda text=".draw?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="暗抽公共牌堆",
                              command=lambda text=".draw_", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="暗抽公共牌堆(多次)",
                              command=lambda text=".draw_*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="暗抽公共牌堆(不放回)",
                              command=lambda text=".draw_?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽公共牌堆(多次，不放回)",
+                             command=lambda text=".draw_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="抽取幸运儿", command=lambda text=".who", role=role: self.insert_text_to_PC(text, role))
             menu.add_command(label="抽取幸运顺序",
                              command=lambda text=".whoabcd", role=role: self.insert_text_to_PC(text, role))
@@ -3909,12 +4010,20 @@ class ChatApp:
                              command=lambda text=".jrrp", role=role: self.insert_text_to_PC(text, role, send=True))
             menu.add_command(label="明抽个人牌堆",
                              command=lambda text=".drawself", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="明抽个人牌堆(多次)",
+                             command=lambda text=".drawself*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="明抽个人牌堆(不放回)",
                              command=lambda text=".drawself?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="明抽个人牌堆(多次，不放回)",
+                             command=lambda text=".drawself?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="暗抽个人牌堆",
                              command=lambda text=".drawself_", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽个人牌堆(多次)",
+                             command=lambda text=".drawself_*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="暗抽个人牌堆(不放回)",
                              command=lambda text=".drawself_?", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="暗抽个人牌堆(多次，不放回)",
+                             command=lambda text=".drawself_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         self.show_menu(event, menu)
 
@@ -4364,7 +4473,8 @@ class ChatApp:
         message = message.replace(self.trpg_module.Fumble, "")
         if message == "":
             return
-
+        if self.whisper_system(role, whisper=False):
+            return
         if role == "DiceBot":
             if ".draw" in message or "。draw" in message:
                 num = 1
@@ -4404,7 +4514,7 @@ class ChatApp:
                                     matches = re.findall(r'\{%([^%]+)%\}', result)
                                     for m in matches:
                                         result = result.replace("{%" + m + "%}", random.choice(Cards_now[m]))
-                                if num == 1:
+                                if num <= 1:
                                     self.role_entries[role].insert(tk.END,
                                                                    f'\n公有不放回牌堆[{cardname}]还余{len(Cards_list[cardname][cardname])}张卡。\n')
                                     if len(Cards_list[cardname][cardname]) == 0:
@@ -6660,6 +6770,7 @@ class ChatApp:
             # 更新角色名
             index = self.roles.index(role)
             # self.roles[index] = new_name
+            old_name_dict = self.role_entries_name.copy()
             self.role_entries_name[role] = new_name
             babel(self)
             # 更新当前角色名
@@ -6696,7 +6807,7 @@ class ChatApp:
                         print("遭遇事件概率：" + str(encounter_prob))
                         self.role_entries["DiceBot"].insert("1.0", f"已录入[{names}]的性格！\n")
                         break
-
+            old_role = ""
             # 按名牌加载设置
             if new_name in role_Chart_at_name and (new_name != role) and ("PL " not in new_name):
                 if new_name in self.infoCanvas_data_by_name:
@@ -6715,9 +6826,21 @@ class ChatApp:
                 if "#SAN" in role_Chart_detail:
                     SAN_ = role_Chart_detail.get("#SAN")
                 else:
-                    _SAN_ = 100
-                self.role_values_entry[role].insert("1.0",
-                                                    f'{SAN}/{SAN_}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                    SAN_ = 100
+                for r2, n2 in old_name_dict.items():
+                    if n2 == new_name and r2 != role:
+                        old_role = r2
+                if old_role != "":
+                    #_SAN = self.role_values_entry[old_role].get("1.0", "2.0").split("/")[0]
+                    role_Chart[role]["SAN"] = self.role_values_entry[old_role].get("1.0", "2.0").split("/")[0]
+                    #_HP = self.role_values_entry[old_role].get("2.0", "3.0").split("/")[0]
+                    #_MP = self.role_values_entry[old_role].get("3.0", "4.0").split("/")[0]
+                    #_MOV = self.role_values_entry[old_role].get("4.0", "5.0").split("/")[0]
+                    old_values = self.role_values_entry[old_role].get("1.0", tk.END)
+                    #self.role_values_entry[role].insert("1.0", f'{_SAN}/{SAN_}:SAN\n{_HP}/{HP}:HP\n{_MP}/{MP}:MP\n{_MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                    self.role_values_entry[role].insert("1.0", old_values + "===\n")
+                else:
+                    self.role_values_entry[role].insert("1.0", f'{SAN}/{SAN_}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 # self.role_entries[role].delete("1.0", tk.END)
                 # self.role_entries[role].insert(tk.END, "已录入！")
                 # self.chat_log.insert(tk.END,
@@ -6730,7 +6853,7 @@ class ChatApp:
                 role_Chart[role] = role_Chart_detail_demo.copy()
             if f"===状态===" not in self.role_values_entry[role].get("1.0", tk.END).strip():
                 self.role_values_entry[role].insert(tk.END, f"\n===状态===\n无(永久)\n")
-            if new_name in self.role_items:
+            if new_name in self.role_items and old_role == "":
                 for key, value in self.role_items[new_name].items():
                     if value != "":
                         for value_ in value:
@@ -7739,6 +7862,11 @@ class ChatApp:
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(QQ)_{timestamp}.txt"
                 chat_log_content = self.chat_log.get("1.0", tk.END)
+                # 悄悄话系统
+                for whispered_roles, whispered_content in self.whisper_data.items():
+                    for receive_roles, receive_content in whispered_content.items():
+                        for receive_roles_, receive_content_ in receive_content.items():
+                            chat_log_content = chat_log_content.replace(receive_roles_, receive_content_)
 
             elif new_text == "活字":
                 if str(self.codename_by_name["_status"]) == "True":
@@ -7748,6 +7876,11 @@ class ChatApp:
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(活字)_{timestamp}.txt"
                 chat_log_content = self.chat_log.get("1.0", tk.END)
+                # 悄悄话系统
+                for whispered_roles, whispered_content in self.whisper_data.items():
+                    for receive_roles, receive_content in whispered_content.items():
+                        for receive_roles_, receive_content_ in receive_content.items():
+                            chat_log_content = chat_log_content.replace(receive_roles_, receive_content_)
                 chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
 
                 # pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n(.*?)\n\n'
@@ -7930,6 +8063,11 @@ class ChatApp:
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(回声)_{timestamp}.txt"
                 chat_log_content = self.chat_log.get("1.0", tk.END)
+                # 悄悄话系统
+                for whispered_roles, whispered_content in self.whisper_data.items():
+                    for receive_roles, receive_content in whispered_content.items():
+                        for receive_roles_, receive_content_ in receive_content.items():
+                            chat_log_content = chat_log_content.replace(receive_roles_, receive_content_)
                 chat_log_content = chat_log_content.replace("\n\n\n", "\n\n")
                 pattern = r'([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\s(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\n([\u4e00-\u9fa5a-zA-Z0-9\s\S]+?)\n\n'
                 matches = re.findall(pattern, chat_log_content)
@@ -8343,6 +8481,11 @@ class ChatApp:
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(QQ)_{timestamp}.txt"
                 chat_log_content = self.chat_log.get("1.0", tk.END)
+                # 悄悄话系统
+                for whispered_roles, whispered_content in self.whisper_data.items():
+                    for receive_roles, receive_content in whispered_content.items():
+                        for receive_roles_, receive_content_ in receive_content.items():
+                            chat_log_content = chat_log_content.replace(receive_roles_, receive_content_)
             filename = "【" + name_text + "】" + filename
             try:
                 # 尝试写入文件
@@ -8357,6 +8500,11 @@ class ChatApp:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"chat_log_{timestamp}.html"
         chat_log_content = self.chat_log.get("1.0", tk.END)
+        # 悄悄话系统
+        for whispered_roles, whispered_content in self.whisper_data.items():
+            for receive_roles, receive_content in whispered_content.items():
+                for receive_roles_, receive_content_ in receive_content.items():
+                    chat_log_content = chat_log_content.replace(receive_roles_, receive_content_)
         with open(filename, "w", encoding='utf-8') as file:
             file.write(f'<html><head></head><body>{chat_log_content}</body></html>')
 
@@ -12001,6 +12149,9 @@ class ChatApp:
 
     def save_settings(self):
         global bot_personality_by_name
+        # 保存小窗内容:
+        with open("GameSaves/whisper_data.json", "w", encoding='utf-8') as file:
+            json.dump(self.whisper_data, file, indent=4, ensure_ascii=False)
         # 保存一轮内丢失的总SAN值:
         with open("GameSaves/san_loss.json", "w", encoding='utf-8') as file:
             json.dump(self.SAN, file, indent=4, ensure_ascii=False)
@@ -12109,7 +12260,8 @@ class ChatApp:
         # 退出时quicksave
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # datestamp = datetime.now().strftime("%Y-%m-%d")
-        filename = f"QuickSaves/{log_file_last_name}.QuickSave_{timestamp}.txt"
+        filename = f"QuickSaves/{log_file_last_name}/{log_file_last_name}.QuickSave_{timestamp}.txt"
+        create_folder(f"QuickSaves/{log_file_last_name}")
         self.last_save_path = filename
         self.search_and_delete_insert_symbol()
         chat_log_content = self.chat_log.get("1.0", tk.END)
