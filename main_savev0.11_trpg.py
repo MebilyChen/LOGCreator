@@ -640,364 +640,6 @@ career_list = [
     "【229】\n【士兵】\n【信誉】：9-30\n【职业属性】：教育×2＋力量或敏捷×2\n【本职技能】：闪避，急救，潜行，聆听，机械维修，射击（来复枪），潜行，侦查，任意两项其他个人或时代特长",
     "【230】\n【密探】\n【信誉】：30-70\n【职业属性】：教育×2＋外貌或敏捷×2\n【本职技能】：乔装，一项社交技能（魅惑、话术、恐吓、说服），潜行，历史，图书馆，聆听，锁匠，导航，其他语言（欧洲），心理学，侦查，格斗（任意）"
 ]
-# xp列表
-xp_list = ["叙述猛烈的感谢之语",
-           "净说讽刺的话",
-           "对对方的话肯定然后又否定",
-           "嗤笑然后道歉",
-           "不听人说话光顾着自己说",
-           "「不能不考虑到这个吧」",
-           "「还是说，有隐藏着什么吗？」",
-           "「真是奇妙」",
-           "「大体上已经明白了」",
-           "「保持沉默」",
-
-           "随便将搜查对象的包或者抽屉打开搜查",
-           "横插一脚进警察的搜查",
-           "为了搜查非法入室或者黑客",
-           "进入禁止进入的地方",
-           "偷听或者偷看警察的搜查",
-           "没有许可就拆解证据",
-           "欺骗搜查对象问出情报",
-           "随便碰触助手/同伴的随身物品",
-           "随便将证据拿走",
-           "随便就开始了鉴定",
-
-           "隐藏自己身份和关联者说话",
-           "隐瞒情报的同时询问",
-           "和搭档/他人一起以演技问出情报",
-           "假装路过的人偷听关联者的对话",
-           "假装偶然拿到证物",
-           "故意一直做作地装傻",
-           "以演技故意惹怒关联者来引出情报",
-           "轻微威胁关联者",
-           "主张自己有遗失物品在现场寻找证物",
-           "对关联者诱导询问",
-
-           "用搭档/他人的身体重现事件",
-           "解开谜题后很开心地笑",
-           "废寝忘食搜查后突然倒下",
-           "考虑事情时谁的声音都听不见",
-           "开始在附近的地上或者墙壁上画事件的相关图",
-           "不断冒出和事件相关的句子难以停止",
-           "完全没考虑除了解决事件之外的事情",
-           "开始连绵不断地说事件的流程",
-           "踏入事件现场进行调查",
-           "就算在用餐也不断说着事件的话",
-
-           "老实不客气地接受搭档/他人的信任",
-           "丢下搭档/他人先走了",
-           "质问搭档/他人对事件的看法",
-           "对搭档/他人自我炫耀",
-           "关于事件对搭档/他人出题",
-           "和搭档/他人因为细枝末节的事情吵架",
-           "对搭档/他人摆出一副老师的样子",
-           "以搭档/他人会跟上的前提随意行动",
-           "对搭档/他人进行详尽仔细的事件说明",
-           "突然开始在搭档/他人的耳边说话",
-
-           "阅读大量书籍",
-           "大声放喜欢的音乐",
-           "在解什么算式",
-           "吃大量喜欢的东西",
-           "一直对着电脑或者手机屏幕调查着什么",
-           "解小谜题",
-           "指点国际象棋或者将棋",
-           "坐在饮茶店等着什么",
-           "一直在睡觉，突然起来了",
-           "暂时什么都不干",
-
-           "在进餐的时候突然就解开了谜",
-           "和助手/同伴闲聊的时候突然就解开了谜",
-           "听到聊天内容的时候突然就解开了谜",
-           "洗澡的时候突然就解开了谜",
-           "梦中突然就解开了谜",
-           "风吹过的东西解开了迷",
-           "看书时找到了事件的启发",
-           "再次访问场景的时候灵光一闪",
-           "确认资料的中途灵光一闪",
-           "和关系者交谈中途灵光一闪",
-
-           "突然哭泣",
-           "突然愤怒",
-           "突然笑出声来",
-           "突然变得情绪高涨",
-           "突然高兴",
-           "突然大声喊叫",
-           "突然开始嗤笑",
-           "突然开始讲述事件的悲伤",
-           "淡然行事",
-           "机械一样只是在做已经决定好的事情",
-
-           "做会被叫停的事情",
-           "消失一段时间又回来了",
-           "从预想外的地方（地下或者空中等）登场",
-           "想到什么突然跑了起来",
-           "责怪自己不中用",
-           "在不知道的时候就解开了事件的一个谜",
-           "一副知道事件相关事件的样子但是对谁都不说",
-           "有留下便条或者邮件报告但是看不到人影",
-           "看到钟表突然开始行动",
-           "阅读和事件看来没什么关系的报纸记事",
-
-           "读取人心，完成那人所想(拜托)的事",
-           "与他人的悲喜同步，同喜或同悲 ",
-           "时常不忘笑容，用平稳的话语使周围的人安心",
-           "通过饮食，与人打好关系",
-           "准确地将知识引用发挥出来，得到周围人的尊敬",
-           "通过计算推导感情，理解人心",
-           "考虑被害者的心情，慨叹着已失去的人或物",
-           "讲述自己打算要做的事，促进他人理解",
-           "谈论故乡或双亲的话题，尝试从源头上了解那个人",
-           "认同助手/同伴所说的话",
-
-           "过分地读取人心，引起不适",
-           "想与他人同喜同悲却做过头，让人害怕",
-           "虽然总是挂着笑容，但笑得太假反而让人不适",
-           "虽想通过饮食打好关系，用餐方式却很奇怪",
-           "展示学识时却炫耀起罕有人知的知识范畴，引人害怕",
-           "想装作理解感情的样子，却没能理解关键之处 ",
-           "慨叹已失去的人或物时，只能用数字来表达",
-           "做事想有人情味，结果却采取了乍看很难懂的行动 ",
-           "想要谈论故乡或双亲，却合不上话题",
-           "装作认同助手/同伴所说的话，却被看穿",
-
-           "将搭档/他人的小物件调包（调换） ",
-           "向食物中加入大量调味料",
-           "披着床单现身吓人",
-           "变装打扮后登场 ",
-           "对休息中的搭档/他人恶作剧，让对方理睬自己",
-           "唐突地戳一戳搭档/他人的脸 ",
-           "不经意地试着触碰搭档/他人",
-           "试着撒很难懂的谎 ",
-           "试着撒很明显的谎",
-           "试着开始躲猫猫（捉迷藏）",
-
-           "露出知晓事件相关重要事项的表情，却不肯说 ",
-           "“这样啊，原来是这么一回事啊”",
-           "得意洋洋地点头，却不明说详情 ",
-           "做出仿佛已预知未来的言行",
-           "扬言已有关于犯人/敌人的头绪，却不细说",
-           "让一无所知的周围群众看到自己不耐烦的样子",
-           "一言一行摆起架子",
-           "每次遇到人都露出冷笑",
-           "一瞬间露出悲伤神色，马上又变回平常的表情",
-           "“还没得到确信”",
-
-           "快要想起什么，却想不起来",
-           "在助手/同伴或客座的提醒下想起自己有话还没说 ",
-           "有想说的内容，却因时机不佳说不出口",
-           "跟不上话题/情节的发展 ",
-           "滔滔不绝，却不说关键的部分",
-           "发出“啊——！”的大叫，却不肯说为何 ",
-           "表露出因不遂愿而急躁不爽的样子 ",
-           "想起稍早前不顺利的事而闷闷不乐 ",
-           "表露出对搭档/他人抱持着焦躁心绪的样子",
-           "有话想对搭档/他人说，却最终都没说出口",
-
-           "吐血或流鼻血",
-           "抱住助手/同伴",
-           "开始引用古典诗歌或小说 ",
-           "毫无关系的前提下突然开始谈论兴趣话题",
-           "吟诵诗歌（念诗） ",
-           "突然开始回想有关回忆之物的事",
-           "事到如今重新想起上次事件时发生的事",
-           "撒娇表示哪里都不想去",
-           "突然开始挥霍游玩并把账都推给助手/同伴付",
-           "重新考虑与搭档/他人之间的关系",
-
-           "对没有集中精力在事件上的搜查相关人员发火",
-           "对犯人/敌人感到非常气愤",
-           "试图推理搭档/他人的想法",
-           "过于集中精神地思考谜题的各种可能性",
-           "直接用「这样不行」这样的话否定别人",
-           "在聊着别的话题时，突然开始说关于事件的事",
-           "短时间内，只吃喜欢吃的东西",
-           "一直在玩游戏或者进行兴趣活动",
-           "没什么干劲",
-           "突然冒出干劲",
-
-           "不等获得许可就拿走别人的东西",
-           "谈话或调查的途中就突然开始移动",
-           "没有铺垫也不打招呼，唐突向人打听事件的事",
-           "说着「对了！」的同时拽着搭档/他人的手开始移动",
-           "突然对人说出「你就是犯人/敌人吧」",
-           "装成突然想起搭档/他人曾经欲言又止的话并追究",
-           "不作任何说明直接给出结论",
-           "比搭档/他人更快地展开行动",
-           "做出难以理解的行动，也不给任何说明",
-           "指示大家的行动，但不解释理由或目的",
-
-           "使用「能做到是当然的啊」这种说话方式",
-           "使用「连这种事都做不到吗」这种说话方式",
-           "做出一副无语的样子",
-           "对做不到的事感到绝望，也不再理会",
-
-           "了解了想知道的事情后对之后的内容失去兴趣",
-           "毫不避讳地在人前说起别人的失误或失败",
-           "不会直说，但摆出一副搭档/他人或搭档/他人的物品是自己的所有物的态度",
-           "拜托别人帮忙，不等回应就自顾自地行动",
-           "态度傲慢地使唤别人，也不道谢",
-           "无自觉地采取高高在上的态度",
-
-           "无论遇上什么事，都想要霸占搭档/他人身旁的位置",
-           "搭档/他人跟别人说话时露骨地表现不爽",
-           "当搭档/他人集中于思考事件而忽视自己就会发火",
-           "总是站在搭档/他人的身后，监视其一举一动",
-           "当搭档/他人想要做什么的时候吵嚷着吸引其注意力",
-           "不跟搭档/他人以外的人说话",
-           "唐突地准备搭档/他人喜欢的东西",
-           "没有任何预兆地感到不安，尽量地靠近搭档/他人",
-           "担心会失去搭档/他人而感到不安",
-           "拼命引导搭档/他人说出能让自己安心的话",
-
-           "非常认真地搜查",
-           "好好地听事件相关人员的话",
-           "认真地听搭档/他人说话",
-           "与人闲聊而不跑题",
-           "不抱怨地认真工作",
-           "好好休息",
-           "阅读搜查资料",
-           "在行动前会先说明理由",
-           "体谅搭档/他人",
-           "难过的时候会说难过，开心的时候会说开心",
-
-           "任性地对搭档/他人提出想吃到自己喜欢的食物，在要求被回应前不会进行任何行动",
-           "对搭档/他人提出自己失去干劲了，要求其做点什么能让自己拿出干劲的事情",
-           "收集癖爆发，在把现在正在收集的收藏道具集齐前不会进行其他行动",
-           "任性地让搭档/他人快去做点什么有趣的事",
-           "每当遇上什么事都会说任性的话",
-           "直截了当地重复自己的欲求，在欲求被达成前都会不停地重复",
-           "试图将事情向着自己所想的方向诱导，如果失败就会摆出一张臭脸",
-           "试图隐藏自己的欲求，但无法完全藏住",
-           "在自己的任性行为被满足前会一直发脾气",
-           "说出任性的话。不管有没有得到解决，都会继续说别的任性的话",
-
-           "对嫌疑人、搭档/他人、同伴进行诱导询问",
-           "目的不明地让搭档/他人或同伴去刺探",
-           "在指示下达之前就抵达了现场",
-           "不管怎样先全力以赴地探查相关者的情况",
-           "将相关资料全部阅览完毕",
-           "自己对事件情况进行了假设",
-           "向搭档/他人说明现阶段对事件的见解",
-           "总而言之先探索眼下可见的东西",
-           "将可疑的物件或人物记录在笔记里",
-           "将类似的过往案例作为参考引证",
-
-           "把搭档/他人撂下一个人去了现场",
-           "一言不发的拉着搭档/他人一起出去",
-           "留下写有目的地的纸条先走了",
-           "突然开始找东西",
-           "好像想到了什么但是什么都不说",
-           "意味深长地点点头",
-           "浮现出意味深长的笑容",
-           "「……好」",
-           "「就这么做吧」",
-           "「我理解了」",
-
-           "优雅地喝茶",
-           "优雅地下国际象棋或者将棋",
-           "听古典音乐",
-           "阅读和工作无关的书",
-           "看报纸",
-           "开始整理身边的东西",
-           "用端正优美的姿势落座",
-           "转瞬之间完成了文书工作",
-           "开始冥想",
-           "开始预约餐食",
-
-           "不让人看见脸或者表情",
-           "目测他人脚的尺寸",
-           "判别他人的话语是否为谎言",
-           "学习说话的方式与动作",
-           "探查是否违法",
-           "调查是否有可疑的人物或者证物",
-           "擅长聆听",
-           "嗅闻气味",
-           "用地图确定场所位置",
-           "确认监视摄像头的位置",
-           "怪癖：单箭头",
-           "怪癖：间谍被同化",
-           "怪癖：愚忠",
-           "怪癖：走上歧途",
-           "怪癖：自卑",
-           "怪癖：狼狈为奸",
-           "怪癖：真小人",
-           "怪癖：假君子",
-           "怪癖：替身",
-           "怪癖：貌合神离",
-           "怪癖：一人独活",
-           "怪癖：团灭结局",
-           "怪癖：意难平",
-           "怪癖：由恨生爱",
-           "怪癖：由爱生恨",
-           "怪癖：嫉妒",
-           "怪癖：互相背叛",
-           "怪癖：一方背叛",
-           "怪癖：NTR",
-           "怪癖：小妈",
-           "怪癖：骨科",
-           "怪癖：绑架幻想",
-           "XP：生理性xx",
-           "怪癖：父子",
-           "XP：边做边骂（？？？？？）",
-           "XP：痴汉变态",
-           "XP：角色的加冕与脱冕（Power Play）",
-           "XP：调教",
-           "XP：只有一个人的PWP（Porn Without Plot）",
-           "XP：蒙眼",
-           "XP：捆绑",
-           "XP：PWP（Porn Without Plot）（请自行决定各种不堪入耳的细节和名词...）",
-           "XP：醉酒",
-           "XP：道具",
-           "XP：制服（名词）",
-           "XP：SM",
-           "XP：野外",
-           "XP：镜面",
-           "XP：下药",
-           "XP：克苏鲁（？）",
-           "XP：生子/怀孕",
-           "XP：跨种族",
-           "XP：兽化",
-           "XP：公共场合",
-           "XP：窒息",
-           "XP：Mob",
-           "XP：战损",
-           "XP：乱伦",
-           "XP：主仆",
-           "XP：绝对不可以欺负小孩子",
-           "XP：Gore",
-           "XP：异装",
-           "XP：囚禁",
-           "XP：边做边打（？？？）",
-           "XP：恶堕：洗脑（调教、药物污染、精神改造）",
-           "XP：恶堕：改造（身体、大脑）",
-           "XP：恶堕：同步（连锁恶堕）",
-           "XP：恶堕：凭依（夺舍、附体）",
-           "XP：恶堕：绝望（人为、故意造成的绝望，挫折、私仇、不惜一切、生存危机、个中缘由、其他日常）",
-           "XP：恶堕：同化（收留、融合）",
-           "XP：恶堕：寄生",
-           "XP：恶堕：怨灵化",
-           "XP：恶堕：尸体操纵",
-           "XP：恶堕：(被)觉醒",
-           "XP：恶堕：人格改变",
-           "XP：恶堕：地位（尊卑）改变",
-           "怪癖：打死不说",
-           "怪癖：工具人",
-           "怪癖：一见误终身",
-           "怪癖：守寡",
-           "怪癖：生错阵营",
-           "怪癖：道德绑架",
-           "怪癖：心理阴影",
-           "怪癖：夜不能寐",
-           "怪癖：小孩子气",
-           "怪癖：泥塑",
-           "怪癖：护短，但失败了",
-           "怪癖：至死都蒙在鼓里",
-           "怪癖：不该愈合的伤口",
-           "怪癖：为了某项原则拍案而起，昭告天下，之后却发现自己是错的。",
-           "XP：触手（及其衍生）"
-           ]
 # 特征列表
 trait_mec_list = [
     "特征是[娇生惯养]：效果：智力(INT)-1(5)，体质(CON)+2(10)",
@@ -2743,7 +2385,7 @@ class ChatApp:
         self.enemy_matches = {}
         self.codename_by_name = load_settings_codename()
         if "_status" not in self.codename_by_name:
-            self.codename_by_name["_status"] = True
+            self.codename_by_name["_status"] = "True"
 
         # 初始化当前聚焦的头像和文本框
         self.current_role = tk.StringVar(value=self.roles[0])
@@ -2794,9 +2436,10 @@ class ChatApp:
         self.chat_log.insert(tk.END, initial_text)
         self.last_save_path = load_last_save()
         if self.last_save_path != "" and os.path.exists(self.last_save_path):
-            self.chat_log.insert(tk.END, f"已加载[{self.last_save_path.strip().replace('QuickSaves//', '').replace('QuickSaves/', '')}]\n===以上可删除===\n\n")
             #log_file_last_name = self.last_save_path.strip().replace('QuickSaves//', '').replace('QuickSaves/', '').split('.QuickSave')[0]
             log_file_last_name, dot = os.path.splitext(os.path.basename(self.last_save_path.strip().split('.QuickSave')[0]))
+            log_filename, dot = os.path.splitext(os.path.basename(self.last_save_path.strip()))
+            self.chat_log.insert(tk.END, f"已加载[{log_filename}]\n===以上可删除===\n\n")
             with open(self.last_save_path, 'r', encoding='utf-8') as file:
                 content = file.read()
                 content = content.replace(initial_text, "")
@@ -2959,7 +2602,7 @@ class ChatApp:
         except FileNotFoundError:
             # 如果文件不存在，返回默认设置
             print(f"文件路径[{file_path}]不存在，已重新创建json文件！")
-            self.weather_FX_items = {"天气": {}, "地点": {}, "日期": {"春":"", "夏":"", "秋":"", "冬":""}, "时间": {"㏂昼☀":"", "㏂夜☆":"", "㏘昼☀":"", "㏘夜☆":""}}
+            self.weather_FX_items = {"天气": {}, "地点": {}, "日期": {"春":"", "夏":"", "秋":"", "冬":""}, "时间": {"㏂昼☀":"", "㏂夜◐":"", "㏘昼☀":"", "㏘夜◐":""}}
 
         if notjustload:
             self.current_path_FX = ""
@@ -3110,19 +2753,19 @@ class ChatApp:
         place = time_info.split("【天气】")[0].strip()
         time_info = time_info.split("【天气】")[1].strip()
         weather = time_info.split("【日期】")[0].strip()
-        if date[0] in self.weather_FX_items["日期"]:#春♧ 夏♡ 秋♤ 冬♢
+        if date[0] in self.weather_FX_items["日期"]:#春✿ 夏♨ 秋♣ 冬♦
             self.on_display_weather_FX(self.weather_FX_items["日期"][date[0]], "日期："+date)
             self.NowWeather.append("日期#"+date[0])
         else:
             self.weather_FX_items["日期"][date]= ""
-        if "㏂" in time and "昼☀" in time: #㏂昼☀ ㏂夜☆ ㏘昼☀ ㏘夜☆
+        if "㏂" in time and "昼☀" in time: #㏂昼☀ ㏂夜◐ ㏘昼☀ ㏘夜◐
             time_ = "㏂昼☀"
-        elif "㏂" in time and "夜☆" in time:
-            time_ = "㏂夜☆"
+        elif "㏂" in time and "夜◐" in time:
+            time_ = "㏂夜◐"
         elif "㏘" in time and "昼☀" in time:
             time_ = "㏘昼☀"
-        elif "㏘" in time and "夜☆" in time:
-            time_ = "㏘夜☆"
+        elif "㏘" in time and "夜◐" in time:
+            time_ = "㏘夜◐"
         else:
             time_ = "???"
         if time_ in self.weather_FX_items["时间"]:
@@ -3295,7 +2938,6 @@ class ChatApp:
                 self.NowEffect.remove(name)
                 content = f"【高级特效】结束{name}"
                 self.search_and_delete_insert_symbol()
-
                 self.chat_log.insert(tk.END,
                                      f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【等待】0.2\n\n')
                 self.chat_log.insert(tk.END,
@@ -3308,7 +2950,6 @@ class ChatApp:
                 content = f"【撤除图片】{name}"
 
                 self.search_and_delete_insert_symbol()
-
                 self.chat_log.insert(tk.END,
                                      f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【等待】1\n\n')
                 self.chat_log.insert(tk.END,
@@ -3438,8 +3079,8 @@ class ChatApp:
             __SAN = int(self.role_values_entry[role].get("1.0", "2.0").split("/")[0])
             _HP = int(self.role_values_entry[role].get("2.0", "3.0").split("/")[0])
             _MP = int(self.role_values_entry[role].get("3.0", "4.0").split("/")[0])
-            # 状态条（血量）
-            statusbar_health = tk.Label(frame, text=self.draw_health_bar(_HP, int(HP), bar_length=18), relief=tk.FLAT)
+            # 状态条（hp血量）→san
+            statusbar_health = tk.Label(frame, text=self.draw_health_bar(__SAN, int(_SAN), bar_length=18), relief=tk.FLAT)
             statusbar_health.grid(row=3, column=1, padx=0, pady=0, sticky="nsew")
             statusbar_health.bind("<Button-1>", lambda event, r=role: self.hide_health_bar(r))
             statusbar_health.bind("<Enter>", lambda event, r=role: self.update_health_bar(r))
@@ -3452,11 +3093,9 @@ class ChatApp:
             statusbar_icon.bind("<Leave>", lambda event, r=role: self.destroy_status_icon_canvas(r))
             self.role_statusbar_icon[role] = statusbar_icon
             self.ani_frame_icon[role] = frame
-            # 状态条（mp量）
-            statusbar_mp = tk.Label(frame, text="MP " + self.draw_health_bar(_MP, int(MP), bar_length=5,
-                                                                             show_text=False) + "\nSAN " + self.draw_health_bar(
-                __SAN, int(_SAN), bar_length=5, show_text=False),
-                                    relief=tk.FLAT, font=("Times New Roman", 7))
+            # 状态条（mp+san量）→mp+hp  _HP, int(HP)
+            statusbar_mp = tk.Label(frame, text="HP " + self.draw_health_bar(_HP, int(HP), bar_length=5, show_text=False) + "\nMP " + self.draw_health_bar(
+                _MP, int(MP), bar_length=5, show_text=False), relief=tk.FLAT, font=("Times New Roman", 7))
             statusbar_mp.grid(row=3, column=0, padx=0, pady=0, sticky="nsew")
             statusbar_mp.bind("<Button-1>", lambda event, r=role: self.hide_health_bar(r))
             statusbar_mp.bind("<Enter>", lambda event, r=role: self.update_health_bar(r))
@@ -3577,8 +3216,13 @@ class ChatApp:
         else:
             self.role_entries[role].delete("1.0", tk.END)
 
-    def list_carddecks(self, event, role, command=None):
+    def list_carddecks(self, event, role, command=None, chooseSelf=True):
+        #是否个人牌堆
         menu = tk.Menu(root, tearoff=1, title=f"【{self.role_entries_name[role]}】的[{command}]牌堆列表")
+        if chooseSelf:
+            isSelf = simpledialog.askstring("个人牌堆？", "是否为个人牌堆（y/n）:", initialvalue="n")
+            if isSelf == "y":
+                command = command.replace("draw", "drawself")
         files = os.listdir("CardDecks")
         # 输出文件名
         if not command:
@@ -3587,8 +3231,7 @@ class ChatApp:
             for file in files:
                 if role == "Dicebot":
                     menu.add_command(label=os.path.splitext(file)[0], command=lambda
-                        text=command.replace("*", "") + " " + os.path.splitext(file)[0] + "*": self.insert_text_to_Bot(
-                        text))
+                        text=command.replace("*", "") + " " + os.path.splitext(file)[0] + "*": self.insert_text_to_Bot(text))
                 else:
                     menu.add_command(label=os.path.splitext(file)[0],
                                      command=lambda
@@ -3787,7 +3430,7 @@ class ChatApp:
                     self.whisper_data[role] = {whisper_name:{garbled_text:content}}
                 self.whisper_data[role][whisper_name][garbled_text] = content
             for roles in self.roles:
-                if roles != role and self.role_entries_name[roles] != whisper_name:
+                if roles != role and self.role_entries_name[roles] != whisper_name and roles != "DiceBot":
                     listen = role_Chart[roles].get("聆听")
                     garbled_text2 = self.generate_garbled_text(content, chaos_level=round((1 - listen/20), 1))
                     self.role_entries[roles].insert(tk.END, f"【{self.role_entries_name[role]}】和【{whisper_name}】在说悄悄话，你偷听到了...\n{garbled_text2}")
@@ -3797,7 +3440,7 @@ class ChatApp:
                     pass
             self.search_and_delete_insert_symbol()
             self.chat_log.insert(tk.END,
-                                 f'{self.role_entries_name[role]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[悄悄话]{self.role_entries_name[role]} → {whisper_name}\n【{self.role_entries_name[role]}】和【{whisper_name}】在说悄悄话...{garbled_text}\n\n')
+                                 f'{self.role_entries_name[role]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[悄悄话]{self.role_entries_name[role]} → {whisper_name}\n【{self.role_entries_name[role]}】和【{whisper_name}】在{random.choice(["说悄悄话", "互传纸条", "密谋着什么", "低语", "低声耳语"])}...{garbled_text}\n\n')
             self.chat_log.yview(tk.END)
 
     def voting_system(self, role):
@@ -3819,6 +3462,7 @@ class ChatApp:
             self.role_entries[role].insert("1.0", "弃权")
         elif self.role_entries[role].get("1.0", "2.0").strip() == "" and len(self.votes) == 0:
             self.role_entries[role].insert("1.0", "弃权")
+            self.role_entries[role].insert("2.0", "\n(发起者请提前写出内容再发起投票，否则记为弃权。再次投票可修改。)")
         #print(self.role_entries[role].get("1.0", "2.0").strip())
         self.search_and_delete_insert_symbol()
         self.votes[role] = self.role_entries[role].get("1.0", "2.0").strip()
@@ -3882,7 +3526,7 @@ class ChatApp:
                 menu.add_command(label="新的...", command=lambda role=role: self.add_new_items(role))
         elif role == "timelog":
 
-            menu.add_command(label="一天结束(重置SAN损失计算)",
+            menu.add_command(label="游戏结束(重置SAN损失计算)",
                              command=lambda: self.reset_san_cal_status("all"))
             menu.add_command(label="暂存当前(开始分流)",
                              command=lambda: self.save_current_time())
@@ -3928,21 +3572,21 @@ class ChatApp:
 
         elif role == "DiceBot":
             menu.add_command(label="活字命令", command=lambda text="text": self.insert_text_to_Bot(text))
-            menu.add_command(label="全体明抽公共牌堆",
+            menu.add_command(label="全体【明】抽牌堆",
                              command=lambda text=".alldraw", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体明抽公共牌堆(不放回)",
+            menu.add_command(label="全体【明】抽牌堆(不放回)",
                              command=lambda text=".alldraw?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体明抽公共牌堆(多次)",
+            menu.add_command(label="全体【明】抽牌堆(多次)",
                              command=lambda text=".alldraw*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体明抽公共牌堆(多次，不放回)",
+            menu.add_command(label="全体【明】抽牌堆(多次，不放回)",
                              command=lambda text=".alldraw?*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽公共牌堆",
+            menu.add_command(label="全体【暗】抽牌堆",
                              command=lambda text=".alldraw_", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽公共牌堆(不放回)",
+            menu.add_command(label="全体【暗】抽牌堆(不放回)",
                              command=lambda text=".alldraw_?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽公共牌堆(多次)",
+            menu.add_command(label="全体【暗】抽牌堆(多次)",
                              command=lambda text=".alldraw_*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽公共牌堆(多次，不放回)",
+            menu.add_command(label="全体【暗】抽牌堆(多次，不放回)",
                              command=lambda text=".alldraw_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="抽取幸运儿",
                              command=lambda text=".who", role=role: self.insert_text_to_Bot(text, send=True))
@@ -3950,22 +3594,6 @@ class ChatApp:
                              command=lambda text=".whoabcd", role=role: self.insert_text_to_Bot(text, send=True))
             menu.add_command(label="全体今日人品",
                              command=lambda text=".jrrp", role=role: self.insert_text_to_Bot(text, send=True))
-            menu.add_command(label="全体明抽个人牌堆",
-                             command=lambda text=".alldrawself", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体明抽个人牌堆(不放回)",
-                             command=lambda text=".alldrawself?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体明抽个人牌堆(多次)",
-                             command=lambda text=".alldrawself*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体明抽个人牌堆(多次，不放回)",
-                             command=lambda text=".alldrawself?*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽个人牌堆",
-                             command=lambda text=".alldrawself_", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽个人牌堆(不放回)",
-                             command=lambda text=".allrawself_?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽个人牌堆(多次)",
-                             command=lambda text=".alldrawself_*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="全体暗抽个人牌堆(多次，不放回)",
-                             command=lambda text=".alldrawself_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         elif role == "chatlog":
             menu.add_command(label="快速保存", command=lambda: self.quickSave())
@@ -3984,46 +3612,29 @@ class ChatApp:
         else:
             menu.add_command(label="小窗...", command=lambda role=role: self.whisper_system(role))
             menu.add_command(label="投票表决", command=lambda role=role: self.voting_system(role))
-            menu.add_command(label="投票表决(不记名)", command=lambda role=role: self.voting_system(role, haveName=False))
             menu.add_command(label="活字命令", command=lambda role=role: self.on_at_right_click(role))
-            menu.add_command(label="明抽公共牌堆",
+            menu.add_command(label="【明】抽牌堆",
                              command=lambda text=".draw", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="明抽公共牌堆(多次)",
+            menu.add_command(label="【明】抽牌堆(多次)",
                              command=lambda text=".draw*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="明抽公共牌堆(不放回)",
+            menu.add_command(label="【明】抽牌堆(不放回)",
                              command=lambda text=".draw?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="明抽公共牌堆(多次，不放回)",
+            menu.add_command(label="【明】抽牌堆(多次，不放回)",
                              command=lambda text=".draw?*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽公共牌堆",
+            menu.add_command(label="【暗】抽牌堆",
                              command=lambda text=".draw_", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽公共牌堆(多次)",
+            menu.add_command(label="【暗】抽牌堆(多次)",
                              command=lambda text=".draw_*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽公共牌堆(不放回)",
+            menu.add_command(label="【暗】抽牌堆(不放回)",
                              command=lambda text=".draw_?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽公共牌堆(多次，不放回)",
+            menu.add_command(label="【暗】抽牌堆(多次，不放回)",
                              command=lambda text=".draw_?*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="抽取幸运儿", command=lambda text=".who", role=role: self.insert_text_to_PC(text, role))
-            menu.add_command(label="抽取幸运顺序",
-                             command=lambda text=".whoabcd", role=role: self.insert_text_to_PC(text, role))
+            if role == "KP":
+                menu.add_command(label="抽取幸运儿", command=lambda text=".who", role=role: self.insert_text_to_PC(text, role))
+                menu.add_command(label="抽取幸运顺序", command=lambda text=".whoabcd", role=role: self.insert_text_to_PC(text, role))
             menu.add_command(label="是与否", command=lambda text=".yesno", role=role: self.insert_text_to_PC(text, role))
             menu.add_command(label="今日人品",
                              command=lambda text=".jrrp", role=role: self.insert_text_to_PC(text, role, send=True))
-            menu.add_command(label="明抽个人牌堆",
-                             command=lambda text=".drawself", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="明抽个人牌堆(多次)",
-                             command=lambda text=".drawself*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="明抽个人牌堆(不放回)",
-                             command=lambda text=".drawself?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="明抽个人牌堆(多次，不放回)",
-                             command=lambda text=".drawself?*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽个人牌堆",
-                             command=lambda text=".drawself_", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽个人牌堆(多次)",
-                             command=lambda text=".drawself_*", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽个人牌堆(不放回)",
-                             command=lambda text=".drawself_?", role=role: self.list_carddecks(event, role, text))
-            menu.add_command(label="暗抽个人牌堆(多次，不放回)",
-                             command=lambda text=".drawself_?*", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         self.show_menu(event, menu)
 
@@ -4042,15 +3653,18 @@ class ChatApp:
             if unified_time_log != "":
                 self.time_log.delete("1.0", tk.END)
                 self.time_log.insert("1.0", unified_time_log)
+            self.send_env_text_to_log()
 
     def save_current_time(self):
         self.current_time_log = self.time_log.get("1.0", tk.END)
+        self.send_env_text_to_log()
 
     def reverse_current_time(self):
         self.unify_times()
         if self.current_time_log and self.current_time_log != "":
             self.time_log.delete("1.0", tk.END)
             self.time_log.insert("1.0", self.current_time_log)
+        self.send_env_text_to_log()
 
     def add_menu_skills(self, event, role):
         if "NPC_name" in role:
@@ -4668,14 +4282,14 @@ class ChatApp:
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", _role_entry)
                 return
-            if ".draw" in message or "。draw" in message or "。selfdraw" in message or ".selfdraw" in message or "。drawself" in message or ".drawself" in message:
+            elif ".draw" in message or "。draw" in message or "。selfdraw" in message or ".selfdraw" in message or "。drawself" in message or ".drawself" in message:
                 self.drawcard(message, role)
                 message = ""
                 _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", _role_entry)
                 return
-            if ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
+            elif ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
                 message = message.lower().replace("。yesno", "").replace(".yesno", "").replace(".no", "").replace(".yes",
                                                                                                                  "").replace(
                     "。no", "").replace("。yes", "").strip()
@@ -4688,6 +4302,43 @@ class ChatApp:
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}{reason_}是或否：【{random.choice(list_)}】\n\n')
                 self.chat_log.yview(tk.END)
                 message = ""
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
+            elif ".whoabcd" in message.lower() or "。whoabcd" in message.lower() or "。who abcd" in message.lower() or ".whoabcd" in message.lower():
+                rolelist = []
+                result = ""
+                if message.lower().replace(".who", "").replace("。who", "").replace("abcd", "").strip() != "":
+                    reason = "因[" + message.lower().replace(".who", "").replace("。who", "").replace("abcd",
+                                                                                                    "").strip() + "]"
+                else:
+                    reason = ""
+                for role3 in self.roles:
+                    if role3 != "DiceBot":
+                        rolelist.append(role3)
+                random.shuffle(rolelist)
+                for r in rolelist:
+                    result = result + " > " + self.role_entries_name[r]
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}{reason}抽取幸运顺序：{result}\n\n')
+                self.chat_log.yview(tk.END)
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
+            elif ".who" in message or "。who" in message:
+                rolelist = []
+                if message.lower().replace(".who", "").replace("。who", "").strip() != "":
+                    reason = "因[" + message.lower().replace(".who", "").replace("。who", "").strip() + "]"
+                else:
+                    reason = ""
+                for role3 in self.roles:
+                    if role3 != "DiceBot" and role3 != "KP":
+                        rolelist.append(role3)
+                self.chat_log.insert(tk.END,
+                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}{reason}抽取幸运儿：【{self.role_entries_name[random.choice(rolelist)]}】\n\n')
+                self.chat_log.yview(tk.END)
                 _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", _role_entry)
@@ -5048,7 +4699,7 @@ class ChatApp:
     f"竭嘶底里-真可怕：真可怕——没有一点点防备，你会尖叫不止调查员表现出大笑，哭泣，嘶吼，害怕等的极端情绪表现，持续{random.randint(1,10)}轮。你看到、听到、理解到的东西，人类有限的头脑实在无法承受。你立刻进入癔症状态，除了屈服于疯狂以外什么也做不了。",
     f"竭嘶底里-它进去了！：它进去了！——有“东西”寄生了你，你必须把它从身体里弄出来（切掉有毛病的肢体、立即进行手术、酗酒、漂白，任何能用来清洁你身体内部的方法）调查员表现出大笑，哭泣，嘶吼，害怕等的极端情绪表现，持续{random.randint(1,10)}轮。你看到、听到、理解到的东西，人类有限的头脑实在无法承受。你立刻进入癔症状态，除了屈服于疯狂以外什么也做不了。"]
         disable_list = [f"假性残疾-目盲：目盲——你的眼前突然一黑，什么也看不见了！调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。",f"假性残疾-耳聋：耳聋——你听不到声音了，你只能辨认出低语和呻吟。调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。", f"假性残疾-失声：失声——你张开嘴，却什么也说不出！调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。", f"假性残疾-失触：触觉失灵——你没有任何触觉，包括痛觉（你受到的伤害全部由KP秘密投掷）。调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。", f"假性残疾-手指失灵：手指失灵——你手拿的东西掉到地上，你的手不受控制，不能再拿取任何东西。调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。", f"假性残疾-手指失灵：手指失灵——你摔倒在地。你不能站立，只能用手支撑身体，在地上拖行（MOV下降到1）调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。",f"假性残疾：调查员陷入了心理性的失明，失聪或躯体缺失感中，持续{random.randint(1,10)}轮。"]
-        madness_temp_list = [f"失忆：调查员会发现自己只记得最后身处的安全地点，却没有任何来到这里的记忆。你无法解释自己为何来这里，要做什么。例如，调查员前一刻还在家中吃着早饭，下一刻就已经直面着不知名的怪物。这将会持续{random.randint(1,10)}轮。",
+        madness_temp_list = [f"失忆：遗忘一条个人推理信息。调查员会发现自己只记得最后身处的安全地点，却没有任何来到这里的记忆。你无法解释自己为何来这里，要做什么。例如，调查员前一刻还在家中吃着早饭，下一刻就已经直面着不知名的怪物。这将会持续{random.randint(1,10)}轮。",
     f"{random.choice(disable_list)}",
     f"极端信念驱使：刚刚发生的事情有如晴天霹雳，你突然顿悟了，你的信仰或者信念得到了极大的加强。这次顿悟会将你的思想信念或信仰变得极端、狂热，达到远超正常水准的疯狂状态。立即根据背景进行相应的扮演。KP 应当查看调查员背景当中的思想信念条目。调查员痴迷于其中最恰当的一项，会表现得非常乖张。如果这个条目里什么都没写，KP可以选取任何适合的内容。你在{random.randint(1,10)}轮以后恢复理性并平静下来。",
     f"暴力倾向：调查员陷入了六亲不认的暴力行为中，对周围的敌人与友方进行着无差别的攻击，持续{random.randint(1,10)}轮。每轮你要投掷1D6决定谁会成为你疯狂进攻的目标：1 ～ 2：你周围的实物（墙、门、物体等）。3 ～ 4：离你最近的敌人（人或非人）。5 ～ 6：离你最近的朋友。",
@@ -5060,7 +4711,7 @@ class ChatApp:
     f"仓皇逃窜：你会强迫性地远离当前位置。你可以不择手段，即使要推倒前面的人、甩下后面的人，你也会做。你会持续逃窜{random.randint(1,10)}轮，然后累倒在地。进行一次困难难度的CON检定，失败表示你昏过去了。",
     f"{random.choice(fear_list)}：恐惧：调查员患上此恐惧症，或者由守秘人选择，来从恐惧症状表中选择一个恐惧源，就算这一恐惧源并不存在，调查员也会在接下来的{random.randint(1,10)}轮内想象它存在。",
     f"{random.choice(mad_list)}：躁狂：调查员患上此躁狂症，或者由守秘人选择，来从躁狂症状表中选择一个躁狂的诱因，在接下来的{random.randint(1,10)}轮内，调查员会渴望沉溺于他新的躁狂症中。"]
-        madness_sum_list = [f"失忆：回过神来，调查员们发现自己身处一个陌生的地方，你却不记得过去的{random.randint(5,10)}小时发生了什么，忘记了自己是谁，而且无法回忆起自己是怎样来到这里的。{random.randint(1,10)}小时之后（或KP认为合适的时间）后，记忆会随时间缓缓恢复。你只知道你现在身上满是伤痕和瘀青，衣服上还有干涸的血迹。",
+        madness_sum_list = [f"失忆：遗忘一条个人推理信息。回过神来，调查员们发现自己身处一个陌生的地方，你却不记得过去的{random.randint(5,10)}小时发生了什么，忘记了自己是谁，而且无法回忆起自己是怎样来到这里的。{random.randint(1,10)}小时之后（或KP认为合适的时间）后，记忆会随时间缓缓恢复。你只知道你现在身上满是伤痕和瘀青，衣服上还有干涸的血迹。",
       f"被窃：调查员在{random.randint(1,10)}小时后恢复清醒，发觉自己被盗，身体毫发无损。如果调查员携带着宝贵之物（见调查员背景），做幸运检定来决定其是否被盗。其他所有贵重品无需检定自动消失。",
       f"遍体鳞伤：调查员在{random.randint(1,10)}小时后恢复清醒，发现自己身上满是拳痕和瘀伤。生命值减少到疯狂前的一半，但这不会造成重伤。调查员没有被窃。这种伤害从何而来由守秘人决定。",
       f"暴力倾向：调查员陷入强烈的暴力与破坏欲之中。当调查员回过神来时，他们做过什么可能很明显，可能被他们记住，也可能并不。调查员对谁或何物施以暴力，他们是杀人还是仅仅造成了伤害，由守秘人决定。可减少{random.randint(1,6)}HP。",
@@ -5112,6 +4763,7 @@ class ChatApp:
             for index, line in enumerate(self.role_values_entry[role].get("1.0", tk.END).split("\n")):
                 if line == "===状态===":
                     self.role_values_entry[role].insert(f"{index+2}.0", f"不定性疯狂：{madness_temp_}(即时)/{madness_sum_}(总结)\n")
+                    self.search_and_delete_insert_symbol()
                     self.chat_log.insert(tk.END,
                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[陷入疯狂]【{self.role_entries_name[role]}】陷入了【不定性疯狂】：{madness_temp_}(即时)/{madness_sum_}(总结)！！！【{self.role_entries_name[role]}】的[{change_}]发生了变化！\n\n')
                     self.chat_log.yview(tk.END)
@@ -5126,6 +4778,7 @@ class ChatApp:
             ran = random.randint(1, 100)
             if ran > INT:
                 self.jrrp_record(role, f"D100={ran}/{INT}：失败", tag="san_cal_status")
+                self.search_and_delete_insert_symbol()
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的[智力]检定失败(D100={ran}/{INT})，没有陷入【临时疯狂】！\n\n')
                 self.chat_log.yview(tk.END)
@@ -5146,6 +4799,7 @@ class ChatApp:
                 for index, line in enumerate(self.role_values_entry[role].get("1.0", tk.END).split("\n")):
                     if line == "===状态===":
                         self.role_values_entry[role].insert(f"{index+2}.0", f"临时疯狂({hours}/{hours}h)：{madness_temp_}(即时)/{madness_sum_}(总结)\n")
+                        self.search_and_delete_insert_symbol()
                         self.chat_log.insert(tk.END,
                                              f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[陷入疯狂]【{self.role_entries_name[role]}】的[智力]检定成功(D100={ran}/{INT})，陷入了【临时疯狂】：{madness_temp_}(即时)/{madness_sum_}(总结)，潜在期{hours}小时！！！【{self.role_entries_name[role]}】的[{change_}]发生了变化！\n\n')
                         self.chat_log.yview(tk.END)
@@ -5158,6 +4812,7 @@ class ChatApp:
             diff = self.SAN[role] - self.last_SAN[role]
             self.last_SAN[role] = self.SAN[role]
             if self.SAN[role] != 0 and diff > 0 and ("不定性疯狂：" in self.role_values_entry[role].get("1.0", tk.END) or "临时疯狂(" in self.role_values_entry[role].get("1.0", tk.END)):
+                self.search_and_delete_insert_symbol()
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[陷入疯狂]【{self.role_entries_name[role]}】的疯狂再次发作！\n\n')
         #print(self.SAN[role])
@@ -5196,6 +4851,7 @@ class ChatApp:
 
     def jrrp(self, role):
         self.update_jrrp(role)
+        self.search_and_delete_insert_symbol()
         name = ""
         if role in self.role_entries_name:
             luck_dic = self.luck_by_name[self.role_entries_name[role]].copy()
@@ -5276,7 +4932,8 @@ class ChatApp:
 
     def jrrp_record(self, role, content, tag):
         #print(content)
-        if "###" in content:
+        if "###" in content and "1d100" in content.lower():
+            print(content)
             conexpress = content.split("###")[1]
             content = content.split("###")[0]
         else:
@@ -5511,6 +5168,7 @@ class ChatApp:
                 self.luck_by_name[role] = luck_dic
 
     def drawcard(self, message, role):
+        self.search_and_delete_insert_symbol()
         message = message.replace("alldraw", "draw").replace("drawall", "draw")
         if "drawself" in message or "selfdraw" in message:
             message = message.replace("self", "")
@@ -6760,6 +6418,7 @@ class ChatApp:
         global bot_personality_by_name
         global mav_prob
         global encounter_prob
+        self.search_and_delete_insert_symbol()
         label.config(relief=tk.FLAT, font=("Times New Roman", 16, "bold"))
         new_name = entry.get().strip()
         if new_name and new_name != "":
@@ -7193,21 +6852,21 @@ class ChatApp:
         f"捡到了一件{random.choice(clothes)}！...",
         f"遇到了{random.choice(cats_and_dogs)}！"
         ]
-        bad = [f"噩梦Bad Dreams：“不要让我睡觉！”你从你经历过最为恐怖的噩梦中醒来。你冷汗直流，浸透了被单；身上则满是瘀青、擦伤和划痕（损失1点耐久值和1点理智值）。从此以后，你每次睡觉都要忍受恐怖梦魇的折磨，损失 1 点理智值。如果你愿意，你可以进行一次 INT 检定来判断自己是否记得自己的梦魇：若你成功，再损失 1D4 点理智值——KP 会描述你记得什么。如果你的 INT 检定失败，你记不得任何清晰的内容，只记得自己对入睡的极端恐惧。此状态将一直持续{random.randint(1,3)}天。",
-    f"厄运Bad Luck：“诸事不顺！”命运在和你做对。你的当前幸运减半。（如果使用了燃运-消耗运气规则，你也不能花费幸运来改变掷骰结果。）此状态将一直持续，结束时间由 KP 另行告知。",
+        bad = [f"噩梦Bad Dreams：“不要让我睡觉！”你从你经历过最为恐怖的噩梦中醒来。你冷汗直流，浸透了被单；身上则满是瘀青、擦伤和划痕（损失1点耐久值和1点理智值）。从此以后，你每次睡觉都要忍受恐怖梦魇的折磨，损失1点理智值。如果你愿意，你可以进行一次INT检定来判断自己是否记得自己的梦魇：若你成功，再损失1D4点理智值——KP 会描述你记得什么。如果你的 INT 检定失败，你记不得任何清晰的内容，只记得自己对入睡的极端恐惧。此状态将一直持续{random.randint(1,3)}天。",
+    f"厄运Bad Luck：“诸事不顺！”命运在和你做对。你的当前幸运减半。（如果使用了燃运-消耗运气规则，你也不能花费幸运来改变掷骰结果。）此状态将一直持续{random.randint(1,24)}小时",
     f"坏乌贼Bad Squid：“唔呕！快滚出去！恶心死我了！”尽管你美美地享用了一餐，有些被你吃掉的东西却不这么认为。也许它就是所谓“坏乌贼”？你大汗淋漓、浑身抽搐，热浪和寒流在你的体内奔涌。头痛越来越强烈，你难以集中精力清晰地思考。也许休息{random.randint(1,4)+1}天能让你恢复正常，要不你就得去看看大夫？你在生病期间，每天进行一次 CON 检定：若失败，损失 1 点耐久值。若结果为困难成功，你的病将在转天痊愈。另外，医学检定也能让你恢复正常。当你生病时，你的 STR、DEX、技能和战斗检定均要受到一个惩罚骰。",
     f"被监视了？Being Watched? ：“你有没有感觉自己不是一个人？”每次你转身或回头时，都有一个人在那里看着你。你十分确定。很难说这个人已经监视你多久了，也许今天下午才刚刚开始，也许已经持续了好几天……",
     f"勒索信Blackmail：你收到了一封意料之外的信，信上没有邮戳，也没有任何标记表明它是如何送到你手上的。信封上写着你的全名。里面装着的信上是用墨水手写的花体字，内容是：你过去的所作所为已经败露。我要把所有事情告诉你最亲最爱的人。我还要把它们全部公之于众。除非你付出代价。你今天在扣眼上佩戴一朵康乃馨，我就知道你同意了；我会联系你，告诉你具体该如何做。不戴的话，就等着自食其果吧！",
-    f"目盲Blinded：“我看不见了！”你毫无征兆地突然失明。一切需要视力的检定（身体协调、战斗等等）必须要极难成功（才视为普通成功）。KP也可以适当地加入惩罚骰。如果你正处在危险的境况中（如站在高处的墙壁突出物上、攀登墙壁等），你可能要做一次 DEX 检定来保证安全。此状态将一直持续，结束时间由 KP 另行告知。",
-    f"受制于人Bound by Command：“你不能碰我！”你的脑袋里开始响起一个声音，指示你不可以伤害某一人（KP 会告诉你是谁）。你绝对确信，你不论尝试做什么，都不可以加害这个人，甚至不能动起这个念头。你的加害这个人的任何行动将不会成功，除非 KP 另行决定。",
-    f"呆滞Dumbfounded：“告诉我该怎么做……”你的脑袋变糊涂了。你难以自主思考。你如同愚钝的僵尸一般寻求别人的指引，心甘情愿地遵从周围其他人对你的命令。此状态将一直持续，结束时间由 KP 另行告知。",
+    f"目盲Blinded：“我看不见了！”你毫无征兆地突然失明。一切需要视力的检定（身体协调、战斗等等）必须要极难成功（才视为普通成功）。KP也可以适当地加入惩罚骰。如果你正处在危险的境况中（如站在高处的墙壁突出物上、攀登墙壁等），你可能要做一次DEX检定来保证安全。此状态将一直持续{random.randint(1,8)}小时。",
+    f"受制于人Bound by Command：“你不能碰我！”你的脑袋里开始响起一个声音，指示你不可以伤害某一人（KP会告诉你是谁）。你绝对确信，你不论尝试做什么，都不可以加害这个人，甚至不能动起这个念头。你的加害这个人的任何行动将不会成功，除非 KP 另行决定。",
+    f"呆滞Dumbfounded：“告诉我该怎么做……”你的脑袋变糊涂了。你难以自主思考。你如同愚钝的僵尸一般寻求别人的指引，心甘情愿地遵从周围其他人对你的命令。此状态将一直持续，结束时间由KP另行告知。",
     f"邪恶低语Evil Whisper：“你听见了吗？”你听到有人在附近说着什么东西。说话的声音太小，你几乎听不见。其他人好像也没人听到。你不能确定说话的内容，但它听上去就像：“这样就对了……杀尽他们……”",
-    f"发热恶寒Feverish Chills：“我这是怎么了？！”你的身体突然受到发热恶寒的摧残。可怕的疼痛顺着你的手脚传递。你全身滚烫，还恶心想吐。每天失去{random.randint(1,6)}点 STR、CON 和 DEX（分别掷骰决定每一项），直到 KP 宣称你的病已经痊愈，或任意一项属性归零（意味着这疾病最终要了你的命）。在你的发热恶寒痊愈之前，所有技能和战斗检定都要受到一个惩罚骰。若你活过这场病，只要症状消失，失去的属性值便可以每天 1D4 点的速度取回。",
+    f"发热恶寒Feverish Chills：“我这是怎么了？！”你的身体突然受到发热恶寒的摧残。可怕的疼痛顺着你的手脚传递。你全身滚烫，还恶心想吐。每天失去{random.randint(1,6)}点 STR、CON 和 DEX（分别掷骰决定每一项），直到KP宣称你的病已经痊愈，或任意一项属性归零（意味着这疾病最终要了你的命）。在你的发热恶寒痊愈之前，所有技能和战斗检定都要受到一个惩罚骰。若你活过这场病，只要症状消失，失去的属性值便可以每天1D4点的速度取回。",
     f"被跟踪了？Followed?：“我敢保证，我被人尾随了。”刚才的一小时中，你感觉自己被跟踪了。在你前进的时候，好像有什么人或者什么东西在跟着你的足迹。",
     f"旅馆失火Hotel Fire：“来人啊！叫消防员啊！”你回到自己的住地，却发现那里正在熊熊燃烧！四周被人群围得水泄不通，消防员在试图控制局势。在{random.randint(1,10)}小时内，你无法进入建筑物附近的任何地方。做一次幸运检定决定受损失的等级：\n成功——火灾造成的损失十分巨大；但大多数客房多少还算完整。你的物品也许烧坏了一小部分，但其他的都完好。\n失败——彻底是一场灾难，整座楼都夷为平地，你的物品也一起变成了灰烬。",
     f"生命吸取Life Drain：“好像……身体被掏空……”你感觉自己的生命力突然衰退，似乎有什么东西在从你体内吸走生命力。失去{random.randint(1,6)}点魔法值。你忽然觉得非常虚弱，摔倒在地并昏厥{random.randint(1,10)}回合。",
-    f"故障Malfunction：“握草！”你用的物品有毛病，造成了一些不好的事情。不管你打算做什么，都会当着你的面失败。进行一次幸运检定：\n成功——你及时丢掉了它或者快速跑开了，没有受到任何伤害。\n失败——这物品伤到了你的{random.choice(hurt_position)}，也许是它刺破了你的皮肤、擦伤了你、爆炸了，甚至更糟！KP 会告知你会受到多少点伤害。",
-    f"记忆受损Memory Loss：“我什么也记不得了！”你不管怎么尝试，都回忆不起来刚才经历那些事情的画面。这就好像你记忆的一部分被云雾笼罩一样，你无法回忆起具体的时间、地点和发生的任何事情。遗忘{random.randint(1,3)}个信息。",
+    f"故障Malfunction：“握草！”你用的物品有毛病，造成了一些不好的事情。不管你打算做什么，都会当着你的面失败。进行一次幸运检定：\n成功——你及时丢掉了它或者快速跑开了，没有受到任何伤害。\n失败——这物品伤到了你的{random.choice(hurt_position)}，也许是它刺破了你的皮肤、擦伤了你、爆炸了，甚至更糟！KP会告知你会受到多少点伤害。",
+    f"记忆受损Memory Loss：“我什么也记不得了！”你不管怎么尝试，都回忆不起来刚才经历那些事情的画面。这就好像你记忆的一部分被云雾笼罩一样，你无法回忆起具体的时间、地点和发生的任何事情。遗忘{random.randint(1,3)}条个人推理信息。",
     f"丢失Missing：“等等！它到底哪去了？！”你找某件物品的时候却发现它不见了！这段时间它能跑到哪里去呢？",
     f"有敌人 - 战场经历！Enemies!：“不要动...”邪教徒、好事者、深陷其中的人，或者是你们的朋友……",
     f"有敌人 - 警务经历！Enemies!：“不要动...”邪教徒、好事者、深陷其中的人，或者是你们的朋友……",
@@ -7218,6 +6877,8 @@ class ChatApp:
     f"有敌人 - 教育经历！Enemies!：“不要动...”邪教徒、好事者、深陷其中的人，或者是你们的朋友……",
     f"有敌人 - 罪犯经历！Enemies!：“不要动...”邪教徒、好事者、深陷其中的人，或者是你们的朋友……",
     f"有敌人！Enemies!：“不要动...”邪教徒、好事者、深陷其中的人，或者是你们的朋友……",
+    f"有野兽！Monsters!：“咿...!!”你们遭遇了{random.randint(1, 7)}只{random.choice(['小型','中型','大型'])}野兽！……",
+    f"有怪物！Monsters!：“快逃命啊!”你们遭遇了{random.randint(1, 7)}只{random.choice(['小型', '中型', '大型'])}怪物！……你听见一阵奇怪的尖锐嗡嗡声。你的面前出现了一个光球，还在继续变大。强烈的不祥之感令你无法忍受，因为你有什么东西在穿过你面前的发光大门！骇人的附肢从传送门里出现，向前伸展，感知着空气。强烈的恶臭逐渐弥漫开来。你明显感受到这东西清楚你们的存在……",
     f"有野兽 - 小型！Monsters!：“咿...!!”你们遭遇了一群{random.randint(2,7)}只组成的小型野兽！……",
     f"有野兽 - 中型！Monsters!：“乖狗狗...”你们遭遇了{random.randint(1,3)}只中型野兽！……",
     f"有野兽 - 大型！Monsters!：“快逃命啊！”你们遭遇了{random.randint(1,2)}只大型野兽！……",
@@ -7226,30 +6887,31 @@ class ChatApp:
                f"有怪物 - 中型！Monsters!：这是{random.randint(1,2)}只中型怪物……“快逃命啊！”你听见一阵奇怪的尖锐嗡嗡声。你的面前出现了一个光球，还在继续变大。强烈的不祥之感令你无法忍受，因为你有什么东西在穿过你面前的发光大门！骇人的附肢从传送门里出现，向前伸展，感知着空气。强烈的恶臭逐渐弥漫开来。你明显感受到这东西清楚你们的存在……",
                f"有怪物 - 大型！Monsters!：这是一只大型怪物……“快逃命啊！”你听见一阵奇怪的尖锐嗡嗡声。你的面前出现了一个光球，还在继续变大。强烈的不祥之感令你无法忍受，因为你有什么东西在穿过你面前的发光大门！骇人的附肢从传送门里出现，向前伸展，感知着空气。强烈的恶臭逐渐弥漫开来。你明显感受到这东西清楚你们的存在……",
                f"神秘纸条Mysterious Note：“这是什么？”你将手伸进口袋，抽出了一张神秘纸条，但刚才它还不在那里。一定是有人把它放进了你的口袋……你展开纸条，看到的是手写的潦草笔迹：午夜时分到图书馆外面来见我。自己来。",
-               f"头脑失控No Longer in Control：不要向别人透露此事。“现在，我就是你的主人……”不知何故，有一种超维度寄生虫钻进了你的大脑。这寄生虫现在愉悦地寄生在你的大脑里，控制了你的一举一动。你必须服从它的命令，它一般会让你表现得铁石心肠、残忍无情，只要一有机会就对别人造成痛苦。你的新主子当然不想自己被发现，会阻止你向其他人泄露自己的情况；它也不允许你伤害自己，或者让你引起不必要的注意。KP会告诉你更多内容。",
+               f"头脑失控No Longer in Control：【不要向别人透露此事。】“现在，我就是你的主人……”不知何故，有一种超维度寄生虫钻进了你的大脑。这寄生虫现在愉悦地寄生在你的大脑里，控制了你的一举一动。你必须服从它的命令，它一般会让你表现得铁石心肠、残忍无情，只要一有机会就对别人造成痛苦。你的新主子当然不想自己被发现，会阻止你向其他人泄露自己的情况；它也不允许你伤害自己，或者让你引起不必要的注意。KP会告诉你更多内容。",
                f"书里的笔记Notes in a Book：“书里掉出了什么东西……”在浏览书籍时，其中一本书掉出了一张古旧的纸片。这张古旧泛黄的纸片上只写了一组坐标，再无其他。如果你决定搞清这些坐标上到底有什么，KP会告诉你更多的……",
                f"被请喝茶Police Trouble：“但是警官，先听我解释……”你被警方拘留了，他们想就最近发生的某件事对你进行讯问。这肯定只是他们搞错了人，因为局子里的警探始终用另一个姓名来称呼你。他想知道你昨晚去了哪里、干过什么。如果有合适的不在场证明（会被验证的），你会在{random.randint(1,6)+1}小时后被释放。但愿你没做过什么可以被警察发现并对号入罪的行为吧……",
-               f"被占据Possessed：不要向别人透露此事。“终于有了属于自己的躯体！”你被一个邪恶巫师的精神占据了，他的意志力比你的强大。这个外来精神可以完全控制你的身体和记忆。失去{random.randint(1,20)}点理智值——但是忽略所有“疯狂”结果，直到你从占据中解脱为止（这时立刻执行疯狂）。KP会把新主子的计划详情告诉你；但是你的主子暂时只是维持对“你”的伪装。",
+               f"被占据Possessed：【不要向别人透露此事。】“终于有了属于自己的躯体！”你被一个邪恶巫师的精神占据了，他的意志力比你的强大。这个外来精神可以完全控制你的身体和记忆。失去{random.randint(1,20)}点理智值——但是忽略所有“疯狂”结果，直到你从占据中解脱为止（这时立刻执行疯狂）。KP会把新主子的计划详情告诉你；但是你的主子暂时只是维持对“你”的伪装。",
                f"预感Premonition：“不要开门！别问我怎么知道的！”你突然失去了意识。在你失去意识期间，你见到了一个尚未出现的未来场景的幻象。进行一次理智检定(1/1D4)。到你醒来时，事实细节都朦胧不清，但你确信这个场景会出现，你会知道并记住它。你可以持有本卡，并在面临抉择时打出它。若你打出本卡，KP将告知你如何选择最符合你的利益。你持有本卡时只能打出本卡一次，打出本卡之后要交还KP。",
                f"血雨Raining Blood：“这雨！是红的！”转瞬间狂风大作，阴云密布。很快开始下雨了；然而雨水的颜色不应该是红色的啊！鲜血从天而降，几秒钟之内就把你们淋湿了。进行一次理智检定(1/1D4)。",
-               f"抢劫现行犯Robbery in Progress ：“抢劫！谁都不许动！”你突然听见有人大嚷；你们已经置身于一场劫案当中了。人们惊慌尖叫，所有人都被要求面朝下卧倒在地上。决定你们的行动：有甲乙两个选项。\n选项甲：你们顺从并按照要求去做。只要几秒钟，罪犯就会劫走你身上的钱包、珠宝以及任何看上去值钱的物品，并逃之夭夭。\n选项乙：你们拒不从命并挨了一顿打，受到{random.randint(1,6)+1}点伤害，尤其是你的{random.choice(hurt_position)}。幸运的是，你们的反抗行为拖延了时间，警察及时赶到了。罪犯匆忙逃离，没机会抢走你们的物品。",
+               f"抢劫现行犯Robbery in Progress ：“抢劫！谁都不许动！”你突然听见有人大嚷；你们已经置身于一场劫案当中了。人们惊慌尖叫，所有人都被要求面朝下卧倒在地上。决定你们的行动：有甲乙两个选项，也可以有更多。\n选项甲：你们顺从并按照要求去做。只要几秒钟，罪犯就会劫走你身上的钱包、珠宝以及任何看上去值钱的物品，并逃之夭夭。\n选项乙：你们拒不从命并挨了一顿打，受到{random.randint(1,6)+1}点伤害，尤其是你的{random.choice(hurt_position)}。幸运的是，你们的反抗行为拖延了时间，警察及时赶到了。罪犯匆忙逃离，没机会抢走你们的物品。",
                f"患病Sickness：“噢噢，我突然觉得好烦！”你变虚弱了。你感觉不对劲。可能是你被传染了什么病，也可能更糟……每天进行一次体质检定，持续{random.randint(1,6)+1}天。若成功，你不损失耐久值；若失败，损失{random.randint(1,4)-1}点耐久值。若任一天的检定出现极难成功，则转天病会痊愈。若你因病失去了一半以上的耐久值，你必须接受医疗（按受到重伤处理）。当你生病时，你的技能和战斗检定均要受到一个惩罚骰。",
-               f"蜘蛛蜇咬Spider Bite：“哎哟！”你伸手探查的时候，突然什么东西咬了你一口！你迅速抽回手，看见一只巨大的黑蜘蛛溜走了。进行一次幸运检定：\n成功——受到 1 点伤害。它只是割破了你的皮肉。\n失败——你的{random.choice(hurt_position)}受到{random.randint(1,10)}点伤害，而且毒液进入了你的循环系统——你会抽搐{random.randint(1,6)}小时（这期间你的技能和战斗检定均要受到一个惩罚骰）。体质检定极难成功可以将蜇咬造成的伤害和中毒时间减半。",
-               f"汽车被盗Stolen Car：“我不信！”你返回自己停车的位置却发现它不见了——被盗了！如果你报警，进行一次幸运检定：\n成功——你的车将在{random.randint(1,10)}小时之后被警察寻获。汽车基本完好，只是油差不多用光了。\n失败——你的车将在{random.randint(1,10)}天之后被警察寻获。它似乎出过车祸，因为它被找到的时候已经破破烂烂，而且被翻了个四脚朝天。KP会决定这辆车还能不能驾驶，以及修理费用的数额。\n注意：如果车内有值钱的物品（包括武器），那么要对车内的每件物品分别进行幸运检定，来决定它是尚在车内还是已经被盗。",
+               f"蜘蛛蜇咬Spider Bite：“哎哟！”你伸手探查的时候，突然什么东西咬了你一口！你迅速抽回手，看见一只巨大的黑蜘蛛溜走了。进行一次幸运检定：\n成功——受到1点伤害。它只是割破了你的皮肉。\n失败——你的{random.choice(hurt_position)}受到{random.randint(1,10)}点伤害，而且毒液进入了你的循环系统——你会抽搐{random.randint(1,6)}小时（这期间你的技能和战斗检定均要受到一个惩罚骰）。体质检定极难成功可以将蜇咬造成的伤害和中毒时间减半。",
+               f"汽车被盗Stolen Car：“我不信！”你返回自己停车的位置却发现它不见了——被盗了！若调查员没有车，将其等同于失窃和差旅问题。调查员将被迫步行到达下一个目的地，除非能够提出另外的解决方案。如果你报警，进行一次幸运检定：\n成功——你的车将在{random.randint(1,10)}小时之后被警察寻获。汽车基本完好，只是油差不多用光了。\n失败——你的车将在{random.randint(1,10)}天之后被警察寻获。它似乎出过车祸，因为它被找到的时候已经破破烂烂，而且被翻了个四脚朝天。KP会决定这辆车还能不能驾驶，以及修理费用的数额。\n注意：如果车内有值钱的物品（包括武器），那么要对车内的每件物品分别进行幸运检定，来决定它是尚在车内还是已经被盗。",
                f"神秘雕像The Mysterious Statue：“这是什么古怪的玩意？”在你探索的一处废墟里，你发现了一个奇怪的雕像。这个雕像是用一种你从未见过的金属铸造的。你清晰地感知到雕像身上存在一种古老的、邪恶的力量。如果你决定搞清雕像上的力量，KP会告诉你更多的……",
                f"车祸！Unexpected：一次意外！司机立刻逃之夭夭。进行一次幸运检定：\n成功——真是走运，只是{random.randint(1,6)}点伤害。\n失败——你的{random.choice(hurt_position)}受到{random.randint(1,6)+1}点伤害，而且你需要进行一个幸运检定来确定是否有其他物品受损。",
                f"威胁Threat：“你们谁也跑不了……”你得罪了某些势力，他们给你发出了威胁。要是你想平安无事，就得解决掉他们。每周进行一次幸运检定，成功意味着你找到了妥善解决这事的办法。失败意味着遭到暗算（{random.randint(1,3)}伤害）；若连续{random.randint(1,6)+1}周失败，你将面临终极对决。",
                f"意外中的幸运Lucky Accident：“差点就要了我的命！”进行一次幸运检定：\n成功——真走运，只是受了{random.randint(1,6)}点伤害。\n失败——{random.choice(hurt_position)}受到{random.randint(1,6)+1}点伤害。幸运的是，幸运检定成功的话，这个意外会有其他方面的补偿。若成功，则补偿值相当于你受的伤害值。",
-               f"迷茫Lost：“我在哪？”你一不留神，竟然迷失了方向。你没有足够的时间搞清楚应该走哪条路。进行一次幸运检定：\n成功——幸运啊，过了{random.randint(1,6)}个小时，最终回到了正确的路线。\n失败——你在某个荒凉的地方迷了路，这里看起来是个绝妙的伏击地点……",
+               f"迷路Lost：“我在哪？”你一不留神，竟然迷失了方向。检定导航，若失败：你没有足够的时间搞清楚应该走哪条路。进行一次幸运检定：\n成功——幸运啊，过了{random.randint(1,6)}个小时，最终回到了正确的路线。\n失败——你在某个荒凉的地方迷了路，这里看起来是个绝妙的伏击地点……",
                f"鬼影Ghostly Vision：“那是啥？”一道若隐若现的鬼影出现在你面前！它的外貌极其恐怖（投影一个随机怪物）。进行一次理智检定 (1D4/1D8)。然后它消失了。",
                f"被盗Stolen：“看看这地方，成了什么样子！”你回到自己的房间时发现你的物品被丢得到处都是，好像被一群牛踩过了一样。很明显，有什么人闯入过，还搜查了你的物品。仅仅将所有物品归回原位就已经要花费不少时间，更别说发现有没有东西被盗、是什么被盗了……",
                f"怪异旋律Strange Melody：“你也听得到吗？”你开始听到一段奇怪而连绵起伏的旋律。你四顾之下并不能找出声音的来源。不论你走到哪里，声音都一直响起。你很快就明白，这旋律并不是由外物，而是你的头脑发出的，而且无论你做什么，都不能减弱或停止这令人疯狂的反复旋律。每天失去1点理智值，直到KP另行决定为止。",
                f"怪异幻象Strange Visions：“看呐！”突然之间，你看到面前出现了一个老流浪汉，你可以保证他刚才绝对没在那里。他饱经风霜的脸上留着花白的长胡子，眼睛直盯着你的方向。他抬起自己的左手，手上有一个由两条圆形线条缠绕成的奇怪印记，好像在向外旋转移动一般。你仿佛被催眠了一样注视着这奇异的几何形状——你也不知道你看了多久。四周似乎没人注意到这老人，不过他张口说道：“你被选中了。”你还没来得及回答，这个老流浪汉就轻笑一声消失了。你看看自己的表，才发现两个小时已经过去了。",
-               f"恐惧！The Horror!：“啊啊啊哎哎哎咿咿咿咿咿！”你被突兀而不可阻挡的恐惧感击溃了。进行一次理智检定 (1/1D6)。你必须逃到你来的地方，不得不撤退到你平常能感觉安全和安心的地方。",
+               f"恐惧！The Horror!：“啊啊啊哎哎哎咿咿咿咿咿！”你被突兀而不可阻挡的恐惧感击溃了。进行一次理智检定 (1/1D6)。你必须逃到你来的地方，不得不撤退到你平常能感觉安全和安心的地方。若有多人在场，你会尝试说服其他人。",
                f"头脑中的声音The Voices in Your Head ：“你知道你想……”你越来越注意自己脑子里的声音。这到底是你的意识，还是什么更黑暗的东西？这声音认识你。它了解你最黑暗的想法，希望并劝说你挣脱道德的束缚——无视社会评价的生活。它想要你：想要什么就去拿、去偷、甚至去杀人，毫不利人，专门利己。从现在起直到 KP 另外告知为止，每当你要进行道德抉择时，进行一次幸运检定。如果幸运检定失败，你必须选择恶堕路线，并且表演出最适合你的行动。",
                f"被调包The Wrong Briefcase：“但我绝对肯定这就是我的！”你打开自己的公文包审阅自己的论文和笔记，却发现它们不翼而飞了！其实，尽管这个公文包看上去和你的几乎一模一样，但它肯定是别人的，因为里面只有些霉变的枕头套和一本又旧又破的《白鲸记》。你的所有证据、作品和笔记都丢失了。",
                f"不速之手Unexpected Remains：“这玩意儿是怎么进去的？！”你打开包，惊恐地发现你的物品当中躺着一只鲜血淋漓的断手。谁也说不清这到底是怎么混进来的。进行一次理智检定 (0/1D4)。",
-               f"跌倒！WHACK!：“啊啊啊啊啊啊啊啊啊啊啊啊！”你明明躲开了脚下的陷阱，但一阵突然、不可阻挡的看不见的巨力击中了你，把你掷到离你站的位置相当远的地面上。进行一次 DEX 检定：\n成功——受到{random.randint(1,4)}点耐久值伤害并倒地。\n失败——{random.choice(hurt_position)}受到{random.randint(1,6)}点耐久值伤害并昏厥{random.randint(1,10)}轮。"
+               f"跌倒！WHACK!：“啊啊啊啊啊啊啊啊啊啊啊啊！”你明明躲开了脚下的陷阱，但一阵突然、不可阻挡的看不见的巨力击中了你，把你掷到离你站的位置相当远的地面上。进行一次 DEX 检定：\n成功——受到{random.randint(1,4)}点耐久值伤害并倒地。\n失败——{random.choice(hurt_position)}受到{random.randint(1,6)}点耐久值伤害并昏厥{random.randint(1,10)}轮。",
+               f"绑架！Kidnapped!：“我身上没有钱！”进行一次DEX检定：\n成功——你成功逃脱了罪犯，但你的队友并不一定。\n失败——你被一棍打昏，并在未来的{random.randint(1,3)}天内，被蒙着眼囚禁在一个未知的地方。你必须想方设法逃脱，或说服对方释放你，否则，你的队友或关系人将被迫支付赎金，除非你们有更好的办法。"
                ]
         for roles in order:
             if roles != "KP" and roles != "DiceBot":
@@ -7282,92 +6944,111 @@ class ChatApp:
                 else:
                     done.append(roles)
 
+    def send_env_text_to_log(self, sendText=True):
+        env_text = self.time_log.get("1.0", tk.END).strip()
+        # self.chat_log.insert(tk.END,
+        # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
+        time_info = env_text.split("【时间】")[1]
+        date = time_info.split("【日期】")[1]
+        time = time_info.split("【地点】")[0]
+        time_info = time_info.split("【地点】")[1]
+        place = time_info.split("【天气】")[0]
+        time_info = time_info.split("【天气】")[1]
+        weather = time_info.split("【日期】")[0]
+        # 上下午
+        if ":" in time:
+            if int(time.split(":")[0]) > 12:
+                time_ = time + "㏘"
+            else:
+                time_ = time + "㏂"
+            if 6 >= int(time.split(":")[0]) >= 5:
+                time_ += "凌晨"
+            elif 9 >= int(time.split(":")[0]) >= 7:
+                time_ += "早晨"
+            elif 11 >= int(time.split(":")[0]) >= 10:
+                time_ += "上午"
+            elif 13 >= int(time.split(":")[0]) >= 12:
+                time_ += "中午"
+            elif 17 >= int(time.split(":")[0]) >= 14:
+                time_ += "下午"
+            elif 19 >= int(time.split(":")[0]) >= 18:
+                time_ += "傍晚"
+            elif 23 >= int(time.split(":")[0]) >= 20:
+                time_ += "夜晚"
+            elif 1 >= int(time.split(":")[0]) >= 0:
+                time_ += "午夜"
+            elif 4 >= int(time.split(":")[0]) >= 2:
+                time_ += "深夜"
+            time_ += "-"
+        else:
+            time_ = "???"
+        # 季节
+        if "/" in date:  # 春✿ 夏♨ 秋♣ 冬♦ 晴☀阴☁雨☂雪☃ ✿❀
+            if 5 >= int(date.split("/")[1]) >= 3:
+                date_ = "春✿" + date
+            elif 8 >= int(date.split("/")[1]) >= 6:
+                date_ = "夏♨" + date
+            elif 11 >= int(date.split("/")[1]) >= 9:
+                date_ = "秋♣" + date
+            else:
+                date_ = "冬♦" + date
+        else:
+            date_ = "???"
+        # 昼夜
+        if "夏" in date_:
+            if 19 >= int(time.split(":")[0]) >= 6:
+                time_ = time_ + "昼☀"
+            else:
+                time_ = time_ + "夜◐"
+        elif "冬" in date_:
+            if 17 >= int(time.split(":")[0]) >= 8:
+                time_ = time_ + "昼☀"
+            else:
+                time_ = time_ + "夜◐"
+        else:
+            if ":" in time_:
+                if 18 >= int(time.split(":")[0]) >= 7:
+                    time_ = time_ + "昼☀"
+                else:
+                    time_ = time_ + "夜◐"
+            else:
+                time_ = "???"
+        # 天气
+        if "晴" in weather:  # 晴☀阴☁雨☂雪☃ ✿❀
+            weather_ = weather + "☀"
+        elif "阴" in weather:
+            weather_ = weather + "☁"
+        elif "雨" in weather:
+            weather_ = weather + "☂"
+        elif "雪" in weather:
+            weather_ = weather + "☃"
+        elif "雾" in weather:
+            weather_ = weather + "▓"
+        else:
+            weather_ = weather
+        date_ = date_.replace("Monday", datenamelist[0]).replace("Tuesday", datenamelist[1]).replace("Wednesday",
+                                                                                                     datenamelist[
+                                                                                                         2]).replace(
+            "Thursday",
+            datenamelist[3]).replace(
+            "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
+        env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather_}【日期】{date_}"
+        env_text = f"【时间】{time}【地点】{place}【天气】{weather}【日期】{date}"
+        if sendText:
+            self.search_and_delete_insert_symbol()
+            self.chat_log.insert(tk.END, f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text_}\n\n')
+            self.chat_log.yview(tk.END)
+        self.time_log.delete("1.0", tk.END)
+        self.time_log.insert("1.0", env_text)
+        return env_text_
+
     def send_message_on_enter(self, event, role=None):
         global datenamelist
         if role == None:
             pass
         elif role == "env":
             self.random_discovery()
-            env_text = self.time_log.get("1.0", tk.END).strip()
-            # self.chat_log.insert(tk.END,
-            # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
-            time_info = env_text.split("【时间】")[1]
-            date = time_info.split("【日期】")[1]
-            time = time_info.split("【地点】")[0]
-            time_info = time_info.split("【地点】")[1]
-            place = time_info.split("【天气】")[0]
-            time_info = time_info.split("【天气】")[1]
-            weather = time_info.split("【日期】")[0]
-            # 上下午
-            if ":" in time:
-                if int(time.split(":")[0]) > 12:
-                    time_ = time + "㏘"
-                else:
-                    time_ = time + "㏂"
-                if 6 >= int(time.split(":")[0]) >= 5:
-                    time_ += "凌晨"
-                elif 9 >= int(time.split(":")[0]) >= 7:
-                    time_ += "早晨"
-                elif 11 >= int(time.split(":")[0]) >= 10:
-                    time_ += "上午"
-                elif 13 >= int(time.split(":")[0]) >= 12:
-                    time_ += "中午"
-                elif 17 >= int(time.split(":")[0]) >= 14:
-                    time_ += "下午"
-                elif 19 >= int(time.split(":")[0]) >= 18:
-                    time_ += "傍晚"
-                elif 23 >= int(time.split(":")[0]) >= 20:
-                    time_ += "夜晚"
-                elif 1 >= int(time.split(":")[0]) >= 0:
-                    time_ += "午夜"
-                elif 4 >= int(time.split(":")[0]) >= 2:
-                    time_ += "深夜"
-                time_ += "-"
-            else:
-                time_ = "???"
-            # 季节
-            if "/" in date: #春♧ 夏♡ 秋♤ 冬♢
-                if 5 >= int(date.split("/")[1]) >= 3:
-                    date_ = "春♧" + date
-                elif 8 >= int(date.split("/")[1]) >= 6:
-                    date_ = "夏♡" + date
-                elif 11 >= int(date.split("/")[1]) >= 9:
-                    date_ = "秋♤" + date
-                else:
-                    date_ = "冬♢" + date
-            else:
-                date_ = "???"
-            # 昼夜
-            if "夏" in date_:
-                if 19 >= int(time.split(":")[0]) >= 6:
-                    time_ = time_ + "昼☀"
-                else:
-                    time_ = time_ + "夜☆"
-            elif "冬" in date_:
-                if 17 >= int(time.split(":")[0]) >= 8:
-                    time_ = time_ + "昼☀"
-                else:
-                    time_ = time_ + "夜☆"
-            else:
-                if ":" in time_:
-                    if 18 >= int(time.split(":")[0]) >= 7:
-                        time_ = time_ + "昼☀"
-                    else:
-                        time_ = time_ + "夜☆"
-                else:
-                    time_ = "???"
-            date_ = date_.replace("Monday", datenamelist[0]).replace("Tuesday", datenamelist[1]).replace("Wednesday",
-                                                                                                         datenamelist[
-                                                                                                             2]).replace(
-                "Thursday",
-                datenamelist[3]).replace(
-                "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
-            env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather}【日期】{date_}"
-            env_text = f"【时间】{time}【地点】{place}【天气】{weather}【日期】{date}"
-            self.chat_log.insert(tk.END, f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text_}\n\n')
-            self.chat_log.yview(tk.END)
-            self.time_log.delete("1.0", tk.END)
-            self.time_log.insert("1.0", env_text)
+            env_text_ = self.send_env_text_to_log()
             self.display_weather_FX(env_text_)
             self.save_settings()
         else:
@@ -7717,7 +7398,6 @@ class ChatApp:
             content = content_
 
         self.search_and_delete_insert_symbol()
-
         # 发布到LOG
         self.chat_log.insert(tk.END,
                              f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{content}\n\n')
@@ -7828,14 +7508,48 @@ class ChatApp:
         current_role = self.current_role.get()
         self.new_window_infoCanvas.destroy()
 
+    def set_codename_window(self):
+        self.new_window_codename = tk.Toplevel(root)
+        self.new_window_codename.title("编辑代称替换")
+        self.name_codename_label = {}
+        self.name_codename_entry = {}
+        self.name_codename_var_list = {}
+        row = 0
+        col = 0
+        for role in self.roles:
+            name_codename_label = tk.Label(self.new_window_codename, text=self.role_entries_name[role])
+            name_codename_label.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+            self.name_codename_label[role] = name_codename_label
+            self.name_codename_var = tk.StringVar()
+            self.name_codename_var.set(self.codename_by_name[role])
+            self.name_codename_var_list[role] = self.name_codename_var
+            name_codename_entry = tk.Entry(self.new_window_codename, textvariable=self.name_codename_var)
+            name_codename_entry.grid(row=row, column=col+1, padx=5, pady=5, sticky="nsew")
+            self.name_codename_entry[role] = name_codename_entry
+            row += 1
+        name_codename_button = tk.Button(self.new_window_codename, text="保存并关闭", command=lambda: self.on_kill_codename_window())
+        name_codename_button.grid(row=row, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
+        self.new_window_codename.protocol("WM_DELETE_WINDOW", lambda: self.on_kill_codename_window())
+
+    def on_kill_codename_window(self):
+        for role in self.roles:
+            self.codename_by_name[role] = self.name_codename_var_list[role].get()
+        # 将角色codename保存到JSON文件
+        with open('AppSettings/codename_settings.json', 'w', encoding='utf-8') as file:
+            json.dump(self.codename_by_name, file, indent=4, ensure_ascii=False)
+        self.codename_by_name = load_settings_codename()
+        if "_status" not in self.codename_by_name:
+            self.codename_by_name["_status"] = "True"
+        self.new_window_codename.destroy()
+
     def output_chat_log(self):
         global log_file_last_name
         for role in self.codename_by_name:
             if role != "_status":
                 if self.codename_by_name[role] == self.role_entries_name[role]:
-                    self.codename_by_name["_status"] = False
+                    self.codename_by_name["_status"] = "False"
                 else:
-                    self.codename_by_name["_status"] = True
+                    self.codename_by_name["_status"] = "True"
                     break
         new_text = simpledialog.askstring("选择输出格式", "请输入输出格式(QQ/活字/回声):", initialvalue="QQ")
         if new_text:
@@ -7870,8 +7584,13 @@ class ChatApp:
 
             elif new_text == "活字":
                 if str(self.codename_by_name["_status"]) == "True":
-                    self.codename_by_name["_status"] = simpledialog.askstring("是否开启替换", "是否开启CodeName替换?(True/False):",
+                    codename_by_name_= simpledialog.askstring("是否开启替换", "是否开启CodeName替换?(True/False/Set):",
                                                                               initialvalue=f"{self.codename_by_name['_status']}")
+                    if codename_by_name_ != "Set":
+                        self.codename_by_name["_status"] = str(codename_by_name_)
+                    else:
+                        self.set_codename_window()
+                        return
                 chat_log_content_ = ""
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"(活字)_{timestamp}.txt"
@@ -7924,6 +7643,9 @@ class ChatApp:
                                 expression = content.replace("(" + r + ")", "")
                                 # 联合检定处理 (【沃姆】掷骰{潜行+意志})1D100=24/[21, 70]:失败/困难成功
                                 if "+" in r and ":" in expression and ", " in expression:
+                                    skill_ = r.split("{")[1].split("}")[0]
+                                    #pc_name = r.split("【")[1].split("】")[0]
+                                    skill_list = skill_.split("+")
                                     comment = expression.split(":")[1]
                                     comment = comment.split("/")
                                     expression_ = expression.split(":")[0].split("/[")[0]
@@ -7931,7 +7653,7 @@ class ChatApp:
                                     k = 0
                                     combine_list = []
                                     for n in number:
-                                        combine_ = "(" + r + ")" + "[" + comment[k] + "]" + expression_ + "/" + n
+                                        combine_ = "(" + r + "：" + skill_list[k] + ")" + "[" + comment[k] + "]" + expression_ + "/" + n
                                         combine_list.append(combine_)
                                         k += 1
                                     content = ";".join(combine_list)
@@ -8046,7 +7768,7 @@ class ChatApp:
                                                                                                                    "_")
                             chat_log_content = chat_log_content.replace(f"<{self.role_entries_name[role]}>",
                                                                         f"<{self.codename_by_name[role]}>").replace(f"@{self.role_entries_name[role]}",
-                                                                        f"@{self.codename_by_name[role]}]").replace(f"与{self.role_entries_name[role]}对抗",
+                                                                        f"@{self.codename_by_name[role]}").replace(f"与{self.role_entries_name[role]}对抗",
                                                                         f"与{self.codename_by_name[role]}对抗").replace(f"对抗{self.role_entries_name[role]}",
                                                                         f"对抗{self.codename_by_name[role]}").replace(f"【{self.role_entries_name[role]}】",
                                                                         f"【{self.codename_by_name[role]}】").replace(f"[{self.role_entries_name[role]}]",
@@ -8055,8 +7777,13 @@ class ChatApp:
             elif new_text == "回声":
                 global EnterCharacters
                 if str(self.codename_by_name["_status"]) == "True":
-                    self.codename_by_name["_status"] = simpledialog.askstring("是否开启替换", "是否开启CodeName替换?(True/False):",
-                                                                              initialvalue=f"{self.codename_by_name['_status']}")
+                    codename_by_name_ = simpledialog.askstring("是否开启替换", "是否开启CodeName替换?(True/False/Set):",
+                                                               initialvalue=f"{self.codename_by_name['_status']}")
+                    if codename_by_name_ != "Set":
+                        self.codename_by_name["_status"] = str(codename_by_name_)
+                    else:
+                        self.set_codename_window()
+                        return
                 EnterCharacters = int(simpledialog.askstring("是否开启自动换行", "自动换行字数(0为不换行):",
                                                              initialvalue="30"))
                 chat_log_content_ = ""
@@ -8095,6 +7822,9 @@ class ChatApp:
                                 expression = content.replace("(" + r + ")", "")
                                 # 联合检定处理 (【沃姆】掷骰{潜行+意志})1D100=24/[21, 70]:失败/困难成功
                                 if "+" in r and ":" in expression and ", " in expression:
+                                    skill_ = r.split("{")[1].split("}")[0]
+                                    # pc_name = r.split("【")[1].split("】")[0]
+                                    skill_list = skill_.split("+")
                                     comment = expression.split(":")[1]
                                     comment = comment.split("/")
                                     expression_ = expression.split(":")[0].split("/[")[0]
@@ -8102,7 +7832,7 @@ class ChatApp:
                                     k = 0
                                     combine_list = []
                                     for n in number:
-                                        combine_ = "(" + r + ")" + "[" + comment[k] + "]" + expression_ + "/" + n
+                                        combine_ = "(" + r + "：" + skill_list[k] + ")" + "[" + comment[k] + "]" + expression_ + "/" + n
                                         combine_list.append(combine_)
                                         k += 1
                                     content = ";".join(combine_list)
@@ -8444,7 +8174,7 @@ class ChatApp:
                 chat_log_content = "\n".join(lines)
                 # 处理时空状态变化：【时间】02:54【地点】多伦多大学【天气】阴【日期】2024/03/01 Friday → <table:时空广播.Time>、.Place .Date .Weather
                 lines = chat_log_content.split('\n')
-                for i, line in enumerate(lines):  # 白天☀ 夜晚☆ 上午㏂ 下午㏘ 春♧夏♡秋♤冬♢
+                for i, line in enumerate(lines):  # 白天☀ 夜晚☆ 上午㏂ 下午㏘ 春✿夏♨秋♣冬♦
                     exp = ""
                     if "【时间】" in line and "【地点】" in line:
                         time_info1 = line.replace("[时空广播]:", "").replace(style_highlight_style_echo[0], "【").replace(
@@ -8471,7 +8201,7 @@ class ChatApp:
                                                                                                                    "_")
                             chat_log_content = chat_log_content.replace(f"[{self.role_entries_name[role]}]:",
                                                                         f"[{self.codename_by_name[role]}]:").replace(f"@{self.role_entries_name[role]}",
-                                                                        f"@{self.codename_by_name[role]}]").replace(f"与{self.role_entries_name[role]}对抗",
+                                                                        f"@{self.codename_by_name[role]}").replace(f"与{self.role_entries_name[role]}对抗",
                                                                         f"与{self.codename_by_name[role]}对抗").replace(f"对抗{self.role_entries_name[role]}",
                                                                         f"对抗{self.codename_by_name[role]}").replace(f"【{self.role_entries_name[role]}】",
                                                                         f"【{self.codename_by_name[role]}】").replace(f"[{self.role_entries_name[role]}]",
@@ -8491,6 +8221,7 @@ class ChatApp:
                 # 尝试写入文件
                 with open(filename, "w", encoding='utf-8') as file:
                     file.write(chat_log_content)
+                print(f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}：LOG[{filename}]输出成功！')
             except:
                 # 出错则弹出警告
                 messagebox.showerror("错误！", "无法输出LOG文件！")
@@ -8575,7 +8306,6 @@ class ChatApp:
                                     'Images/AvatarImages/' + filename + extension)
             # 发布到LOG
             self.search_and_delete_insert_symbol()
-
             self.chat_log.insert(tk.END,
                                  f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【差分】<{self.role_entries_name[role]}({filename})>\n\n')
             self.chat_log.yview(tk.END)
@@ -9013,6 +8743,7 @@ class ChatApp:
                     expression = skill
                     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                     log = f"{self.role_entries_name[role]} {timestamp}\n{reason}\n\n"  # 不加引号
+                    self.search_and_delete_insert_symbol()
                     self.chat_log.insert(tk.END, log)
                     # 滚动到最底部
                     self.chat_log.yview(tk.END)
@@ -9086,6 +8817,7 @@ class ChatApp:
                                     else:
                                         _mav_list = bot_personality["妙语"][expression]
                                     mav_words_ = random.choice(_mav_list)
+                                    self.search_and_delete_insert_symbol()
                                     self.chat_log.insert(tk.END,
                                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
                                     self.chat_log.yview(tk.END)
@@ -9205,7 +8937,7 @@ class ChatApp:
                     pass
                 else:
                     result_ = self.trpg_module.roll(expression, role)
-                    if result_:
+                    if result_ and "d100" in expression.lower():
                         self.jrrp_record(role, result_ + "###" + expression, "solo")
                         if "扣除" in result_ and "SAN" in result_:
                             self.SAN_[role] = int(result_.split("扣除")[1].split("点")[0])
@@ -9677,11 +9409,682 @@ class ChatApp:
         motive_desc = {}
         global drink_list
         global sweet_list
-        global xp_list
         global trait_mec_list
         global mbti_list
         global app_list
         global everyday_list
+        # xp列表_sm分表_完全权力交换分表
+        xp_sm_tpe = [
+    "项圈：一些奴隶佩戴项圈作为饰品以表示归属。主人可能会在一个佩戴仪式上赠送项圈，这可以是在私人场合，也可以是在生活方式圈子中的公开场合。项圈可能是定制的，并包含代表关系或主人的符号或首字母。一些人用不太明显的珠宝或饰品代替项圈，或在特殊场合佩戴更精致的项圈，而日常使用简单的珠宝。网络别名也适用。",
+    "高潮/自慰控制：主人规定奴隶何时以及如何进行性活动，包括自慰。他决定奴隶何时可以高潮，甚至可能强制高潮。你甚至可以尝试一些高潮控制游戏或尝试破坏他的高潮。",
+    "洗手间控制：奴隶可能需要请求使用洗手间的许可，甚至穿尿布。注意，阻止使用洗手间可能导致健康问题。",
+    "财务控制：主人可能控制奴隶赚的钱，并用它支付账单、购买物品或储蓄/投资。他也可能不允许奴隶在家外工作。主人可能满足奴隶的所有需求，使奴隶依赖于主人。",
+    "分手控制：在一些完全权力交换关系中，奴隶被剥夺结束关系的能力。",
+    "睡眠控制：主人可能决定奴隶何时以及如何睡觉。一些奴隶可能睡在笼子或宠物床里。他们可能需要许可才能和主人一起睡，并可能睡在床尾。",
+    "姿势和位置：在完全权力交换中，主人可能要求奴隶在主人进入房间时采取特定姿势，并且必须在主人面前跪下。奴隶可能需要倒退离开主人，以免背对他们。",
+    "外貌：奴隶可能在穿着或外貌上听从女主人的决定。化妆、鞋子和配饰可能都由主人决定。",
+    "服务：当奴隶服务主人时，她可能会提供食物和饮料、他最喜欢的书、按摩、口交或任何其他他命令的服务。主人会指定服务的方式，例如跪下服务。",
+    "眼神接触：在一些完全权力交换关系中，主人要求奴隶将目光保持在地面，除非另有指示。",
+    "时间：主人可以规定奴隶如何使用她的时间以及她必须优先处理的事项。",
+    "安全词的取消：许多相信完全权力交换的人不使用安全词，因为这违背了完全放弃所有控制的理念。然而，并不是所有的D/s情侣都同意取消安全词。"
+]
+        # xp列表_sm分表_kink分表
+        xp_sm_kink = ["Abasiophilia: attraction to people in neck braces, wheelchairs, casts, or other devices that impair mobility that was documented for the first time as occurring in a woman in the late 80s. It may be part of a medical fetish or enjoyed because it restricts movement.",
+    "Abduction as seduction: a kink where the abductor/kidnapper treats the victim in a loving manner.",
+    "Abrasions: people who enjoy this fetish like giving or receiving cuts and scrapes.",
+    "Acarophilia: arousal from scratching. Scratching is often an element incorporated into rough sex.",
+    "Accidental stimulation: refers to accidental physical stimulation and situations that arouse adrenaline and cause arousal.",
+    "Acrotomophilia: fetish for amputees. Fetishists may prefer a specific type of amputee (arm, leg, etc). A person with a fetish for *being* an amputee has apotemnophilia. There may be overlap with morphophilia.",
+    "Actirasty: arousal by the rays of the sun. This may be enjoyed through sex outside.",
+    "Agalmatophilia: a person with this fetish is aroused by statues, mannequins or other figurative representations. This may be related to Pygmalionism, an attraction to items of one’s own creation.",
+    "Age play: role play in which one or both partners pretends to be a different age/stage. Types of age play include infantilism, Daddy/daughter play, and diaper play, among others. Some kinksters differentiate between DD/lg and age play.",
+    "Agoraphilia: fetish dedicated to sex in public places.",
+    "Aliens: kinksters fetishize about having sex with aliens, often in an abduction and forced scenario.",
+    "Altocalciphilia: a fetish for high heels, usually worn by women but not always.",
+    "Amazons and authoritarians: fetish dedicated to physically strong women like Amazons, women with strong personalities, or women in positions of authority.",
+    "Amaurophilia: kink for being unable to see, blinded or blindfolded during sex.",
+    "Anal penetration: a fetish for anal penetration with foreign objects (not sex toys or penises). Inserting objects that are not designed for anal safety (porous, without a flared base, with sharp edges) can cause damage.",
+    "Anal sex: both giving and receiving anal sex can be a kink or fetish. Giving to a male with a strap-on is also known as pegging.",
+    "Anal toys worn under clothing: a fetish for using/wearing anal toys such as using butt plugs during the day and not just during sex activity. It may be a command of a submissive by a dominant, part of anal training to take bigger items or penises and/or as part of foreplay.",
+    "Anal training: the practice of preparing one’s anus for inserting large items.",
+    "Anasteemaphilia: a fetish for people over extreme sizes, ie a giant or a dwarf. It can be used to refer to attraction to partners of differing heights even if those people aren’t especially gigantic or tiny.",
+    "Anonymous sex: a kink revolving around anonymous sexual encounters where one or both parties is unaware of the other’s identity. Gloryholes are a common form of anonymous sex but they are not the only form.",
+    "Aquaphilia: fetish for water and having sex in or around water. This can extend to a fetish for swimwear or posing in water even if it doesn’t involve sexual activity.",
+    "Asphyxiation: a highly danerous kink dedicated to choking, smothering and strangulation. Autoerotic asphyxiation is self-choking. To be clear, asphyxiation is very dangerous and has led to injuries and deaths. See also breath play.",
+    "Autogynephilia: a kink where men present/dress as women (gynemimetophilia refers to men impersonating women). Autoandrophilia is arousal at the idea of being a man. Note that this term was coined as an improvement on cross-dressing kink and has been used to describe transgendered individuals and has been used as an argument that trans people are mentally ill. Many prefer not to use this term, which is often transphobic. However, some people may have a fetish for crossdressing or becoming another gender that does not relate to their gender identity.",
+    "Autofellatio: a kink where a man performs a blowjob on himself.",
+    "Autoplushophilia: a type of plushophilia where a person is aroused by the idea being a stuffed animal, especially a cartoonish one.",
+                      "Barebacking: sex without a condom. Barebacking is especially common in the gay community, but this act can be dangerous and lead to STI transmission or pregnancy.",
+                      "Bathroom control: when the dominant person controls when, how and where the submissive can urinate or defecate. Extreme bathroom control can be dangerous.",
+                      "Begging: kink for begging and pleading (to have sex, for release/orgasm, to perform an act, etc.). Begging is submissive in nature.",
+                      "Belonephilia: affinity to pins, needles and sharp objects. Belonephilia can be quite dangerous. See also knife play.",
+                      "Bestiality: sex with animals.",
+                      "Bimbofication: The process of making someone into a bimbo or being turned into a bimbo themselves. This might be a fun “punishment” for a bratty sub.",
+                      "Blindfolds: a type of bondage that blocks a person’s vision. See also amaurophilia.",
+                      "Body Inflation: The practice of inflating or pretending to inflate a part of one’s body, often for sexual gratification.",
+                      "Bondage: restraint of a person, either by physical item (cuffs, rope, etc.) or instruction (known as mental bondage). Restraint can be full-body (vacuum beds, suspension) or involve a single body part such as the eyes (blindfold), mouth (ball gag), wrists or even thumbs. Bondage may include furniture like and devices like handcuffs. Reddit has a number of subreddits dedicated to the subject.",
+                      "Body modification: kink for a variety of body modifications. This may mean anything that changes the appearance of a body from tattoos to piercings to saline injections, but this kink may also only refer to specific body mods such as lip sewing.",
+                      "Branding: marking someone with a symbol, word, etc. Typically uses a heated object (such as a metal hanger) to produce the brand. Branding is dangerous.",
+                      "Breath play: choking and limiting breath. Being aroused by this is known as hypoxyphilia This kink is a type of edge play that is dangerous.",
+                      "Breast/nipple torture: the breast equivalent of CBT. Torture may include hitting, pinching, bondage, and other methods of inflicting pain onto breasts.",
+                      "Breast/nipple worship: the act of worshipshipping someone’s breasts or nipples.","Caning: the act of hitting someone with a rod known as caning.  Fleshy areas such as the back of the thighs and butt are advised, but some people enjoy caning the bottoms of feet. Canes are traditionally made from wood, but modern canes may be made from plastic, metal or other semi-flexible materials. Caning is a form of impact play that is more extreme than typical flogging and may be dangerous if done improperly. Sadists are usually the most common type of domthat enjoy caning their sub.",
+    "Castration: An extreme fetish involving removal of all or part of a man’s genitals. Actual castration is incredibly dangerous. Most kinksters obsess over it without actually going through with it. This kink goes hand in hand with emasculation fetishes as well as the ball busting, in which a man’s balls are crushed.",
+    "CBT: Cock and ball torture (CBT) is pain applied to a man’s genitals. It may be a form of punishment. CBT can involve shoes, sounding, stretching, impact implements and other tools. CBT can be dangerous.",
+    "Chasmophilia: aroused by crevices, caverns, or valleys.",
+    "Chastity: a fetish where someone’s access to their genitals is blocked. Women wear chastity belts, and men wear cock cages that prevent erection and release. Also known as forced abstinence or forced celibacy. Chastity can be used as a form of self-denial or orgasm control, including ruined orgasms.",
+    "Choking: blood choking is the act of choking someone until they pass out. It is incredibly dangerous and can lead to brain damage. Choking is a type of edge play",
+    "Claustrophilia: this fetish is the opposite of claustrophobia. A person becomes aroused or experiences orgasm through confinement to small spaces. This is a type of bondage.",
+    "Clothed sex (endytophilia): the affinity for sex while fully or partially clothed. You can enjoy this kink while lifting your skirt or dress, so your man penetrates you. Pushing underwear to the side can also be a form of this fetish.",
+    "Cock and/or ball fetishization: an obsession with cock and balls.",
+    "Cock worship: similar to breast worship. This fetish involves verbal, physical and mental adoration of a penis – including fake ones (strap-ons).",
+    "Collaring: for many types of submissive, the act of wearing a collar shows submission, loyalty and/or devotion to a dominant. A collar may be seen as purely sexual or also romantic (similar to an engagement/wedding ring). Collars may be placed on in public or private collaring ceremonies, and dominants may provide instructions for wearing collars. The collar may be an actual collar purchased from a pet store, one that is hand-tooled or a safe-for-work necklace or choker that can be worn in non-kinky spaces.",
+    "Consensual nonconsent: situations where one or both parties have given prior consent for activities that may appear to be or actually involve nonconsent. Rape play is a common form. The “victim” has given prior consent to this type of play but seems to resist. Couples should negotiate boundaries beforehand, including a safe word. Consensual nonconsent should never be spontaneous. If negotiations are avoided or safe words ignored, consensual nonconsent can lead to real trauma or even become sexual assault.",
+    "Corsetry: the act of wearing a corset, sometimes to the extent of changing the shape and size of one’s body. Tight-lacing a corset enables one to successfully waist-train.  Some dominants may use tight-lacing to limit breathing. It’s not just limited to your abs and tummy either.",
+    "Cross-dressing: dressing like a member of the opposite sex. For many people, it’s not necessarily sexual while it is for others. Cross-dressing can involves clothing, accessories, makeup, and wigs.",
+    "Crurophilia: A kink related to legs.",
+    "Crush fetish: a particular fetish relating to crushing small animals or objects. Squashing kink is a similar obsession.",
+    "Cunnilingus: this kink can be geared towards receiving oral sex as a woman or giving it either as a man or woman. Cunnilingus plays well with pussy worship. If your partner has a kink for licking pussy, you won’t need to convince him to go down on.",
+    "Cupping: small cups or jars are applied upside down to the body, usually the back. Fire or a hand-pump creates suction that results in temporary bruising and a tight feeling. Extreme cupping can break the skin, but cupping is considered safe (the flame is only used for suction and doesn’t burn the skin).",
+                      "Dacryphilia: arousal caused by tears or crying.",
+                      "Degradation: if you like when your man talks down to you during sex, you might be into degradation. This is one of those kinks that works especially well with domination and submission. Just because you like doing it (giving or receiving) during sex doesn’t mean you think any less of your partner. However, not everyone likes degradation, and that’s okay.",
+                      "Dendrophilia: also known as Arbophilia. A sexual attraction to trees, either because they are phallic-shaped or because of the texture. May overlap with xylophilia.",
+                      "Diapers: this fetish is usually part of infantilism – but not always.",
+                      "Discipline: giving or receiving punishment for perceived or defined infractions. Discipline is a major part of many power exchange relationships and something typically desired by masochists and administered by sadists.",
+                      "Dirty talking: having a kink for talking dirty during sex is pretty tame. Some people might not even consider it a fetish! See also narratophilia.",
+                      "Doraphilia: playing with skin, leather, or fur. Hyphephilia is a similar fetish for touching hair, fur, skin and certain fabrics.",
+                      "Double penetration: penetration of a woman’s vagina and ass via a combination of toys, penises or both. Double penetration may be part of a group sex scenario (MFM), which often occurs in the swinging lifestyle.",
+                      "Dracophilia: a fetish for dragons. Fantasy fetish companies such as Bad Dragon make dragon dildos, including those that ejaculate!",
+                      "DVP: stands for double vaginal penetration. Unlike double penetration (DP), which is simultaneous anal and vaginal penetration, DVP involves two penises or one penis and one toy in the vagina. It can be satisfying for all parties; although, it requires lube and preparation. In DVP, only one partner may have enough room to thrust.",
+                      "Edge play: Any kink or fetish that is considered more risky or extreme. Examples include choking, breath play, knife play, fire play, and any activity that results in bleeding.",
+                      "Elastophilia: a fetish for stretchy materials including spandex, latex, silicone, etc. Elastophiles often enjoy bouncing on these materials or sinking deep down into something stretchy.",
+                      "Electric play: playing with uncontrolled electricity is very dangerous and can even lead to heart failure. However, most people (aside from those with pacemakers, heart issues, and other implants), can safely play with TENS units or violet wands to explore this kink.",
+                      "Enemas (klismaphilia) : inserting a tube into the anus and using a liquid (typically water, but other solutions may be utilized including urine) to clean out the rectum. Enemas may be used to prepare for anal activities, but this is not necessary. An enema could be a form of punishment or control.",
+                      "Enkuopoiphilia: fetish for impregnantion or breeding.",
+                      "Eproctophilia: arousal from flatulence (farts). It’s a type of olfactophilia",
+                      "Exhibitionism: a common fetish for being naked and performing sexually in front of a person or persons. Masturbating for your partner is a mild form of this kink, but performing in sex windows or at BDSM shows and parties is a safe way to explore this fetish. Sex in public is partly exhibitionism. Related to agrexophilia, which is arousal when other people know about your sexual activities, and autagonistophilia, exposing oneself while on stage and being photographed. The counterpart of voyeurism.",
+                      "Exoticism: fetishizing members and elements of Far Eastern culture (Japan, China, etc.), including fictional worlds inspired by these locations. A preoccupation with Geishas is common in the Western world, for example. See also Otherness.",
+                      "Face fucking: an extreme form of blowjob where a man roughly fucks a partner’s mouth. This kink isn’t inherently dangerous, but it can be uncomfortable and lead to tears, gagging and even vomiting.",
+                      "Face sitting: the act of a woman sitting on a man’s face while he performs oral. Face sitting can include mild suffocation but doesn’t have to. It’s incredibly dominant.",
+                      "Face slapping: a slap across the face brings you to attention and corrects your mistakes. You’re unlikely to enjoy this fetish unless you’re a bit of a masochist, but it’s not as far out as some items on our list of kinks.",
+                      "Fat fetishism: The sexual attraction to overweight or obese people due to their weight and size. Gaining or feederism (mentioned below as “Forced feeding”) is a variation of fat fetishism where the sexual attraction/gratification is not solely gained from the “fatness” but more from the process of gaining weight/getting fat.",
+                      "Fellatio: Not usually deemed a fetish or kink, but it can be for some.",
+                      "Figging: using ginger root to create a burning sensation. It must be peeled before it can be inserted anally or vaginally.",
+                      "Fighting/Wrestling: play fighting and wrestling is sexy because your body proximity as you struggle to maintain control. Even if you lose, you don’t *really* lose! If you’re turned on by a fight between other people, you’re not alone, either.",
+                      "Fire play: a form of edge play that involves flames and fire. Kinksters should be careful with hair, which can burn off and smell terrible (consider shaving first). Fire/heat may be contrasted with cold/ice. Fire play can be dangerous.",
+                      "Fisting: the act of penetration with a full hand. Unlike the name suggests, your partner should start with your hand straight and thumb tucked under his fingers like a duck bill. After he inserts his knuckles – the widest part of his hand – he can curl his fingers into a fist/ball shape. Fisting requires time, patience, trust and lots of lube.",
+                      "Flogging (flagellation): hitting someone with a multi-tailed tool known as a flogger. Depending upon the strength of the swing, flogging can range from warm-up to harsh impact that draws blood. Floggers tails come in many materials: fur, leather, suede, rubber, silicone, and ball-chain to name a few.",
+                      "Food play: incorporating food into sex. This may mean using someone as a dish or table, covering your partner’s body with food and licking it off (think whipped cream or chocolate sauce, but you can get creative!). Food play can be fun, but beware that playing with food near your vagina could contribute to a yeast infection. More on that [here](https://badgirlsbible.com/yeast-infections-causes-symptoms-treatment). A fetish for food is known as sitophilia.",
+                      "Foot fetish (podophilia): a foot fetishist enjoys feet sexually. This may involve footjobs, licking and sucking, massaging. Foot worship in a power exchange scene can take the form of polishing shoes or boots even with a tongue or worshipping feet!",
+                      "Forced feeding: a kink for forcing someone to eat, potentially until they gain weight. This fetish is a type of body modification fetish. Feederism sometimes specifically refers to men feeding women but can be used without any distinction.",
+                      "Formicophilia: arousal by insects or by insects crawling on and nibbling the body. The fetish for bees and wasps specifically is known as melissophilia while an attraction to spiders is known as arachnophilia.",
+                      "Frotting: rubbing of two penises together. One man may hold the penises together during this act. Similar activities include frottage (rubbing while clothed for sexual stimulation) and frotteurism (rubbing or fondling an unsuspecting/non-consenting person).",
+                      "Furries: this kink is hot, literally. Furries dress as animals or humanoid animal creatures, sometimes decked head-to-toe in fur. They often don animalistic dildos via strap-ons to enhance their furry play. Many furries engage in role playing games and cosplay as part of their lifestyle, which can become quite expensive. Note that some furries engage only in costumes and roleplay only and no sexual activity (although some people do not see a distinction). To differentiate, “yiffy” refers to a sexualized furry fetish.",
+                      "Gags: a form of mouth bondage. Gags come in many forms, but ball gags are the most common. They may also take the form of bit, cleave, pacifier, penis or spider gag, among others. Mouth gags aren’t usually dangerous, but they can be uncomfortable. Make sure to fit the gag properly to your (or your partner’s) mouth.",
+                      "Gerontophilia: attraction to someone from a much older age group. May-December relationships can fall into this kink if the members of the couple specifically fetishize the age difference.",
+                      "Golden showers: See watersports.",
+                      "Group sex (Polyiterophilia): group sex and multiple party scenarios can be quite hot, but they can also be uncomfortable. Threesomes are one of the more common arrangements (and a fascination with three-person sex is known as triolism/troilism). Wanna try a threesome yourself?",
+                      "Haematomania aka hematolagnia : lust for blood and bleeding. May include wounds, vampirism or biting to draw blood. It goes without saying that this one is obviously quite dangerous.",
+                      "Harpaxophilia: the fetish for being robbed. Can be played as a role in consensual non-consent. Chrematistophilia is a similar kink for being forced to pay for sex.",
+                      "Helplessness: any role in which someone is helpless. They may be the victim to their roleplay partner (robber, kidnapper, etc), or their partner may act as a savior (think of a princess who needs saving or an inept housewife).",
+                      "Homeovestism: attraction to the clothing of one’s own gender or by people wearing the clothing accepted as appropriate for their gender by society.",
+                      "Hybristophilia: arousal by the knowledge that one’s partner has committed a heinous act or crime. This can include cheating, lying, robbery, or murder. This is sometimes known as Bonnie and Clyde Syndrome after the American bank-robbing and murdering duo. One partner is turned on by the other’s bad deeds. Some people find themselves attracted to criminals who are in prison.",
+                      "Hypnotism: in an erotic situation, hypnosis could be a form of consensual nonconsent. Try out this kink with some sexy magician/assistant role play.",
+                      "Hypoxia: paraphilia for being submerged under water to restrict breathing, a type of erotic asphyxiation. This can be fatal.",
+                      "Immobility: a kink involving bondage and forced feeding.",
+                      "Impact play: any activity involving hitting, either with body parts or other tools. Hitting, punching, spanking, flogging, whipping and paddling are just a few forms of impact play, and intensity varies with the tool and effort.",
+                      "Impregnation: the fascination with making someone pregnant/conception during sex, typically from a man’s point of view.",
+                      "Imprisonment: obsession with being locked inside cages, cells, coffins or other areas.",
+                      "Infantilism: a specific type of age play where someone plays an infant/baby. This can involve pacifiers, diapers, bottles, etc. A second person may act as a nanny or parent.",
+                      "Internal cumshots: similar to a semen fetish but arousal is due to being ejaculated into rather than on. If you’re trying to avoid pregnancy, anal sex is the only safe way to engage in this kink. But STIs can be transmitted through semen even during anal sex.",
+                      "Intercrural or interfemoral sex: thrusting between someone’s thighs without penetration.",
+                      "Intoxication: taking drugs or alcohol during or before a sex scene. Intoxication can lead to poor decision-making, risky behavior and mistakes that could be dangerous or even fatal, especially when mixed with edge play.",
+                      "Jerk off instructions (JOI): Being instructed to told to to masturbate.",
+                      "Katoptronophilia: a fetish for having sex in front of mirrors. Some people are simply turned on by seeing themselves in a mirror.",
+                      "Keraunophilia: a sexual fascination with thunder and lightning – similar to arousal from thunderstorms (brontophilia). You can’t incorporate it into your sex, but a thunderstorm makes a good backdrop for sexy times! Many people find their levels of desire increase during storms.",
+                      "Kigurumi: this fetish is all about wearing anime masks, specifically men who wear masks of women.",
+                      "Knife play: a type of edge play activity that involves actual knives or blades or the implication of. Breaking someone’s skin during kinky sex could be quite dangerous.",
+                      "Lactation: a lactation fetishist is all about lactating mammaries, that is, boobs producing milk. Many women enjoy the sensation of nipple suckling, and their partners enjoy breastfeeding. Lactation fetishists may encourage lactation when it wouldn’t naturally occur because the milk specifically is their kink (lactophilia), or engage in breastfeeding without milk.",
+                      "Latex/rubber: latex, rubber, PVC and similar materials attract our eyes with their sheen. They make for perfect fetish photography, too. Fortunately, you can get your kink on with the help of many retailers that specialize in latex gear and clothing.",
+                      "Lesbophilia: men with this kink enjoy lesbian sex more than your typical male. Some may go so far as to imagine themselves as women in girl-on-girl scenarios.",
+                      "Lithophilia: a kink for rocks, stones, or gravel. This can be used nonsexually.",
+                      "Macro Fetish: people with this kink enjoy partners who are giant. This may mean plus-sized, but it can mean giants in the realm of fantasy roleplaying and writing.",
+                      "Macrogenitalism: a fetish for genitals that are particularly large. This isn’t limited just to penises.",
+                      "Maiesiophilia: sexual attraction to pregnant women or giving birth.",
+                      "Maschalagnia: a fetish dedicated to armpits, including, kissing, licking and smelling. This kink may also involve inserting penises in the armpit for stimulation.",
+                      "Masochism: enjoyment of pain, punishment, and torture. Someone who feels this is known as a masochist. Masochists are often but not always submissive.",
+                      "Mechanophilia: sexual attraction to and arousal by machines. While other fetishes objectify robots, this one can include a wider variety and may also go along with the desire to have sex in or on a machine such as a car, bike, plane, etc.",
+                      "Medical play: role play involving medical scenarios, medical implements (scalpels, needles, speculums, etc) and/or medical uniforms. Medical play often involves an examination of one person by the “doctor,” who may take advantage of the situation. Play piercing is also common in medical play. Any play that breaks the skin can be dangerous if an infection occurs.",
+                      "Menophilia: an obsession with menstrual blood. Fetishists of this type don’t mind period sex. In fact, they may prefer it. And they might like going down on a woman when she has her period.",
+                      "Merinthophilia: the fetish for bondage. See also vincilagnia.",
+                      "Mess fetish (hygrophilia): if you would rather avoid the wet spot on the bed, then this kink probably isn’t for you. Mess fetishists enjoy the mess created by sexual fluids, both male and female fluid. They may use the fluids as lubes, to drink, to “paint” on their partner’s body or passing it back and forth orally (snowballing).",
+                      "Micro fetish: the opposite of a macro fetish. Kinksters enjoy when partners are much smaller than them or being the smaller partner. Those who fall into the latter group may enjoy the feeling of being crushed during sex.",
+                      "Military: a military fetish that often goes hand in hand with a uniform fetish.",
+                      "Mixophilia: a kink related to watching yourself having sex. Recording sex and mirrors are two ways to enjoy this kink.",
+                      "Morphophilia: people with this fetish are attracted to bodies and body parts that are different from the norm. They might enjoy amputees, dwarves or people with other deformations.",
+                      "Mummification: a kink where someone is bound entirely or nearly entirely to prevent almost all movement. A vacuum bed can achieve full mummification as can plastic wrap, but it can be dangerous if bindings prevent airflow. Mummification can also involve extreme temperatures, so hydration is a must to do it safely.",
+                      "Muscles: some people have a fetish for defined or large muscles. Muscle worship is one variant of this kink.",
+                      "Mysophilia: this fetish is for dirt and items that have been dirtied, especially by bodily fluids during sex. Used underwear is a common example.",
+                      "Narratophilia: a fetish shared by those who enjoy telling and listening to dirty stories, talking about sex or incorporating dirty talk into sex.",
+                      "Nasolingus: a fetish for sucking on someone’s nose.",
+                      "Nasophilia: fetish for noses.",
+                      "Necrophilia: the fetish for human corpses.",
+                      "Necrozoophilia: fetish for deceased animals.",
+                      "Needle play:  playing with needles can involve breaking the skin and temporary piercing. Needles can also be used to scratch.",
+                      "Nonconsensual: a kink for sex without consent (rape). All nonconsensual sexual activities and play are forms of sexual assault or rape. This is illegal, traumatizing and can be dangerous.",
+                      "Nullification: kink for removing any body part. This is very dangerous.",
+                      "Nullo: an extreme kink for removal of genitals. In practice, nullo is very dangerous and can even be fatal.",
+                      "Nyctophilia: if you love the night, you might have this fetish. It can also refer to fetishizing darkness. Scotophilia has the same meaning.",
+                      "Objectophilia (Objectum Sexuality): also known as fetishism. This refers specifically to arousal by and sexual activity with an inanimate object such as shoes.",
+                      "Oculolinctus: desire to lick eyeballs.",
+                      "Oculophilia: an obsession with the eyes.",
+                      "Odaxelagnia: kink for biting or being bitten. May or may not involve blood.",
+                      "Odontophilia: the general fetish for teeth, which can include biting, licking teeth or even removing them.",
+                      "Olfactophilia: attraction to smells, especially pungent body odors. Osmolagnia is the fetish for sweat or gaseous emissions specifically.",
+                      "Omorashi: the Japanese word for a fetish related to having a full bladder and urinating on oneself. Often shortened to “omo.”",
+                      "Orgasm denial: type of play where someone’s orgasm is denied entirely, limited/ruined or delayed.",
+                      "Otherness: sexual attraction to someone from other places, including aliens. See all xenophilia and exoticism.",
+                      "Parthenophilia: a fetish for virginal partners.",
+                      "Partialism: sexual obsession for specific body parts and not the whole. Eyes, faces, forearms, and feet are all common objects of obsession, but any body part will do.",
+                      "Pecattiphilia: fetish for sinning and breaking religious rules.",
+                      "Pediophilia: fetish for dolls, especially sex dolls.",
+                      "Penis Humiliation: a kink involving insulting a man’s penis, including size, appearance, and performance.",
+                      "Peodeiktophilia: showing one’s penis to others (flashing).",
+                      "Pet play: any kink where someone acts like a domesticated pet. Cats and dogs are especially common with leashes, collars and food/water dishes used as props.",
+                      "Phalloorchoalgolagnia: arousal from pain directed toward male genitals. See also cock and ball torture (CBT).",
+                      "Phallophilia: obsession with large penises.",
+                      "Phobophilia: sexual obsession with being afraid. This fetish can be directed toward hate as well as fear.",
+                      "Phygephilia: fetish for being a fugitive on the run.",
+                      "Pictophilia: fetish for watching pornography, especially of the same actor.",
+                      "Play piercing (Piquerism, Picquerism): play piercing is performed for temporary decoration as well as for the sensation of breaking the skin.",
+                      "Plushophilia: fetish for stuffed animals. These people may have a kink specifically for teddy bears, and they may be furries. Reddit has numerous communities on stuffed animals.",
+                      "Pony play: a kink for acting like a pony or its master. “Ponies” can wear everything from blinders to bits to bridles to fake ears and hooves. Ponies are trained by their masters and may even do manual labor.",
+                      "Psychrophilia: arousal by being cold or watching others be cold. Having sex in freezers or meat lockers or around ice might fulfill this kink. In other contexts, a psychrophile is an organism such as bacteria that grows in extreme temperatures such as the poles or deep ocean.",
+                      "Pregnancy: this kink goes beyond a woman’s pregnant glow. Some people just can’t get enough of a pregnant woman’s powerful and sexy body. It’s so common that there are three different names for it: preggophilia, and maieusophoria. Your partner may even be surprised by how turned on he is when you’re pregnant – and your hormones might have you wanting more sex, too.",
+                      "Psychrocism: fetish dedicated to being cold, having sex with a cold partner or using cold objects (ice cubes, cold dildos, etc) during sex.",
+                      "Pteronphilia: kink for being tickled specifically by feathers.",
+                      "Pubephilia: obsession with pubic hair. A love for pubic hair has been expressed in literature and art.",
+                      "Pygmalionism: sexual obsession with human-like images, especially when you made it yourself. This fetish may lead to stimulating oneself with statues or mannequins.",
+                      "Pygophilia: partialism to butts and seeing, touching and playing with them.",
+                      "Pyrolagnia: sexual arousal from watching or setting fires. Playing with fire is dangerous. At least one study has been done on the subject.",
+                      "Pyrophilia: a fascination with fire. Setting fires and using fire during sex can be dangerous. However, massage candles can be used safely because of the wax’s low melting point, and fire cupping is not usually risky.",
+                      "Quirofilia: fetish for hands. Some people fetishize certain parts of the hand such as the fingers or fingernails. Others may prefer hands of a certain size or shape. Still others with this fetish may enjoy seeing hands performing certain actions. It could be masturbation or something nonsexual such as washing the dishes.",
+                      "Rape fantasy: a fetish for acting out a pretend rape (consensual nonconsent). This fantasy can occur on both the victim or perpetrator’s sides. Arousal at the idea of rape is known as raptophilia.",
+                      "Revving: kink for watching someone rev an engine, especially when they wear heels. Also known as “pedal pushing” or “pedal pumping.” There are plenty of videos on pornography sites and even Youtube featuring women in bare feet or high heels pushing the gas pedal. Sometimes these women are referred to as gas pedal honeys.",
+                      "Retifism: the fetish for shoes and footwear. Also known as altocalciphilia.",
+                      "Rhabdophilia: a fetish for receiving physical beatings such as flogging or whipping.",
+                      "Robotism: kink for androids (male robots) or gynoids (female robots) or cyborgs.",
+                      "Ropework: a kink for rope as used as the specific type of bondage. Popular types of ropework include the Japanese-inspired shibari, more correctly called “Kinbaku”.",
+                      "Rimming: a kink for giving or receiving rim jobs. Aka. Oral sex in and around the anus.",
+                      "Sadism: the kink for providing pain. Masochists and sadists often come together to meet one another’s kinky needs.",
+                      "Savantophilia: fetish for people who have a cognitive impairment or delay.",
+                      "Scatophilia a fetish for fecal matter. Also known as coprophilia.",
+                      "Sensation play: a light kink where partners exchange sensations on the skin. Items with different textures (soft, hard, bumpy, smooth, cold, hot, etc) can be run across the skin. Pain isn’t involved, but you can alternate between pain and sensation during light BDSM play.",
+                      "Sensory deprivation: any play that prevents someone from using one of their five senses. Blindfolds block sight, gloves prevent touch, earmuffs deprive the sense of hearing, etc.",
+                      "Siderodromophilia: a fetish for trains or engaging in sexual activity on a train.",
+                      "Slime fetish: a kink for slime and slimy things. Tentacles are a prime example of a slime fetish in popular media. This fetish is closely related to the mess fetish.",
+                      "Sneezing Fetish: a kink for watching someone else sneeze. This person is usually naked. Sneezing elicits a bodily response somewhat similar to orgasm. People with a sneeze fetish might also participate in tickling and forced urinating kinks.",
+                      "Snuff: a fantasy fetish for killing someone or being killed. Snuff is often considered to be an urban legend, and it’s an obviously dangerous and illegal in practice.",
+                      "Somnophilia: the fetish for sexual partners who are asleep. It is a rare fetish. People with this fascination may enjoy the “sleeping princess” trope. In reality, a partner should specify prior consent to sexual activity that happens or begins while they are asleep because sleeping people cannot give consent. Definitions differ, however.",
+                      "Sounding: a kink for inserting thin tubes, usually made of glass or metal, into the urethra. This is one of the most common forms of urethral play. Kinksters often use medical sounds or similar tools, and sounding can be part of medical play. Sounding can be dangerous, especially if the item inserted breaks off internally or is not sanitized beforehand.",
+                      "Spanking: this is a fetish that many people have tried in the bedroom. A firm hand comes into play as punishment or enticement in many power exchange relationships, including domestic discipline relationships and schoolgirl roleplay. You might enjoy spanking from time to time even if you don’t consider yourself all that kinky, but spanking can also be quite extreme.",
+                      "Stigmatophilia: the fetish for piercings and sometimes tattoos. See body modification fetish.",
+                      "Stockings: items that are often fetishized. Some people like all of them. Others prefer those that are lace-topped, hooked to a garter belt or with a visible seam down the back.",
+                      "Strap-on: fetish specifically for using strap-ons. Anal, oral or vaginal penetration can be achieved. Anally penetrating a male with a strap-on is known as pegging.",
+                      "Stygiophilia: arousal by thoughts of hell and eternal damnation.",
+                      "Stuffing: eating until the point of physical pain.",
+                      "Suspension: the practice of suspending someone from the ground or being suspended yourself. Suspension can be accomplished with ropes, harnesses and other devices and items.",
+                      "Symphorphilia: fetish for watching car accidents or other traumatic incidents.",
+                      "Taphephilia: fetish for being buried alive. This may be connected to an imprisonment kink.",
+                      "Teasing (Tantalolagnia): To enjoy teasing as sexual gratification. This may be prolonged sexual teasing or teasing in the form of insults and ribbing.",
+                      "Technophilia: a fetish for any technology such as robots, AI and sex machines. Kinks for cybernetic enhancements fall into this category, and some may fetishize the idea of amputations.",
+                      "Teleiophilia: the erotic preference for persons between the age of physical maturity and the onset of middle-age.",
+                      "Telephonicophilia: the fetish for phone sex and dirty talking over the phone.",
+                      "Tentacle fetish: fetish for tentacles. Many people enjoy animated erotica/pornography with tentacles, and tentacles dildos also lend to this fantasy.",
+                      "Teratophilia: attraction to people with bodily deformities. This umbrella term includes several other fetishes on this list including stigmatophilia, morphophilia, and acrotomophilia. However, it may also refer to a sexual attraction to “actual” monsters.",
+                      "Thesauromania: kink for collecting women’s clothing. The collector may focus on specific items/categories such as underwear.",
+                      "Tickling (Knismolagnia, Knismo, Titillagnia): while tickling can be a form of teasing, it’s a kink in its own right for some people. Those who enjoy tickling may enjoy surrendering control or struggling to retain it. Tickling to the point of urinating is also one flavor of this fetish. Tickle torture is a kink for tickling or being tickled while bound.",
+                      "Transformation fetish: kink for transforming into other people or even non-human creatures. TF is common in hentai and some written erotica.",
+                      "Trichophilia: hair fetish. Hair pulling during sex.",
+                      "Triolism: a fetish for threesomes. This may include a kink for watching your partner have sex with someone else.",
+                      "Tripsolagnophilia: massage fetish. Even if you don’t have a fetish, a sensual massage can be relaxing and it’s good foreplay!",
+                      "Underwear fetish: the fascination with underwear, usually women’s underwear. Men with this fetish will collect, wear or smell underwear.",
+                      "Uniforms: many women love a man in uniform, but not every couple incorporates this into their sex lives. Those who do just might have a uniform fetish. Uniforms, of course, can make someone seem like a powerful person (military, police and firefighter uniforms are some of the most popular) or help you get into the role of a naif (schoolgirl, waitress, Playboy bunny) and a well-fitted uniform shows off a person’s body in just the right way. If your job requires a uniform, you’re in luck. Otherwise, you can hit up a costume shop or even buy uniform-inspired lingerie.",
+                      "Ursusagalmatophilia: kink for teddy bears or dressing up as a teddy bear/animal.",
+                      "Urtication: using the nettle plant to sting a partner’s skin.",
+                      "Vaccinophilia: vaccination fetish. See also medical play and belonephilia.",
+                      "Vicarphilia: being sexually vicarious, specifically related to enjoying other’s stories of sexual activity.",
+                      "Vincilagnia: kink for being tied up and at the mercy of another person. This is a type of bondage fetish.",
+                      "Vomit Fetish (Emetophilia): a sexual obsession with the act or substance of vomit.",
+                      "Vore/Vorarephilia : sexual desire to be eaten alive or to eat someone while they are still alive. Vore would incredibly dangerous and illegal if attempted in reality, but it remains a fantasy for most people. You’ll find plenty of art and stories dedicated to vore on DeviantArt, Tumblr, and Reddit.",
+                      "Voyeurism: a kink for watching someone else while naked or engaged in sexual activity. Voyeurs and exhibitionists make excellent pairings. Non-consensual voyeurism may be against the law. Ecouteurism is a related kink for listening to someone have sex without permission. The fetish is also known as scopophilia.",
+                      "Watersports (urophilia): A relatively popular fetish, watersports are also known as golden showers. This kink involves playing with urine, being peed on or urinating on another person. Want to know more about golden showers? A particular form of this is wetting: urinating in one’s underwear and clothing.",
+                      "Wax play: using wax during sex. Wax comes in the form of massage candles, which are relatively safe. But other types of wax may have a higher melting point and be more dangerous. Flames used to melt wax also pose a risk.",
+                      "Weapon fetish: sexual arousal due to weapons. This appears in some erotic media.",
+                      "Wet and messy (WAM) fetish: being turned on by being soiled by things other than bodily fluids. Also known as sploshing. This can include food.",
+                      "Xenophilia: sexual attraction to exotic people or objects.",
+                      "Xylophilia: fetish for wood. It may also be described as an attraction to nature, sexual or in general.",
+                      "Yeastiality: sexual activity involving bread, especially warm dough. This may be an alleged kink. Introducing yeast to the genitals can lead to an infection.",
+                      "Yiffing: sex with stuffed animals or a furry.",
+                      "Zelophilia: arousal due to jealousy, either your own or someone’s jealousy over you. Cuckhold fantasies are one such example where men know – and sometimes watch – their wives engaging in affairs.",
+                      "Zentai: wearing skintight suits while grinding against others in similar suits.",
+                      "Zoophilia: dressing like an animal for sex or feeling romantic attraction to animals.",
+                      "Zoosexual: sexual attraction to animals. See bestiality.",
+                      "Zwischenstufe: the sexual obsession with people of the same sex."
+                      ]
+        # xp列表_sm分表_sm type分表
+        xp_sm_type = [
+            "【DOM】爸爸/妈妈型支配者：关怀和保护，使其成为那些脆弱、敏感或需要关心的顺从者的好伴侣。养育型的支配者通常喜欢顺从者的顽皮、可爱和天真，甚至是他们的天真，并认真对待顺从者的福祉。责骂 – 当顺从者犯错时；体罚– 当他们越界时；安慰 – 拥抱你的顺从者并告诉他们他们是乖女孩或乖男孩；保护 –他们顺从者的感情；表扬 –表扬他们的伴侣听话和服从（如果你有表扬癖，这会非常好）",
+            f"【DOM】主人/女主人：“主人”和“奴隶”常常进行24/7的权力交换，这也被称为完全权力交换（TPE，total-power-exchange)。在TPE中，权力交换从未停止；相反，它渗透到情侣生活的方方面面，主人或女主人掌控他们共同生活的全部或大部分方面，可能剥夺奴隶争辩或拒绝的能力。提供许可 – 例如，允许顺从者自慰、进食、上厕所、触碰自己或说话；施加惩罚 – 当命令没有被准确遵循时；承担责任 – 为奴隶的身体、心理、情感和经济福祉负责。最显著的TPE条款：{random.choice(xp_sm_tpe)}",
+            "【DOM】顽童调教者：如你所料，调教淘气鬼者是淘气鬼的对手。淘气鬼是以叛逆和顽固著称的顺从者。调教淘气鬼者必须同样强大，以赢得淘气鬼的顺从，并理解这种行为的本质。当调教淘气鬼者对他们的顺从者使用惩罚或武力时，这种关注最终会让淘气鬼感到被渴望、被关心，甚至是安全。成功的调教淘气鬼者所需的耐心和冷静并不是每种支配者都具备的特质。一些支配者更喜欢不会顶嘴的顺从者。然而，许多调教淘气鬼者发现，调教淘气鬼的挑战和行为是有趣的。身体束缚和压制 – 如果淘气鬼反抗，捆绑可以帮忙；下达命令 – 可能会被忽视或反抗；提供惩罚 – 在必要时，但不会失去冷静；展示力量 – 应对淘气的行为，退缩或显得软弱不是淘气鬼想要的；保持耐心和尊重 – 向淘气鬼展示他们并不是难以应对的，并且受到关心",
+            "【DOM】绳艺主导/绳艺师：在BDSM中，绳艺主导或绳艺师是特别或仅对绳缚感兴趣的支配者。他们可能涉猎从悬吊到胸部束缚到捆绑等各种技巧。绳艺师有时可以在玩乐派对、地牢或会议上找到，他们的伴侣甚至可以完全穿着衣服。严肃的绳艺主导通常会拍摄他们的作品，包括他们自己发明的捆绑方式。准备 – 绳子和配件如快挂；关注顺从者 – 在开始之前讨论任何伤害或问题，绑缚时关注身体反应等；仔细捆绑 – 确保绳子不扭曲或摩擦皮肤；不拉扯绳子穿过皮肤或让松散的绳子击打顺从者；确保顺从者的安全 – 检查绳子是否有磨损，悬吊是否能承重，避免对器官/压点施压，听从安全词，并在紧急情况下迅速解开或放下顺从者；练习 – 绑结可以通过观看视频、阅读书籍或网站，以及参加工作坊来进行练习",
+            "【DOM】财务支配者：这种类型的支配者是财务顺从者（有时称为支付猪）的对手。“Fin”代表财务，但财务权力交换不应与传统的性工作混淆，性工作者提供性刺激以换取金钱。相反，财务支配者以某种方式控制他们的顺从者的金钱。知道有人控制他们的财务对财务顺从者来说是一种吸引力。由于控制的是财务而不是身体，这种安排非常适合异地恋。限制对金钱和账户的访问 – 包括信用卡、银行账户等；提供金钱访问权限 – 即津贴；从财务顺从者那里接收钱 – 作为服务的报酬；羞辱玩法 – 例如言语羞辱（这是某些但不是所有财务支配关系的重要组成部分）",
+            "【DOM】服务型主导：如果你是那种喜欢通过提供感觉和刺激来满足伴侣需求的支配者，你可能是服务型主导。服务型主导可能并不认为支配是他们性格的一部分；相反，他们在BDSM场景中扮演积极角色，因为他们喜欢为他人服务。这种角色在场景结束时也随之结束，他们的理想伴侣可能是受方，但不一定是顺从者。服务型主导可以被视为从下而上的支配者的一种对立面。一些专业的支配者，包括专业女支配者，也可以被视为一种服务型主导。绑缚顺从者 – 使用绳子、手铐、眼罩或其他束缚工具；进行冲击玩法 – 如打屁股、鞭打、拍打、鞭笞等；提供刺激 – 温度玩法、刀片、拍打、电击等；协助其他支配者或主导者 – 进行惩罚等；与受方协商– 在场景前；注意安全词 – 在场景中",
+            "【DOM】宠物主人：一些顺从者会扮演宠物的角色，比如狗、猫和马等。他们的支配伴侣通常是主人。这些情侣共同模仿动物与主人之间的关系，行为因具体动物而异。例如，马匹玩法可能涉及比其他类型的宠物玩法更多的训练和体力劳动。宠物玩法为独特的配饰和性玩具创造了许多机会，包括项圈、口套、牵引绳、马具等。训练 – 他们的马、狗、猫或其他宠物；准备配饰和装备 – 项圈、马具、口套；梳理他们的宠物 – 梳毛和洗澡；提供其他照顾 – 如水、食物和关注",
+            "【DOM】女支配者（Domme）：“Domme”是“dom”的女性化版本，因此它指的是女性支配者，发音相同。为伴侣提供刺激和感觉 – 快感、疼痛、感官支配、束缚等；下达命令和惩罚 – 可以包括羞辱或女性化（sissification），或布置顺从任务；关心伴侣的福祉 – 身体、心理和情感方面；反向插入– 使用绑带进行肛门插入，可以刺激前列腺",
+            "【DOM】原始型支配者：原始型支配者喜欢野性和动物性的虐恋与BDSM，这在许多人看来属于边缘玩法（风险更高的癖好）。这与温和的支配者表现出的行为截然不同。原始行为可以通过伴侣（有时称为猎物）的抓挠、刮伤、咬等动作触发。一些原始型支配者更喜欢依靠身体的力量，而不是束缚和其他工具。偶尔，一些原始型支配者会与其他原始型支配者或首领一起玩耍，权力交换来回流动，这在其他类型的支配者中较少见。追捕 – 并压制顺从者；进行粗野性爱 – 咬、抓、扯头发等‘’发出动物般的声音 – 包括低吼；利用感官 – 尤其是嗅觉",
+            "【DOM】白骑士型支配者：白衣骑士是一种将自己视为顺从者的拯救者，纠正错误并与敌人作战的支配者类型。许多人将自己视为和被视为利他主义者。骑士精神通常是他们信仰和个性的基石。当遇到无法解决的问题时，白衣骑士可能会感到沮丧，并且可能过分关注拯救人们，选择脆弱或受伤的伴侣。这种类型的支配者通常是男性。解决问题 – 尤其是为了他们的顺从者；保护 – 他们的伴侣和家人；宠爱顺从者 – 他/她是公主（或王子），而支配者是国王（或皇后）",
+            "【DOM】施虐者：施虐者是一种喜欢制造疼痛的支配者类型。他们喜欢想出独特的方法来给他们的伴侣带来痛苦。这种痛苦可以是身体的，也可以是心理的，比如羞辱和屈辱。当然，我们仍在谈论BDSM，必须要有同意，所以这并不是真正会伤害伴侣的施虐者。发火把愤怒发泄在伴侣身上，或忽视顺从者的福祉的人不是安全的支配者。造成痛苦 – 身体和心理（羞辱）；提供后续照料 – 处理顺从者掉落和游戏过程中造成的身体伤害",
+            "【DOM】皮革型支配者：这种类型的支配者是更大的皮革亚文化的一部分，起源于军队成员，主要由男同性恋组成。因此，一些皮革型支配者（和顺从者）可能不认为自己是BDSM社区的一部分，也不认为自己拥有D/s关系。展现阳刚气概 – 通过皮革服装（顶部人物通常会戴穆尔帽），个人风格以及参加摩托车俱乐部来展现；参加皮革活动 – 如Folsom街市等游行和比赛；实践传统 – 通常基于军事礼仪",
+            "【DOM】快感型支配者：这是一个相对较新的术语，实际上在现实中并没有得到广泛使用。快感型支配者通过满足伴侣的性需求来获得性满足感。他们能给予的快感越多，就越好。快感型支配者通常是男性，而他们的顺从者是女性。一些人不同意这是一种支配者类型，因为可能没有任何权力交换。快感支配可能被认为是服务型主导的一个方面。让伴侣悬于性高潮边缘 – 多次将顺从者带到高潮边缘然后再次停止；拒绝高潮 – 通过物理动作或口头命令，可能破坏高潮；用高潮折磨 – 刺激伴侣尽可能多地达到高潮，甚至在感觉不舒服之后",
+            "Top：场景中的主动参与者，与Bottom相对应。他们不一定是支配者，可能只在一个古怪的场景中扮演主动角色，也许是为了取悦伴侣，而没有支配的个性或真正参与权力交换。你不会真正听到有人被描述为“支配的Top”，因为这种差异。但是，你可以把他们看作是“Bottom支配者”。打顺从者 – 或进行其他冲击游戏；用绳子、口球、眼罩或其他工具束缚他们的伴侣；尊重安全词 – 在使用时暂停或停止游戏；了解他们的工具 – 以安全和正确地使用它们",
+            "【DOM】喂食者：这绝对是一种较不常见的支配者类型。喂食主义是一种非常特定的恋物，在这种恋物中，人们通过吃东西（或喂食他人）到导致不适的程度来获得满足感。被喂食者或增重者是吃东西的人，而喂食者通过提供食物参与其中。喂养伴侣 – 包括准备食物和鼓励超出舒适范围的进食；恋物（肥胖）体 – 当体型变大时，会变成一种恋物；可以包括身体崇拜（特别是涉及胃部的）",
+            "【DOM】导师：支配性导师并不是另一种支配者，而是一个在这种生活方式和可能的社区中经验丰富的支配者，这使他们能够指导那些对这些事情新手的人。顺从者也可以成为导师。在导师方面，有些支配者会指导其他支配者，帮助他们学习他们需要引导（未来）顺从者的技能。一些顺从者出于同样的原因寻求顺从者导师。然而，一个支配者可以指导一个顺从者，以提供有关顺从者无法获得的BDSM的信息和专业知识。支配性导师和顺从性学员不会像在D/s关系中那样交换权力。利用指导新顺从者的人可能更像是一个伪支配者。倾听学员 – 排解、担忧、问题；给予建议 – 无论是对具体问题的回答还是更普遍的建议； 表现耐心 – 对于对BDSM/kink新手；教学 – 如何使用工具、沟通、阅读身体语言等；提供结构 – 通过任务或作业，如果有助于学员学习的话；帮助 – 学员找到他们自己的支配或古怪的风格，而不是把自己的支配类型强加给对方",
+            "【DOM】温和/柔和型支配者：柔和型或温和型支配者可能不喜欢与顽皮的人或其他顺从者类型一起玩，他们更叛逆。一些柔和型支配者完全避免任何会造成疼痛的事物，而另一些则会包括轻微的活动，比如打屁股。培育伴侣 – 而不是期望严格的顺从者规则或惩罚；鼓励成长和自爱 – 在伴侣身上；严肃讨论 – 而不是惩罚；强调事后关怀 – 在场景之后",
+            "【DOM】生育者：在生育者恋物社区内对这个术语的使用似乎没有达成共识，这可能有点令人困惑。一些人对成为父母或使某人怀孕的想法感到非常兴奋。这可能仅限于角色扮演，其中使用淫秽语言和未察觉的避孕措施。然而，有些人则将其扩展到实际怀孕。关于“生育者”的两个常见定义包括对这种恋物感兴趣的*任何人*或是使别人（男性）怀孕的人。当涉及到让别人怀孕时，确实可能存在一些支配性行为。讨论恋物 – 表达他们有多么想让某人怀孕；插入并射精 – 没有避孕套/保护措施（这可能导致性传播感染以及怀孕）；恋物化 – 他们伴侣怀孕或具有生育能力的身体（也许享受怀孕期间的性生活），潜在地将其视为自己的财产",
+            "【DOM】假支配者：假支配者完全是为了满足自己的需求，而不关心伴侣或认真对待支配者的责任。很少有人会称这种支配者类型为关心的支配者。他们可能会更关注性行为而不是亲密权力交换的其他方面，忽视安全预防措施，比如事后关怀，期望任何顺从者服从，而不尊重需要时间了解潜在伴侣的事实，无论你是否古怪。真正的支配者尊重安全和你的界限，并理解如果你需要慢慢进行或者在玩耍或建立关系之前彼此审核。",
+            "【sub】顽童顺从者；对于外人来说，顽童顺从者可能看起来不太听话或不太顺从。然而，仔细观察会发现，这种类型的顺从者喜欢挑战权威，但这一切都是在游戏中进行的。这样做会让顽童引起伴侣的注意，通常被称为顽童驯服者。对于顽童来说，这种关注是最终的奖励。顶嘴 – 当受到责备时；不服从命令 – 当被要求做某事时；抵抗 – 当你的支配者束缚你时",
+            "【sub】服务型顺从者：服务型顺从者是最常见的顺从者类型之一，他们专注于为他们的支配性伴侣执行任务。服务可以采取实际的形式，如做家务、办差事和支付账单。然而，服务型顺从者也被期望在性方面为他们的伴侣提供服务，并且可能需要以特定方式执行任务。充当人类家具、跪着或为他们的支配性伴侣着装都是服务型顺从或BDSM更为独特的例子。做饭 – 并为伴侣服务，让他们先吃或选择菜单；为伴侣或客人 – 服务和加满饮料；可以品尝饮料以确保正确；性服务 – 为伴侣或客人提供性服务；清洁 – 家庭、商业、车辆、衣物，甚至给支配者洗澡；照顾孩子 – 可以是关系中的一部分；筹划 – 派对、假期或其他活动；为为支配者所做的任务 – 感到自豪",
+            "【sub】顺从的公主：顺从的公主通常希望被崇拜和膜拜。只有在这种情况下，她才会将控制权交给她的支配者。这并不是因为她不尊重她的伴侣；她只是对自己评价很高。这与“枕头公主”不同，后者是指在LGBTQ+社区内主要用于指代更喜欢接受而不是给予快乐的女性。希望得到照顾和呵护 – 与她们对自己的看法相符；略微抗拒 – 用撅嘴和哭闹；期待 – 被像皇室成员一样对待，包括从她们的支配者那里受到呵护",
+            "Bottom：Bottom接受刺激，但这种刺激可能只持续一段时间。通常，Bottom享受刺激，但并不是顺从的，因此他们对于D/s关系或接受命令并不感兴趣。接受刺激和刺激 – 柔和的或更痛苦的感觉；要求刺激 – 并不一定涉及权力游戏；在场景结束后重新获得控制权；在场景之前协商限制 – （BDSM合同可能会有所帮助）",
+            "【sub】受虐狂：受虐狂是指那些真正喜欢疼痛的人，也许实际上是如此。受虐狂中最极端的形式是痛苦荡妇，他们喜欢强烈的疼痛。受虐狂可能不会把心理控制权交给他们的伴侣。不听话或反抗 – 以鼓励身体惩罚；享受游戏中的惩罚 – 打屁股，Impact play等等；尝试痛苦的癖好 – 穿针引线、刀具游戏、火游戏等；要求更多 – 强度或刺激",
+            "【sub】聪明受虐者（SAM）：聪明的受虐者或SAM在某种程度上是痛苦荡妇和顽劣者的结合。他们展现了一种好玩的一面，通常只对他们的伴侣展现，而不对其他人展现。然而，SAM比顽劣者走得更远，因为他们是渴望痛苦的受虐者，无论是身体上还是情感上。回嘴 – 开玩笑、嘲笑他们的支配者、质疑他们，总是嘴硬；做鬼脸 – 微笑等；转身背对 – 当他们的伴侣在讲话或要求关注时",
+            "【sub】求虐型顺从者：虽然顽劣者可能只是反抗，而聪明的受虐者则挑衅他们的伴侣以引发他们的愤怒，但“求虐型”顺从者完全是关于身体上的斗争。他们有时被称为好斗的底部。足够强大、聪明和迅速的支配者将“征服”这个人，从而引出他们的顺从；抵抗 – 直到被制服；反抗 – 推搡，可能踢，打等；逃跑 – 逃离他们的伴侣",
+            "【sub】模特型顺从者：模特型顺从者喜欢打扮漂亮并展示自己。他们可能会避开那些会留下痕迹的活动，因为这会破坏他们的美丽，反而更倾向于那些能增强美感或让他们看到自己的活动。这些人可能根本不是真正的顺从者。有些人喜欢在镜头前表现得像模特，但往往不服从、不接受疼痛或不参与其他形式的束缚。当然，一个人可以既是模特，又是活跃的顺从者。 打扮 – 穿着性感装备；摆姿势 – 为相机拍摄；购买或借用装备 – 用于拍摄；被束缚 – 为拍照目的；参加活动 – 与品牌、其他模特或摄影师合作；推广 – 品牌、产品或服务；在社交媒体上发布 – 推广自己并分享作品；可能包括出售视频或图片；观察 – 在镜子或屏幕上；记录 – 他们的活动，即使他们不打算以后观看",
+            f"【sub】奴隶：奴隶从未停止过顺从，他们将所有的控制权都交给了他们的伴侣。奴隶通常涉及24/7或完全权力交换(TPE)关系。请求许可 – 常见的请求包括手淫、高潮、吃饭、说话或上厕所；服从命令 – 包括明确的和隐含的命令；完全交出控制权；随时性地可用。最显著的TPE条款：{random.choice(xp_sm_tpe)}",
+            "【sub】宠物：宠物可以包括小马女孩和男孩、小狗、小猫等。他们像动物一样行动并与主人建立联系。每种宠物顺从类型都有其自己的规范和期望，因此在进一步了解这种顺从类型时，请记住这一点。穿戴服装/配饰 – 项圈、马具、耳朵、尾巴、口罩、骑具、皮革或毛皮装备等；摆姿势/移动 – 用四肢走路、在牵引绳上、连接到拴马桩等；饮食 – 用碟子、水碗等；服从 – 接受常给动物的简单命令，包括对骑马鞭的回应等；睡觉 – 在狗窝里、床边、地板上等；发出动物叫声 – 嘶鸣、喵喵叫、吠叫或用爪子拍打；自我清洁 – 舔自己，即使只是装装样子；玩耍 – 用球或其他宠物会喜欢的玩具",
+            "【sub】家庭纪律Bottom：家庭纪律（Domestic Discipline，简称DD）是一种生活方式，在许多方面与BDSM有重叠，但许多人并不认为它是BDSM。相反，家庭纪律是一种使家庭运转顺畅的方式，通常由男性/丈夫/父亲控制他的妻子/伴侣和孩子。即使没有其他BDSM活动，打屁股在家庭纪律中也很常见。DD是一种传统且相对保守的生活方式，可能与家庭的宗教信仰相辅相成，其中丈夫是家庭精神健康的守护者。照顾 – 家庭和孩子；接受惩罚 – 特别是打屁股；服从 – 她的丈夫；祈祷 – 虔诚地",
+            "【sub】卧室顺从者：卧室顺从者对BDSM生活方式或关系不感兴趣。他们只是在卧室内享受放弃权力，而在卧室外恢复“正常”。只要有时间限制，顺从是可以的。任何卧室外的顺从期望都是不受欢迎的。这也被称为性顺从者。被束缚 – 出于性目的；接受刺激和冲击 – 包括感官支配、Impact play等；接受命令 – 仅在场景期间；提供性快感 – 通过口交、阴道交、手交或肛交",
+            "【sub】财务顺从者：财务顺从者（finsub）将他们的财务控制权交给他们的财务主导（findom或findomme）。有时使用“付款猪”（paypig）一词，通常指的是与女性财务主导在一起的男性财务顺从者。财务支配可以很容易地在线进行或在异地关系中进行。支付给主导者 – 以现金、商品、服务、债务偿还、住房等形式；服从 – 财务主导者的命令；被羞辱 – 由财务主导者进行，包括其他羞辱游戏和言语虐待；提供访问权限 – 财务账户等；请求 – 使用自己的钱，类似于津贴或零花钱",
+            "【sub】绳子兔子：喜欢被绳子绑起来的顺从者有时被称为绳兔子。他们为绳子在皮肤上的感觉而活。通常，绳子兔子是女性，而他们的绳子Top（常称为“索具师”）是男性，但这并不总是如此。被束缚 – 长时间的绑缚需要极大的耐心；摆姿势 – 供拍照；使用安全词 – 在任何有问题的迹象出现时",
+            "【sub】我家主子永远是对的型顺从者：这种类型的顺从者与其说是他们如何对待他们的主子，不如说是他们在其他人面前的表现。这类顺从者认为他们的主子拥有世界上所有的经验和知识。这种看法可能源于顺从者自身缺乏经验或天真。有时，主子也缺乏经验。这种类型的关系有点像新关系能量——令人兴奋但可能误导。拥有这种顺从性格的人有时会让人烦恼。不停地谈论他们的主子 – 不断重复讲述主子的故事；完全奉献 – 完全投入到他们的伴侣中；隐瞒自己的意见 – 或接受主子的意见；无视他人的论点 – 没有过多的“证据”。这种类型的顺从者容易成为虐待者的牺牲品。这种关系只要主子对顺从者好就能维持，但顺从者很容易忽视警示信号，陷入危险境地。",
+            "【sub】比你更奴性：你不需要猜测某人是否是这种类型的顺从者，因为他们会直接告诉你。他们是24/7的顺从者——或奴隶——并认为其他人也应该这样。否则，这些人就不是*真正的*顺从者。不喜欢被称为顺从者 – 而不是奴隶；大声且频繁地宣称24/7顺从是最好的 – 常常认为自己比别人更顺从，牺牲更多；避免使用安全词 – 因为他们认为“真正的顺从者”应该没有安全词；可能根本不会设定安全词",
+            "【sub】真正的顺从者：那些完全展现所有常见顺从特质的顺从者有时会得到这个昵称。这些顺从者通常缺乏经验，并且急于证明自己，这可能导致一些问题。服务主子 – 或任何人，而不仅仅是他们自己的主子；忽视警示信号 – 因为他们渴望成为顺从者；将他人的需求置于自己的需求之上 – 即使他们应该优先考虑自己；表现得胆怯或温顺 – 使他们容易被控制或虐待；避免互动 – 或者通过隔离自己来试图顺从，不想冒犯任何人",
+            "【sub】训练中的顺从者：训练中的顺从者可以有多种含义，并不完全与某种特定的顺从性格类型有关。首先，这可以是关系初期，主子教授他们的期望。训练中的顺从者也可能在与非关系中的人学习如何顺从，为未来的关系做准备。无论哪种情况，都有很大的重叠性。学习 – 了解一般的BDSM社区、礼仪和他人的期望，通过媒体等途径获取信息；尝试 – 不同类型的顺从，以了解自己属于哪种类型的顺从者；因错误而受罚；在犯错后改进 – 这些错误是难免的；观察其他顺从者/关系 – 如果可能的话；自我反思 – 找到自己的需求、目标和内在力量；寻求保护 – 来自他们的主子或训练者；制定训练计划 – 包括时间表、具体步骤和练习空间；记日记 – 记录感受和经历，可能允许主子阅读"
+            ]
+        # xp列表
+        xp_list = ["叙述猛烈的感谢之语",
+                   "净说讽刺的话",
+                   "对对方的话肯定然后又否定",
+                   "嗤笑然后道歉",
+                   "不听人说话光顾着自己说",
+                   "「不能不考虑到这个吧」",
+                   "「还是说，有隐藏着什么吗？」",
+                   "「真是奇妙」",
+                   "「大体上已经明白了」",
+                   "「保持沉默」",
+
+                   "随便将搜查对象的包或者抽屉打开搜查",
+                   "横插一脚进警察的搜查",
+                   "为了搜查非法入室或者黑客",
+                   "进入禁止进入的地方",
+                   "偷听或者偷看警察的搜查",
+                   "没有许可就拆解证据",
+                   "欺骗搜查对象问出情报",
+                   "随便碰触助手/同伴的随身物品",
+                   "随便将证据拿走",
+                   "随便就开始了鉴定",
+
+                   "隐藏自己身份和关联者说话",
+                   "隐瞒情报的同时询问",
+                   "和搭档/他人一起以演技问出情报",
+                   "假装路过的人偷听关联者的对话",
+                   "假装偶然拿到证物",
+                   "故意一直做作地装傻",
+                   "以演技故意惹怒关联者来引出情报",
+                   "轻微威胁关联者",
+                   "主张自己有遗失物品在现场寻找证物",
+                   "对关联者诱导询问",
+
+                   "用搭档/他人的身体重现事件",
+                   "解开谜题后很开心地笑",
+                   "废寝忘食搜查后突然倒下",
+                   "考虑事情时谁的声音都听不见",
+                   "开始在附近的地上或者墙壁上画事件的相关图",
+                   "不断冒出和事件相关的句子难以停止",
+                   "完全没考虑除了解决事件之外的事情",
+                   "开始连绵不断地说事件的流程",
+                   "踏入事件现场进行调查",
+                   "就算在用餐也不断说着事件的话",
+
+                   "老实不客气地接受搭档/他人的信任",
+                   "丢下搭档/他人先走了",
+                   "质问搭档/他人对事件的看法",
+                   "对搭档/他人自我炫耀",
+                   "关于事件对搭档/他人出题",
+                   "和搭档/他人因为细枝末节的事情吵架",
+                   "对搭档/他人摆出一副老师的样子",
+                   "以搭档/他人会跟上的前提随意行动",
+                   "对搭档/他人进行详尽仔细的事件说明",
+                   "突然开始在搭档/他人的耳边说话",
+
+                   "阅读大量书籍",
+                   "大声放喜欢的音乐",
+                   "在解什么算式",
+                   "吃大量喜欢的东西",
+                   "一直对着电脑或者手机屏幕调查着什么",
+                   "解小谜题",
+                   "指点国际象棋或者将棋",
+                   "坐在饮茶店等着什么",
+                   "一直在睡觉，突然起来了",
+                   "暂时什么都不干",
+
+                   "在进餐的时候突然就解开了谜",
+                   "和助手/同伴闲聊的时候突然就解开了谜",
+                   "听到聊天内容的时候突然就解开了谜",
+                   "洗澡的时候突然就解开了谜",
+                   "梦中突然就解开了谜",
+                   "风吹过的东西解开了迷",
+                   "看书时找到了事件的启发",
+                   "再次访问场景的时候灵光一闪",
+                   "确认资料的中途灵光一闪",
+                   "和关系者交谈中途灵光一闪",
+
+                   "突然哭泣",
+                   "突然愤怒",
+                   "突然笑出声来",
+                   "突然变得情绪高涨",
+                   "突然高兴",
+                   "突然大声喊叫",
+                   "突然开始嗤笑",
+                   "突然开始讲述事件的悲伤",
+                   "淡然行事",
+                   "机械一样只是在做已经决定好的事情",
+
+                   "做会被叫停的事情",
+                   "消失一段时间又回来了",
+                   "从预想外的地方（地下或者空中等）登场",
+                   "想到什么突然跑了起来",
+                   "责怪自己不中用",
+                   "在不知道的时候就解开了事件的一个谜",
+                   "一副知道事件相关事件的样子但是对谁都不说",
+                   "有留下便条或者邮件报告但是看不到人影",
+                   "看到钟表突然开始行动",
+                   "阅读和事件看来没什么关系的报纸记事",
+
+                   "读取人心，完成那人所想(拜托)的事",
+                   "与他人的悲喜同步，同喜或同悲 ",
+                   "时常不忘笑容，用平稳的话语使周围的人安心",
+                   "通过饮食，与人打好关系",
+                   "准确地将知识引用发挥出来，得到周围人的尊敬",
+                   "通过计算推导感情，理解人心",
+                   "考虑被害者的心情，慨叹着已失去的人或物",
+                   "讲述自己打算要做的事，促进他人理解",
+                   "谈论故乡或双亲的话题，尝试从源头上了解那个人",
+                   "认同助手/同伴所说的话",
+
+                   "过分地读取人心，引起不适",
+                   "想与他人同喜同悲却做过头，让人害怕",
+                   "虽然总是挂着笑容，但笑得太假反而让人不适",
+                   "虽想通过饮食打好关系，用餐方式却很奇怪",
+                   "展示学识时却炫耀起罕有人知的知识范畴，引人害怕",
+                   "想装作理解感情的样子，却没能理解关键之处 ",
+                   "慨叹已失去的人或物时，只能用数字来表达",
+                   "做事想有人情味，结果却采取了乍看很难懂的行动 ",
+                   "想要谈论故乡或双亲，却合不上话题",
+                   "装作认同助手/同伴所说的话，却被看穿",
+
+                   "将搭档/他人的小物件调包（调换） ",
+                   "向食物中加入大量调味料",
+                   "披着床单现身吓人",
+                   "变装打扮后登场 ",
+                   "对休息中的搭档/他人恶作剧，让对方理睬自己",
+                   "唐突地戳一戳搭档/他人的脸 ",
+                   "不经意地试着触碰搭档/他人",
+                   "试着撒很难懂的谎 ",
+                   "试着撒很明显的谎",
+                   "试着开始躲猫猫（捉迷藏）",
+
+                   "露出知晓事件相关重要事项的表情，却不肯说 ",
+                   "“这样啊，原来是这么一回事啊”",
+                   "得意洋洋地点头，却不明说详情 ",
+                   "做出仿佛已预知未来的言行",
+                   "扬言已有关于犯人/敌人的头绪，却不细说",
+                   "让一无所知的周围群众看到自己不耐烦的样子",
+                   "一言一行摆起架子",
+                   "每次遇到人都露出冷笑",
+                   "一瞬间露出悲伤神色，马上又变回平常的表情",
+                   "“还没得到确信”",
+
+                   "快要想起什么，却想不起来",
+                   "在助手/同伴或客座的提醒下想起自己有话还没说 ",
+                   "有想说的内容，却因时机不佳说不出口",
+                   "跟不上话题/情节的发展 ",
+                   "滔滔不绝，却不说关键的部分",
+                   "发出“啊——！”的大叫，却不肯说为何 ",
+                   "表露出因不遂愿而急躁不爽的样子 ",
+                   "想起稍早前不顺利的事而闷闷不乐 ",
+                   "表露出对搭档/他人抱持着焦躁心绪的样子",
+                   "有话想对搭档/他人说，却最终都没说出口",
+
+                   "吐血或流鼻血",
+                   "抱住助手/同伴",
+                   "开始引用古典诗歌或小说 ",
+                   "毫无关系的前提下突然开始谈论兴趣话题",
+                   "吟诵诗歌（念诗） ",
+                   "突然开始回想有关回忆之物的事",
+                   "事到如今重新想起上次事件时发生的事",
+                   "撒娇表示哪里都不想去",
+                   "突然开始挥霍游玩并把账都推给助手/同伴付",
+                   "重新考虑与搭档/他人之间的关系",
+
+                   "对没有集中精力在事件上的搜查相关人员发火",
+                   "对犯人/敌人感到非常气愤",
+                   "试图推理搭档/他人的想法",
+                   "过于集中精神地思考谜题的各种可能性",
+                   "直接用「这样不行」这样的话否定别人",
+                   "在聊着别的话题时，突然开始说关于事件的事",
+                   "短时间内，只吃喜欢吃的东西",
+                   "一直在玩游戏或者进行兴趣活动",
+                   "没什么干劲",
+                   "突然冒出干劲",
+
+                   "不等获得许可就拿走别人的东西",
+                   "谈话或调查的途中就突然开始移动",
+                   "没有铺垫也不打招呼，唐突向人打听事件的事",
+                   "说着「对了！」的同时拽着搭档/他人的手开始移动",
+                   "突然对人说出「你就是犯人/敌人吧」",
+                   "装成突然想起搭档/他人曾经欲言又止的话并追究",
+                   "不作任何说明直接给出结论",
+                   "比搭档/他人更快地展开行动",
+                   "做出难以理解的行动，也不给任何说明",
+                   "指示大家的行动，但不解释理由或目的",
+
+                   "使用「能做到是当然的啊」这种说话方式",
+                   "使用「连这种事都做不到吗」这种说话方式",
+                   "做出一副无语的样子",
+                   "对做不到的事感到绝望，也不再理会",
+
+                   "了解了想知道的事情后对之后的内容失去兴趣",
+                   "毫不避讳地在人前说起别人的失误或失败",
+                   "不会直说，但摆出一副搭档/他人或搭档/他人的物品是自己的所有物的态度",
+                   "拜托别人帮忙，不等回应就自顾自地行动",
+                   "态度傲慢地使唤别人，也不道谢",
+                   "无自觉地采取高高在上的态度",
+
+                   "无论遇上什么事，都想要霸占搭档/他人身旁的位置",
+                   "搭档/他人跟别人说话时露骨地表现不爽",
+                   "当搭档/他人集中于思考事件而忽视自己就会发火",
+                   "总是站在搭档/他人的身后，监视其一举一动",
+                   "当搭档/他人想要做什么的时候吵嚷着吸引其注意力",
+                   "不跟搭档/他人以外的人说话",
+                   "唐突地准备搭档/他人喜欢的东西",
+                   "没有任何预兆地感到不安，尽量地靠近搭档/他人",
+                   "担心会失去搭档/他人而感到不安",
+                   "拼命引导搭档/他人说出能让自己安心的话",
+
+                   "非常认真地搜查",
+                   "好好地听事件相关人员的话",
+                   "认真地听搭档/他人说话",
+                   "与人闲聊而不跑题",
+                   "不抱怨地认真工作",
+                   "好好休息",
+                   "阅读搜查资料",
+                   "在行动前会先说明理由",
+                   "体谅搭档/他人",
+                   "难过的时候会说难过，开心的时候会说开心",
+
+                   "任性地对搭档/他人提出想吃到自己喜欢的食物，在要求被回应前不会进行任何行动",
+                   "对搭档/他人提出自己失去干劲了，要求其做点什么能让自己拿出干劲的事情",
+                   "收集癖爆发，在把现在正在收集的收藏道具集齐前不会进行其他行动",
+                   "任性地让搭档/他人快去做点什么有趣的事",
+                   "每当遇上什么事都会说任性的话",
+                   "直截了当地重复自己的欲求，在欲求被达成前都会不停地重复",
+                   "试图将事情向着自己所想的方向诱导，如果失败就会摆出一张臭脸",
+                   "试图隐藏自己的欲求，但无法完全藏住",
+                   "在自己的任性行为被满足前会一直发脾气",
+                   "说出任性的话。不管有没有得到解决，都会继续说别的任性的话",
+
+                   "对嫌疑人、搭档/他人、同伴进行诱导询问",
+                   "目的不明地让搭档/他人或同伴去刺探",
+                   "在指示下达之前就抵达了现场",
+                   "不管怎样先全力以赴地探查相关者的情况",
+                   "将相关资料全部阅览完毕",
+                   "自己对事件情况进行了假设",
+                   "向搭档/他人说明现阶段对事件的见解",
+                   "总而言之先探索眼下可见的东西",
+                   "将可疑的物件或人物记录在笔记里",
+                   "将类似的过往案例作为参考引证",
+
+                   "把搭档/他人撂下一个人去了现场",
+                   "一言不发的拉着搭档/他人一起出去",
+                   "留下写有目的地的纸条先走了",
+                   "突然开始找东西",
+                   "好像想到了什么但是什么都不说",
+                   "意味深长地点点头",
+                   "浮现出意味深长的笑容",
+                   "「……好」",
+                   "「就这么做吧」",
+                   "「我理解了」",
+
+                   "优雅地喝茶",
+                   "优雅地下国际象棋或者将棋",
+                   "听古典音乐",
+                   "阅读和工作无关的书",
+                   "看报纸",
+                   "开始整理身边的东西",
+                   "用端正优美的姿势落座",
+                   "转瞬之间完成了文书工作",
+                   "开始冥想",
+                   "开始预约餐食",
+
+                   "不让人看见脸或者表情",
+                   "目测他人脚的尺寸",
+                   "判别他人的话语是否为谎言",
+                   "学习说话的方式与动作",
+                   "探查是否违法",
+                   "调查是否有可疑的人物或者证物",
+                   "擅长聆听",
+                   "嗅闻气味",
+                   "用地图确定场所位置",
+                   "确认监视摄像头的位置",
+                   "怪癖：单箭头",
+                   "怪癖：间谍被同化",
+                   "怪癖：愚忠",
+                   "怪癖：走上歧途",
+                   "怪癖：自卑",
+                   "怪癖：狼狈为奸",
+                   "怪癖：真小人",
+                   "怪癖：假君子",
+                   "怪癖：替身",
+                   "怪癖：貌合神离",
+                   "怪癖：一人独活",
+                   "怪癖：团灭结局",
+                   "怪癖：意难平",
+                   "怪癖：由恨生爱",
+                   "怪癖：由爱生恨",
+                   "怪癖：嫉妒",
+                   "怪癖：互相背叛",
+                   "怪癖：一方背叛",
+                   "怪癖：NTR",
+                   "怪癖：小妈",
+                   "怪癖：骨科",
+                   "怪癖：绑架幻想",
+                   "XP：生理性xx",
+                   "怪癖：父子",
+                   "XP：边做边骂（？？？？？）",
+                   "XP：痴汉变态",
+                   "XP：角色的加冕与脱冕（Power Play）",
+                   "XP：调教",
+                   "XP：只有一个人的PWP（Porn Without Plot）",
+                   "XP：蒙眼",
+                   "XP：捆绑",
+                   "XP：PWP（Porn Without Plot）（请自行决定各种不堪入耳的细节和名词...）",
+                   "XP：醉酒",
+                   "XP：道具",
+                   "XP：制服（名词）",
+                   f"XP：BDSM。一个{random.choice(xp_sm_type)}，性癖是{random.choice(xp_sm_kink)}。",
+                   f"XP：BDSM。一个{random.choice(xp_sm_type)}，性癖是{random.choice(xp_sm_kink)}。",
+                   f"XP：BDSM。一个{random.choice(xp_sm_type)}，性癖是{random.choice(xp_sm_kink)}。",
+                   f"XP：BDSM。一个{random.choice(xp_sm_type)}，性癖是{random.choice(xp_sm_kink)}。",
+                   f"XP：BDSM。一个{random.choice(xp_sm_type)}，性癖是{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   f"XP：{random.choice(xp_sm_kink)}。",
+                   "XP：野外",
+                   "XP：奴隶试用期",
+                   "XP：奴隶交换",
+                   "XP：镜面",
+                   "XP：下药",
+                   "XP：克苏鲁（？）",
+                   "XP：生子/怀孕",
+                   "XP：跨种族",
+                   "XP：兽化",
+                   "XP：公共场合",
+                   "XP：窒息",
+                   "XP：Mob",
+                   "XP：战损",
+                   "XP：乱伦",
+                   "XP：主仆",
+                   "XP：绝对不可以欺负小孩子",
+                   "XP：Gore",
+                   "XP：异装",
+                   "XP：囚禁",
+                   "XP：边做边打（？？？）",
+                   "XP：恶堕：洗脑（调教、药物污染、精神改造）",
+                   "XP：恶堕：改造（身体、大脑）",
+                   "XP：恶堕：同步（连锁恶堕）",
+                   "XP：恶堕：凭依（夺舍、附体）",
+                   "XP：恶堕：绝望（人为、故意造成的绝望，挫折、私仇、不惜一切、生存危机、个中缘由、其他日常）",
+                   "XP：恶堕：同化（收留、融合）",
+                   "XP：恶堕：寄生",
+                   "XP：恶堕：怨灵化",
+                   "XP：恶堕：尸体操纵",
+                   "XP：恶堕：(被)觉醒",
+                   "XP：恶堕：人格改变",
+                   "XP：恶堕：地位（尊卑）改变",
+                   "怪癖：打死不说",
+                   "怪癖：工具人",
+                   "怪癖：一见误终身",
+                   "怪癖：守寡",
+                   "怪癖：生错阵营",
+                   "怪癖：道德绑架",
+                   "怪癖：心理阴影",
+                   "怪癖：夜不能寐",
+                   "怪癖：小孩子气",
+                   "怪癖：泥塑",
+                   "怪癖：护短，但失败了",
+                   "怪癖：至死都蒙在鼓里",
+                   "怪癖：不该愈合的伤口",
+                   "怪癖：为了某项原则拍案而起，昭告天下，之后却发现自己是错的。",
+                   "XP：触手（及其衍生）"
+                   ]
         # 音乐列表
         music_list = [f"原声带：{random.choice(['游戏', '电影', '史诗', '氛围', '游戏、电影'])}",
                       f"电音：{random.choice(['House', 'Trance', 'Techno', '氛围', 'Dubstep', 'Drum&Bass', 'EDM', 'Trap', '改编'])}",
@@ -10184,9 +10587,9 @@ class ChatApp:
             int(self.EDU_text.get()) + int(self.APP_text.get()) + int(self.DEX_text.get()) + int(
                 self.STR_text.get()) + int(self.INT_text.get()) + int(self.CON_text.get()) + int(
                 self.POW_text.get()) + int(self.SIZ_text.get()) + int(self.LUCK_text.get())))
-        self.HP_label.config(text=str((int(self.CON_text.get()) + int(self.SIZ_text.get())) / 10).split(".")[0],
+        self.HP_label.config(text="HP: " + str((int(self.CON_text.get()) + int(self.SIZ_text.get())) / 10).split(".")[0],
                              fg="red")
-        self.MP_label.config(text=str(int(self.POW_text.get()) / 5).split(".")[0], fg="blue")
+        self.MP_label.config(text="MP: " + str(int(self.POW_text.get()) / 5).split(".")[0], fg="blue")
 
     def random_entry_for_new_roles_NPC_by_mock(self, event):
         if self.description_text.get("1.0", tk.END) == "" or self.description_text.get("1.0",
@@ -10257,9 +10660,9 @@ class ChatApp:
             int(self.EDU_text.get()) + int(self.APP_text.get()) + int(self.DEX_text.get()) + int(
                 self.STR_text.get()) + int(self.INT_text.get()) + int(self.CON_text.get()) + int(
                 self.POW_text.get()) + int(self.SIZ_text.get()) + int(self.LUCK_text.get())))
-        self.HP_label.config(text=str((int(self.CON_text.get()) + int(self.SIZ_text.get())) / 10).split(".")[0],
+        self.HP_label.config(text="HP: " + str((int(self.CON_text.get()) + int(self.SIZ_text.get())) / 10).split(".")[0],
                              fg="red")
-        self.MP_label.config(text=str(int(self.POW_text.get()) / 5).split(".")[0], fg="blue")
+        self.MP_label.config(text="MP: " + str(int(self.POW_text.get()) / 5).split(".")[0], fg="blue")
 
     def edit_entry_for_new_roles_NPC(self):
         for pcname, pcdict in role_Chart_at_name.items():
@@ -10312,9 +10715,9 @@ class ChatApp:
                     int(self.EDU_text.get()) + int(self.APP_text.get()) + int(self.DEX_text.get()) + int(
                         self.STR_text.get()) + int(self.INT_text.get()) + int(self.CON_text.get()) + int(
                         self.POW_text.get()) + int(self.SIZ_text.get()) + int(self.LUCK_text.get())))
-                self.HP_label.config(text=str((int(self.CON_text.get()) + int(self.SIZ_text.get())) / 10).split(".")[0],
+                self.HP_label.config(text="HP: " + str((int(self.CON_text.get()) + int(self.SIZ_text.get())) / 10).split(".")[0],
                                      fg="red")
-                self.MP_label.config(text=str(int(self.POW_text.get()) / 5).split(".")[0], fg="blue")
+                self.MP_label.config(text="MP: " + str(int(self.POW_text.get()) / 5).split(".")[0], fg="blue")
                 break
             else:
                 self.description_text.delete("1.0", tk.END)
@@ -11038,10 +11441,15 @@ class ChatApp:
             else:
                 self.role_sstatusbar_mp[role].config(
                     text="MP " + self.draw_health_bar(_MP, MP_, bar_length=5, show_text=False), font=None)
+            #SAN = self.role_values_entry[role].get("1.0", "2.0")
+            #_SAN = int(SAN.split("/")[0])
+            #SAN_ = int(SAN.split("/")[1].split(":")[0])
+            if is_hiding_health_bar:
+                # self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=("Times New Roman", 1))
+                self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=None)
+            else:
+                self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=None)
         else:
-            SAN = self.role_values_entry[role].get("1.0", "2.0")
-            _SAN = int(SAN.split("/")[0])
-            SAN_ = int(SAN.split("/")[1].split(":")[0])
             HP = self.role_values_entry[role].get("2.0", "3.0")
             _HP = int(HP.split("/")[0])
             HP_ = int(HP.split("/")[1].split(":")[0])
@@ -11049,13 +11457,13 @@ class ChatApp:
             _MP = int(MP.split("/")[0])
             MP_ = int(MP.split("/")[1].split(":")[0])
             if is_hiding_health_bar:
-                self.role_sstatusbar_mp[role].config(text="MP " + self.draw_health_bar(_MP, MP_, bar_length=5,
-                                                                                       show_text=False) + "\nSAN " + self.draw_health_bar(
-                    _SAN, SAN_, bar_length=5, show_text=False), font=("Times New Roman", 1))
+                self.role_sstatusbar_mp[role].config(text="HP " + self.draw_health_bar(_HP, HP_, bar_length=5,
+                                                                                       show_text=False) + "\nMP " + self.draw_health_bar(
+                    _MP, MP_, bar_length=5, show_text=False), font=("Times New Roman", 1))
             else:
-                self.role_sstatusbar_mp[role].config(text="MP " + self.draw_health_bar(_MP, MP_, bar_length=5,
-                                                                                       show_text=False) + "\nSAN " + self.draw_health_bar(
-                    _SAN, SAN_, bar_length=5, show_text=False), font=("Times New Roman", 7))
+                self.role_sstatusbar_mp[role].config(text="HP " + self.draw_health_bar(_HP, HP_, bar_length=5,
+                                                                                       show_text=False) + "\nMP " + self.draw_health_bar(
+                    _MP, MP_, bar_length=5, show_text=False), font=("Times New Roman", 7))
             status_list_ = self.role_values_entry[role].get("1.0", tk.END).split("===状态===")[1].split("===")[
                 0].strip().split("\n")
             for status in status_list_:
@@ -11108,11 +11516,14 @@ class ChatApp:
                 else:
                     self.role_statusbar_icon[role].config(image="")
                     # print(status2)
-        if is_hiding_health_bar:
-            # self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=("Times New Roman", 1))
-            self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=None)
-        else:
-            self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=None)
+            SAN = self.role_values_entry[role].get("1.0", "2.0")
+            _SAN = int(SAN.split("/")[0])
+            SAN_ = int(SAN.split("/")[1].split(":")[0])
+            if is_hiding_health_bar:
+                # self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=("Times New Roman", 1))
+                self.role_statusbar_health[role].config(text=self.draw_health_bar(_SAN, SAN_, bar_length=18), font=None)
+            else:
+                self.role_statusbar_health[role].config(text=self.draw_health_bar(_SAN, SAN_, bar_length=18), font=None)
 
     def destroy_status_icon_canvas(self, role):
         # print("leave" + role)
@@ -11544,6 +11955,9 @@ class ChatApp:
                     else:
                         self.tree_list[role].grid_forget()  # 缩进
                         self.tree2_list[role].grid_forget()
+                        for r in self.roles:
+                            if r != "KP":
+                                self.thoughts[r].grid_forget()
                         self.info_toggle[role] = "on"
                 else:
                     if role == "KP":
@@ -11554,6 +11968,9 @@ class ChatApp:
                     else:
                         self.tree_list[role].grid(row=0, column=4, sticky="nsew")
                         self.tree2_list[role].grid(row=2, column=4, sticky="nsew")
+                        for r in self.roles:
+                            if r != "KP":
+                                self.thoughts[r].grid(row=1, column=4, padx=0, pady=0, sticky="nsew")
                         self.info_toggle[role] = "off"
 
     def add_inference2self(self, name, info, memory_index, role=None):
@@ -11765,12 +12182,12 @@ class ChatApp:
                             maxheight=5)  # 设置表头的字体大小
 
             if role == "KP":
-                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=12, undo=True)
+                self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=10, undo=True)
                 self.KP_entry.insert(tk.END, "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响")
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
                 self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
-                                              style="Treeview")
+                                              style="Treeview", height=8)
                 self.tree_main.heading("信息来源", text="信息来源")
                 self.tree_main.heading("信息内容", text="信息内容")
                 self.tree_main.heading("共享人", text="共享人")
@@ -11788,13 +12205,22 @@ class ChatApp:
                 entry2.grid(row=1, column=4, padx=0, pady=0, sticky="nsew")
                 self.thoughts[role] = entry2
                 # 创建Treeview
-                self.tree = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数"), show="headings",
-                                         style="Treeview")
-                self.tree_list[role] = self.tree
-                # 创建Treeview
-                self.tree2 = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数", "记忆状态"), show="headings",
-                                          style="Treeview")
-                self.tree2_list[role] = self.tree2
+                if role == "PL 2":
+                    self.tree = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数"), show="headings",
+                                             style="Treeview", height=8)
+                    self.tree_list[role] = self.tree
+                    # 创建Treeview
+                    self.tree2 = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数", "记忆状态"), show="headings",
+                                              style="Treeview", height=8)
+                    self.tree2_list[role] = self.tree2
+                else:
+                    self.tree = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数"), show="headings",
+                                             style="Treeview", height=8)
+                    self.tree_list[role] = self.tree
+                    # 创建Treeview
+                    self.tree2 = ttk.Treeview(frame, columns=("信息来源", "信息内容", "记忆指数", "记忆状态"), show="headings",
+                                              style="Treeview", height=8)
+                    self.tree2_list[role] = self.tree2
                 # 添加标签以供后续使用
                 self.tree2.tag_configure('red_background', background='red')
                 self.tree2.bind("<Double-1>", lambda event, role=role: self.on_double_click2(event, role))
@@ -13423,75 +13849,7 @@ class TRPGModule:
         if not auto and ("min" in timer or "h" in timer or "w" in timer or "d" in timer):
             timer_ = timer.replace("time_", "").replace("min", "分钟").replace("h", "小时").replace("d", "天").replace("w",
                                                                                                                   "周")
-            env_text = self.ChatApp.time_log.get("1.0", tk.END).strip()
-            # self.chat_log.insert(tk.END,
-            # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
-            time_info = env_text.split("【时间】")[1]
-            date = time_info.split("【日期】")[1]
-            time = time_info.split("【地点】")[0]
-            time_info = time_info.split("【地点】")[1]
-            place = time_info.split("【天气】")[0]
-            time_info = time_info.split("【天气】")[1]
-            weather = time_info.split("【日期】")[0]
-            # 凌晨、早晨、上午、中午、下午、傍晚、夜晚、午夜
-            if ":" in time:
-                if int(time.split(":")[0]) > 12:
-                    time_ = time + "㏘"
-                else:
-                    time_ = time + "㏂"
-                if 6 >= int(time.split(":")[0]) >= 5:
-                    time_ += "凌晨"
-                elif 9 >= int(time.split(":")[0]) >= 7:
-                    time_ += "早晨"
-                elif 11 >= int(time.split(":")[0]) >= 10:
-                    time_ += "上午"
-                elif 13 >= int(time.split(":")[0]) >= 12:
-                    time_ += "中午"
-                elif 17 >= int(time.split(":")[0]) >= 14:
-                    time_ += "下午"
-                elif 19 >= int(time.split(":")[0]) >= 18:
-                    time_ += "傍晚"
-                elif 23 >= int(time.split(":")[0]) >= 20:
-                    time_ += "夜晚"
-                elif 1 >= int(time.split(":")[0]) >= 0:
-                    time_ += "午夜"
-                elif 4 >= int(time.split(":")[0]) >= 2:
-                    time_ += "深夜"
-                time_ += "-"
-            else:
-                time_ = "???"
-                # 季节
-            if 5 >= int(date.split("/")[1]) >= 3:
-                date_ = "春♧" + date
-            elif 8 >= int(date.split("/")[1]) >= 6:
-                date_ = "夏♡" + date
-            elif 11 >= int(date.split("/")[1]) >= 9:
-                date_ = "秋♤" + date
-            else:
-                date_ = "冬♢" + date
-            # 昼夜
-            if "夏" in date_:
-                if 19 >= int(time.split(":")[0]) >= 6:
-                    time_ = time_ + "昼☀"
-                else:
-                    time_ = time_ + "夜☆"
-            elif "冬" in date_:
-                if 17 >= int(time.split(":")[0]) >= 8:
-                    time_ = time_ + "昼☀"
-                else:
-                    time_ = time_ + "夜☆"
-            else:
-                if 18 >= int(time.split(":")[0]) >= 7:
-                    time_ = time_ + "昼☀"
-                else:
-                    time_ = time_ + "夜☆"
-            date_ = date_.replace("Monday", datenamelist[0]).replace("Tuesday", datenamelist[1]).replace("Wednesday",
-                                                                                                         datenamelist[
-                                                                                                             2]).replace(
-                "Thursday",
-                datenamelist[3]).replace(
-                "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
-            env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather}【日期】{date_}"
+            env_text_ = self.ChatApp.send_env_text_to_log(sendText=False)
             self.ChatApp.search_and_delete_insert_symbol()
             self.ChatApp.chat_log.insert(tk.END,
                                          f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n时间已流逝【{timer_}】...现在是：\n{env_text_}\n\n')
@@ -13535,54 +13893,8 @@ class TRPGModule:
     def newday(self):
         self.add_time_1d()
         print("新的一天")
-        env_text = self.ChatApp.time_log.get("1.0", tk.END).strip()
-        # self.chat_log.insert(tk.END,
-        # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
-        time_info = env_text.split("【时间】")[1]
-        date = time_info.split("【日期】")[1]
-        time = time_info.split("【地点】")[0]
-        time_info = time_info.split("【地点】")[1]
-        place = time_info.split("【天气】")[0]
-        time_info = time_info.split("【天气】")[1]
-        weather = time_info.split("【日期】")[0]
-        # 上下午
-        if int(time.split(":")[0]) > 12:
-            time_ = time + "㏘"
-        else:
-            time_ = time + "㏂"
-        # 季节
-        if 5 >= int(date.split("/")[1]) >= 3:
-            date_ = "春♧" + date
-        elif 8 >= int(date.split("/")[1]) >= 6:
-            date_ = "夏♡" + date
-        elif 11 >= int(date.split("/")[1]) >= 9:
-            date_ = "秋♤" + date
-        else:
-            date_ = "冬♢" + date
-        # 昼夜
-        if "夏" in date_:
-            if 19 >= int(time.split(":")[0]) >= 6:
-                time_ = time_ + "昼☀"
-            else:
-                time_ = time_ + "夜☆"
-        elif "冬" in date_:
-            if 17 >= int(time.split(":")[0]) >= 8:
-                time_ = time_ + "昼☀"
-            else:
-                time_ = time_ + "夜☆"
-        else:
-            if 18 >= int(time.split(":")[0]) >= 7:
-                time_ = time_ + "昼☀"
-            else:
-                time_ = time_ + "夜☆"
-        date_ = date_.replace("Monday", datenamelist[0]).replace("Tuesday", datenamelist[1]).replace("Wednesday",
-                                                                                                     datenamelist[
-                                                                                                         2]).replace(
-            "Thursday",
-            datenamelist[3]).replace(
-            "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
-        env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather}【日期】{date_}"
-        env_text = f"【时间】{time}【地点】{place}【天气】{weather}【日期】{date}"
+        env_text_ = self.ChatApp.send_env_text_to_log(sendText=False)
+        self.ChatApp.search_and_delete_insert_symbol()
         self.ChatApp.chat_log.insert(tk.END,
                                      f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n新的一天到来了...\n{env_text_}\n\n')
         self.ChatApp.chat_log.yview(tk.END)
