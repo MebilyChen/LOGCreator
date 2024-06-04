@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import fnmatch
 import math
 import os
 import re
@@ -44,24 +44,26 @@ def create_folder(folder_path):
         print(f"文件夹 '{folder_path}' 已经存在")
 
 
-audio_list = {}
 babel_on = False
 frame_Map = 0
 frames_map = {}
 current_frame_map = {}
 Is_fill = False
 Is_square = False
-Cards_list = {}
 isOpeningFiles = False
 Is_Opened = False
 log_file_last_name = ""
 is_hiding_health_bar = False
 focused_NPC = ""
+audio_list = {}
+Cards_list = {}
+Cards_list_by_role = {}
 room_info_search = {}
 room_info_list = {}
 hurt_position = ["【头部】","【左眼】","【右眼】","【颈部】","【腹部】","【胸部】","【躯干】","【躯干】","【躯干】","【躯干】","【躯干】","【躯干】","【躯干】","【躯干】","【躯干】","【躯干】","【左臂】","【右臂】","【左手】","【右手】","【下腹】","【左腿】","【右腿】","【左脚】","【右脚】"]
 
-def play_audio(file_path, name, loops=-1):
+def play_audio(file_path, name, loops=-1): #程序能够续接音效、BGM、HO和FX #程序会显示当前正在播放的BGM名称
+    print("开始播放：" + name + " → " +file_path)
     if file_path:
         pygame.mixer.init()
         # pygame.mixer.music.load(file_path)
@@ -71,11 +73,11 @@ def play_audio(file_path, name, loops=-1):
         if loops == -1:
             audio_list[name] = sound
 
-
 def kill_audio(name):
+    global audio_list
+    print("停止播放：" + name)
     audio_list[name].stop()
     audio_list.pop(name)
-
 
 # 例子：创建名为 'my_folder' 的文件夹在当前工作目录下
 create_folder('AppSettings')
@@ -1307,6 +1309,17 @@ def load_PL_INFO():
         # 如果文件不存在，返回默认设置
         return {}
 
+def load_last_session_data():
+    try:
+        # 尝试加载自定义角色数值信息
+        with open('GameSaves/last_session_data.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # 如果文件不存在，返回默认设置
+        last_session_data = {"Cards_list": Cards_list, "room_info_search": room_info_search, "room_info_list": room_info_list, "Cards_list_by_role": Cards_list_by_role, "NowBGM": ["全部"], "NowImage": [], "NowEffect": [], "NowDialogState": False, "NowCharacterEffect": [], "BG": ""}
+        with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
+            json.dump(last_session_data, file, indent=4, ensure_ascii=False)
+        return last_session_data
 
 def load_role_count():
     # 从配置文件加载角色数量，默认为0
@@ -1319,7 +1332,6 @@ def load_last_save():
     config = configparser.ConfigParser()
     config.read('AppSettings/config.ini')
     return config.get('Path', 'SavePath', fallback=0)
-
 
 role_Chart_detail_demo = {
     "EDU": 0,
@@ -2274,9 +2286,36 @@ role_Chart = load_Chart().copy()
 role_Chart_at_name = load_Chart_at_name().copy()
 bot_personality_by_name = load_DiceBot_personality()
 adv_comment = ""
-Cards_list_by_role = {}
 
-
+string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！这就是全部的陛下庇护！", " - 陛下所言甚是/陶醉", " - "
+                                                                                                       "你生而有翼，为何竟愿一生匍匐前进，形如虫蚁？",
+                             " - 好的国王千篇一律 坏的国王万里挑一", " - 变成卢学家后能看自己的头衔互相贴贴吗", " - 导演因染新冠七天没到片场发现剧组被新来的演员带去溜冰",
+                             " - 你的Bug我的Bug好像都一样", " - 新约是不是就像陛下一样可爱", " - 傻卢，罚你一天不见陛下",
+                             " - 送你默默饮泪的泪城纪念雨景球", " - 送你向着它告白就能获得陛下碎片的勇气流星", " - 陛下正在搭建他的绝对帝国", " - 一半的陛下庇护",
+                             " - 陛下那么肥干什么，没有陛下的气质",
+                             " - 陛下很便宜的", " - 情人眼里出陛下", " - 陛下很好养活的", " - 有王吗？", " - 只能说没有陛下漂亮",
+                             ' - "你们都没有我懂陛下！"', " - 就像陛下",
+                             ' - "我是真的对陛下没感觉"',
+                             " - 曾经有一只超可爱的陛下在我面前，我却没有珍惜", " - 感觉陛下有危险！", " - 这个陛下救不了我", " - 成为陛下",
+                             ' - "有毛的都被我干掉了"', " - 陛下，本命链顶端的男人", " - 王学家和卢卢跳舞被陛下追着打",
+                             " - 陛下笑着吃了这个蛋糕，他久违的微笑也让我开心了起来", " - 下午好，今天的小骑士是要油炸呢还是要清蒸呢",
+                             " - 我需要陛下来平息我胸中怒火/翻进白宫", " - 噢可爱的生灵，请告诉我陛下为什么这么美好", " - 咩碳睡了！咩碳希望能梦到陛下！/大声",
+                             " - 有时候，只需一个代名词就能拯救别人一天的好心情。—— 王学家咩碳",
+                             " - 沃姆是不能飞的，所以你一说飞天沃姆，我想到的是被打飞的沃姆你知道吗", " - INTJ可不会被绊倒 —— 会被ENTJ绊倒",
+                             " - 我不懂，我没有背叛过陛下", " - 陛下束紧了我的缰绳，让我无法发疯", " - 陛下，您离遍布生物圈又近了一步",
+                             " - 突然感受到了人类的可爱，我祝福人类（拿着橄榄枝洒圣水）", " - 我去带陛下做核酸", " - 白宫：警惕蛾族打旧日之光牌",
+                             " - 给我一个世设，我能适配整只陛下", " - 死了也是死在陛下怀里", " - 陛下一笑倾城，圣巢虫子都跳虚空自杀以保陛下周全",
+                             " - 太久不上供 就会被踢出白宫", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                             "", "", "", "", ""]
+# 从列表中随机选择一个字符串
+encouragement = random.choice(string_list_encouragement)
+title_name = "自嗨团 v1.92" + encouragement
 # logging.debug("Variable value: %s", role_Chart_at_name)
 
 
@@ -2285,36 +2324,8 @@ class ChatApp:
         self.root = root
         self.autoSave_firstTime()
         # 一系列字符串
-        string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100！这就是全部的陛下庇护！", " - 陛下所言甚是/陶醉", " - "
-                                                                                                               "你生而有翼，为何竟愿一生匍匐前进，形如虫蚁？",
-                                     " - 好的国王千篇一律 坏的国王万里挑一", " - 变成卢学家后能看自己的头衔互相贴贴吗", " - 导演因染新冠七天没到片场发现剧组被新来的演员带去溜冰",
-                                     " - 你的Bug我的Bug好像都一样", " - 新约是不是就像陛下一样可爱", " - 傻卢，罚你一天不见陛下",
-                                     " - 送你默默饮泪的泪城纪念雨景球", " - 送你向着它告白就能获得陛下碎片的勇气流星", " - 陛下正在搭建他的绝对帝国", " - 一半的陛下庇护",
-                                     " - 陛下那么肥干什么，没有陛下的气质",
-                                     " - 陛下很便宜的", " - 情人眼里出陛下", " - 陛下很好养活的", " - 有王吗？", " - 只能说没有陛下漂亮",
-                                     ' - "你们都没有我懂陛下！"', " - 就像陛下",
-                                     ' - "我是真的对陛下没感觉"',
-                                     " - 曾经有一只超可爱的陛下在我面前，我却没有珍惜", " - 感觉陛下有危险！", " - 这个陛下救不了我", " - 成为陛下",
-                                     ' - "有毛的都被我干掉了"', " - 陛下，本命链顶端的男人", " - 王学家和卢卢跳舞被陛下追着打",
-                                     " - 陛下笑着吃了这个蛋糕，他久违的微笑也让我开心了起来", " - 下午好，今天的小骑士是要油炸呢还是要清蒸呢",
-                                     " - 我需要陛下来平息我胸中怒火/翻进白宫", " - 噢可爱的生灵，请告诉我陛下为什么这么美好", " - 咩碳睡了！咩碳希望能梦到陛下！/大声",
-                                     " - 有时候，只需一个代名词就能拯救别人一天的好心情。—— 王学家咩碳",
-                                     " - 沃姆是不能飞的，所以你一说飞天沃姆，我想到的是被打飞的沃姆你知道吗", " - INTJ可不会被绊倒 —— 会被ENTJ绊倒",
-                                     " - 我不懂，我没有背叛过陛下", " - 陛下束紧了我的缰绳，让我无法发疯", " - 陛下，您离遍布生物圈又近了一步",
-                                     " - 突然感受到了人类的可爱，我祝福人类（拿着橄榄枝洒圣水）", " - 我去带陛下做核酸", " - 白宫：警惕蛾族打旧日之光牌",
-                                     " - 给我一个世设，我能适配整只陛下", " - 死了也是死在陛下怀里", " - 陛下一笑倾城，圣巢虫子都跳虚空自杀以保陛下周全",
-                                     " - 太久不上供 就会被踢出白宫", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                                     "", "", "", "", ""]
-        # 从列表中随机选择一个字符串
-        encouragement = random.choice(string_list_encouragement)
-        self.root.title("自嗨团 v1.92" + encouragement)
-
+        global title_name
+        self.root.title(title_name)
         # 设置图标
         self.root.iconbitmap("AppSettings/icon.ico")
 
@@ -2367,11 +2378,15 @@ class ChatApp:
         self.SAN = load_san_loss()
         self.SAN_ = {}
         self.last_SAN = {}
+
         self.NowBGM = ["全部"]
         self.NowImage = []
         self.NowEffect = []
         self.NowDialogState = True
         self.NowCharacterEffect = []
+        self.BG = ""
+        self.load_last_session()
+
         self.Weather_FX_setting(notjustload=False)
         self.new_window_weather_FX = None
         self.role_dir_path = load_dir_path()
@@ -2843,6 +2858,7 @@ class ChatApp:
             self.new_window_weather_FX.protocol("WM_DELETE_WINDOW", lambda: self.on_kill_image_FX())
 
     def display_image(self, file_path, text, name=None, seconds=-1):
+        print("图片展示：" + text + " → " + file_path)
         if file_path:
             new_window_HO = tk.Toplevel(root)
             new_window_HO.title("图片展示：" + text)
@@ -2883,6 +2899,7 @@ class ChatApp:
             new_window_HO.protocol("WM_DELETE_WINDOW", lambda: self.on_kill_image(new_window_HO, text, name))
 
     def display_FX(self, file_path, text):
+        print("FX展示：" + text + " → " + file_path)
         if file_path:
             new_window_FX = tk.Toplevel(root)
             new_window_FX.title("FX展示：" + text)
@@ -3370,6 +3387,66 @@ class ChatApp:
             file_path = "GameSaves/item_settings_by_name.json"
             with open(file_path, "w", encoding='utf-8') as file:
                 json.dump(self.role_items, file, indent=4, ensure_ascii=False)
+
+    def find_file(self, file_name, search_path):
+        result = ""
+        # Walk through the directory
+        for root, dirs, files in os.walk(search_path):
+            print(f"正在查找: {root}")
+            # Iterate over the files in the directory
+            for file in files:
+                # Split the file name and extension
+                name, ext = os.path.splitext(file)
+                # Check if the file name matches the given file name without extension
+                if name == file_name:
+                    print(f"已匹配文件: {file} 于 {root}")
+                    # Construct the full path of the matched file
+                    result = os.path.join(root, file)
+                    return result  # Return immediately after finding the file
+        return result  # Return empty if no file is found
+
+
+    def load_last_session(self):
+        #global audio_list
+        global Cards_list
+        global room_info_search
+        global room_info_list
+        global Cards_list_by_role
+        global title_name
+        self.last_session_data = load_last_session_data()
+        # 获取当前脚本文件的绝对路径
+        #script_path = os.path.abspath(__file__)
+        # 获取当前脚本文件所在的目录
+        #script_directory = os.path.dirname(script_path)
+        self.NowBGM = self.last_session_data["NowBGM"] #续接 + 显示名字
+        for name in self.NowBGM:
+            if name != "全部":
+                avatar_path = self.find_file(name, f"ReplayResources/BGM")
+                play_audio(avatar_path, name)
+        self.NowImage = self.last_session_data["NowImage"] #续接
+        for name in self.NowImage:
+            avatar_path = self.find_file(name, f"ReplayResources/HandOut")
+            self.display_image(avatar_path, "HandOut", name)
+        self.NowEffect = self.last_session_data["NowEffect"] #续接
+        for name in self.NowEffect:
+            avatar_path = self.find_file(name, f"ReplayResources/FX")
+            self.display_FX(avatar_path, name)
+        self.NowDialogState = self.last_session_data["NowDialogState"]
+        self.NowCharacterEffect = self.last_session_data["NowCharacterEffect"]
+        #audio_list = self.last_session_data["audio_list"]
+        Cards_list = self.last_session_data["Cards_list"]
+        room_info_search = self.last_session_data["room_info_search"]
+        room_info_list = self.last_session_data["room_info_list"]
+        Cards_list_by_role = self.last_session_data["Cards_list_by_role"]
+        self.BG = self.last_session_data["BG"]
+        self.display_image(self.BG, "背景图")
+
+        BGM_list = self.NowBGM.copy()
+        BGM_list.remove("全部")
+        string = ""
+        for song in BGM_list:
+            string += "   ▶ " + song
+        self.root.title(title_name + string)
 
     def generate_garbled_text(self, input_str, chaos_level=1.0):
         """
@@ -7138,7 +7215,7 @@ class ChatApp:
             role = "KP"
         self.avatar_click_event = role
         current_role = self.current_role.get()
-        options = ["【背景】", "【背景】纯黑", "【BGM】", "【停止BGM】", "【音效】", "【展示图片】", "【撤除图片】", "【特效】震动", "【特效】闪屏", "【高级特效】开始",
+        options = ["【背景】", "【背景】纯黑", "【背景】纯白", "【BGM】", "【停止BGM】", "【音效】", "【展示图片】", "【撤除图片】", "【特效】震动", "【特效】闪屏", "【高级特效】开始",
                    "【高级特效】结束", "【改变名字】[+(之后出场角色被改成的名字, 留空为恢复)]", "【对话框特效】震动", "【隐藏/显示对话框】",
                    f"【开始角色特效】({self.role_entries_name[role]})", "【结束角色特效(连续和剪影)】", "【更换对话框样式】[+(对话框样式名, 留空为撤除样式)]",
                    "【等待】[+(秒数)]", "【角色退场】[+(角色名, 留空为清退)]"]
@@ -7193,9 +7270,9 @@ class ChatApp:
         self.content_ = var.get()
 
     def confirm_selection(self, var, role):
+        global title_name
         self.top_ask.destroy()  # 销毁窗口
         content_ = var.get()
-
         if (content_ == "【背景】") or ("【BGM】" in content_) or ("音效" in content_) or ("【展示图片】" in content_):
             if "背景" in content_:
                 avatar_path = filedialog.askopenfilename(
@@ -7206,12 +7283,11 @@ class ChatApp:
                     filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
                     content = f"【背景】{filename_}"
                     self.display_image(avatar_path, "背景图")
-                    if os.path.exists(
-                            'ReplayResources/BG/' + filename_ + dotextension):
+                    self.BG = avatar_path
+                    if os.path.exists('ReplayResources/BG/' + filename_ + dotextension):
                         pass
                     else:
-                        shutil.copyfile(avatar_path,
-                                        'ReplayResources/BG/' + filename_ + dotextension)
+                        shutil.copyfile(avatar_path,'ReplayResources/BG/' + filename_ + dotextension)
                 else:
                     return
             elif "音效" in content_:
@@ -7241,9 +7317,14 @@ class ChatApp:
                     filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
                     self.NowBGM.append(filename_)
                     play_audio(avatar_path, filename_)
+                    BGM_list = self.NowBGM.copy()
+                    BGM_list.remove("全部")
+                    string = ""
+                    for song in BGM_list:
+                        string += "   ▶ " + song
+                    self.root.title(title_name + string)
                     content = f"【BGM】{filename_}"
-                    if os.path.exists(
-                            'ReplayResources/BGM/' + filename_ + dotextension):
+                    if os.path.exists('ReplayResources/BGM/' + filename_ + dotextension):
                         pass
                     else:
                         shutil.copyfile(avatar_path,
@@ -7257,8 +7338,7 @@ class ChatApp:
                     initialdir="ReplayResources/HandOut")
                 if avatar_path:
                     filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
-                    if os.path.exists(
-                            'ReplayResources/HandOut/' + filename_ + dotextension):
+                    if os.path.exists('ReplayResources/HandOut/' + filename_ + dotextension):
                         pass
                     else:
                         shutil.copyfile(avatar_path,
@@ -7287,7 +7367,6 @@ class ChatApp:
                 self.NowDialogState = True
         elif "恢复名字" in content_:
             content = "【改变名字】"
-
         elif "停止BGM" in content_:
             if len(self.NowBGM) > 1:
                 self.create_dropdown(role, self.NowBGM, "请选择要停止的BGM：")
@@ -7310,6 +7389,12 @@ class ChatApp:
                 # print("没有使用中的BGM！")
                 messagebox.showwarning("警告", "没有使用中的BGM！")
                 content = f"【停止BGM】[+(BGM名称)]"
+            BGM_list = self.NowBGM.copy()
+            BGM_list.remove("全部")
+            string = ""
+            for song in BGM_list:
+                string += "   ▶ " + song
+            self.root.title(title_name + string)
 
         elif "撤除图片" in content_:
             if self.NowImage:
@@ -7338,12 +7423,10 @@ class ChatApp:
                         initialdir="ReplayResources/FX")
                     if avatar_path:
                         filename_, dotextension = os.path.splitext(os.path.basename(avatar_path))
-                        if os.path.exists(
-                                'ReplayResources/FX/' + filename_ + dotextension):
+                        if os.path.exists('ReplayResources/FX/' + filename_ + dotextension):
                             pass
                         else:
-                            shutil.copyfile(avatar_path,
-                                            'ReplayResources/FX/' + filename_ + dotextension)
+                            shutil.copyfile(avatar_path, 'ReplayResources/FX/' + filename_ + dotextension)
                         content_ = filename_
                         self.display_FX(avatar_path, filename_)
                 else:
@@ -7394,6 +7477,9 @@ class ChatApp:
                 messagebox.showwarning("警告", "没有使用中的角色特效！")
         elif "角色退场" in content_:
             content = "【角色退场】"
+        elif content_ == "【背景】纯黑" or content_ == "【背景】纯白":
+            content = content_
+            self.BG = ""
         else:
             content = content_
 
@@ -8023,6 +8109,7 @@ class ChatApp:
                 chat_log_content = chat_log_content.replace("【更换样式】", "<bubble>:")
                 chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【背景】纯黑", "<background>:black")
+                chat_log_content = chat_log_content.replace("【背景】纯白", "<background>:white")
                 chat_log_content = chat_log_content.replace("【背景】", "<background>:")
                 chat_log_content = chat_log_content.replace("【BGM】", "<BGM>:")
                 chat_log_content = chat_log_content.replace("【高级特效】开始", "<animation>:")
@@ -12575,6 +12662,15 @@ class ChatApp:
 
     def save_settings(self):
         global bot_personality_by_name
+        #global audio_list
+        global Cards_list
+        global room_info_search
+        global room_info_list
+        global Cards_list_by_role
+        # save last session
+        self.last_session_data = {"Cards_list": Cards_list, "room_info_search": room_info_search, "room_info_list": room_info_list, "Cards_list_by_role": Cards_list_by_role, "NowBGM": self.NowBGM, "NowImage": self.NowImage, "NowEffect": self.NowEffect, "NowDialogState": self.NowDialogState, "NowCharacterEffect": self.NowCharacterEffect, "BG": self.BG}
+        with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
+            json.dump(self.last_session_data, file, indent=4, ensure_ascii=False)
         # 保存小窗内容:
         with open("GameSaves/whisper_data.json", "w", encoding='utf-8') as file:
             json.dump(self.whisper_data, file, indent=4, ensure_ascii=False)
