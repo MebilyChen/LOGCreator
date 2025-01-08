@@ -1,0 +1,102 @@
+{
+    "characters": {
+        "Total(PC)": {
+            "Money": 2160,
+            "总资产": 1662300,
+            "消费水平": 432,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 10
+        },
+        "NPCs": {
+            "Money": 100,
+            "Ammo": 50,
+            "Medicine": 10,
+            "Food": 18,
+            "Water": 15,
+            "饥饿": 0
+        },
+        "Wyrm": {
+            "Money": 180,
+            "总资产": 4500,
+            "消费水平": 60,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 0
+        },
+        "Lurien": {
+            "Money": 300,
+            "总资产": 7500,
+            "消费水平": 60,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 10
+        },
+        "Hollow": {
+            "Money": 30,
+            "总资产": 300,
+            "消费水平": 12,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 0
+        }
+    },
+    "logs": {
+        "Total(PC)": {
+            "Money": 2160,
+            "总资产": 1662300,
+            "消费水平": 432,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 10
+        },
+        "NPCs": {
+            "Money": 100,
+            "Ammo": 50,
+            "Medicine": 10,
+            "Food": 18,
+            "Water": 15,
+            "饥饿": 0
+        },
+        "Wyrm": {
+            "Money": 180,
+            "总资产": 4500,
+            "消费水平": 60,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 0
+        },
+        "Lurien": {
+            "Money": 300,
+            "总资产": 7500,
+            "消费水平": 60,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 10
+        },
+        "Hollow": {
+            "Money": 30,
+            "总资产": 300,
+            "消费水平": 12,
+            "Ammo": 0,
+            "Medicine": 0,
+            "Food": 0,
+            "Water": 0,
+            "饥饿": 0
+        }
+    }
+}
