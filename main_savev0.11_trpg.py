@@ -21002,7 +21002,7 @@ class ChatApp:
             self.tree2_list[role].delete(*self.tree2_list[role].get_children())
 
     def calculator(self):
-        self.dialog = DiceRollDialog(self.new_window, f"信息扩散器 & 调查进度计算器")
+        self.dialog = DiceRollDialog(self.new_window, f"信息扩散器 & 调查进度计算器", tree=self.tree_list)
         result = self.dialog.result
 
     def expand_information(self, role=None):
@@ -24593,9 +24593,9 @@ class MemoryInfoDialog_public(simpledialog.Dialog):
 
 
 class DiceRollDialog(simpledialog.Dialog):
-    def __init__(self, parent, title=None):
+    def __init__(self, parent, title=None, tree=None):
         super().__init__(parent, title)
-        self.ChatApp = None
+        self.tree = tree
         # self.ChatApp = chat_app_instance
 
     def randomize_info(self):
@@ -24699,7 +24699,7 @@ class DiceRollDialog(simpledialog.Dialog):
     def body(self, master):
         tk.Label(master, text="第一次掷骰结果：").grid(row=0, column=0, sticky="e")
         tk.Label(master, text="第二次掷骰结果：").grid(row=1, column=0, sticky="e")
-        # tk.Label(master, text="线索名（当前无效）：").grid(row=2, column=0, sticky="e")
+        tk.Label(master, text="线索名：").grid(row=2, column=0, sticky="e")
         tk.Label(master, text="===情报扩散器").grid(row=3, column=0, sticky="e")
         tk.Label(master, text="编辑房间与情报===").grid(row=3, column=1, sticky="e")
         tk.Label(master, text="房间类型").grid(row=4, column=0, sticky="e")
@@ -24800,7 +24800,21 @@ class DiceRollDialog(simpledialog.Dialog):
                       f"如果数量不够，则不提供任何关键词（比如只有一个关键地点，则在80%以上给出）如果信息过于简短，可以提前给出全部段落，负值同理；\n如果段落总结不出关键词，可以将关键词替换为句子。\n" \
                       f"注意虚假信息和无效信息是不一样的。无效信息在0%给出，虚假信息需要起到误导PC的作用（比如新增了一个地点，新增了一个人物，关键信息错误等） "
         messagebox.showinfo("处理方案", result_text)
-        # self.ChatApp.add_inference2self(source, source + "的搜查进度", result_percentage, "DiceBot")
+        if self.tree is None:
+            print("Error: 'tree' attribute is not set or is None.")
+            return
+        #self.ChatApp.add_inference2self(source, source + "的搜查进度", result_percentage, "DiceBot")
+        self.tree["DiceBot"].insert("", "end", values=(source, source + "的搜查进度", result_percentage))
+        # 获取 Treeview 中所有条目的ID，并按记忆指数从大到小排序
+        sorted_ids = sorted(self.tree["DiceBot"].get_children(), key=lambda x: self.tree["DiceBot"].set(x, "记忆指数"),
+                            reverse=True)
+        # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
+        for item_id in sorted_ids:
+            values = self.tree["DiceBot"].item(item_id, "values")
+            # 在这里进行你需要的操作，可以根据需要修改 values 的内容
+            self.tree["DiceBot"].insert("", "end", values=values)
+            self.tree["DiceBot"].delete(item_id)
+            self.tree["DiceBot"].update()
 
         print(result_text)
 
