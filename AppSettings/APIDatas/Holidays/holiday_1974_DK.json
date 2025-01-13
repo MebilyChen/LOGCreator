@@ -1,0 +1,205 @@
+[
+    {
+        "date": "1974-01-01",
+        "localName": "Nytårsdag",
+        "name": "New Year's Day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-11",
+        "localName": "Skærtorsdag",
+        "name": "Maundy Thursday",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-12",
+        "localName": "Langfredag",
+        "name": "Good Friday",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-14",
+        "localName": "Påskedag",
+        "name": "Easter Sunday",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-15",
+        "localName": "2. Påskedag",
+        "name": "Easter Monday",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-05-10",
+        "localName": "Store bededag",
+        "name": "General Prayer Day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-05-23",
+        "localName": "Kristi Himmelfartsdag",
+        "name": "Ascension Day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-05-24",
+        "localName": "Banklukkedag",
+        "name": "Bank closing day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    },
+    {
+        "date": "1974-06-02",
+        "localName": "Pinsedag",
+        "name": "Pentecost",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-06-03",
+        "localName": "2. Pinsedag",
+        "name": "Whit Monday",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-06-05",
+        "localName": "Grundlovsdag",
+        "name": "Constitution Day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    },
+    {
+        "date": "1974-12-24",
+        "localName": "Juleaftensdag",
+        "name": "Christmas Eve",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    },
+    {
+        "date": "1974-12-25",
+        "localName": "Juledag / 1. juledag",
+        "name": "Christmas Day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-12-26",
+        "localName": "2. juledag",
+        "name": "St. Stephen's Day",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-12-31",
+        "localName": "Nytårsaftensdag",
+        "name": "New Year's Eve",
+        "countryCode": "DK",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    }
+]

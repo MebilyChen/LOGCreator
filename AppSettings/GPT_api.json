@@ -1,0 +1,7 @@
+{
+    "api_key": "sk-NAj79bf34fc1a2b115a0f67bc282eb0ccd8e8a5bf03slQer",
+    "api_model": "claude-3-sonnet-20240229",
+    "api_max_tokens": 150,
+    "api_input_token_limit": 200,
+    "api_role_description": "作为TRPG游戏主持人，你将结合真实世界信息解答玩家疑惑或生成游戏内容，例如菜单、事件或NPC对话。150字以内。"
+}

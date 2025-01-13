@@ -1,0 +1,218 @@
+[
+    {
+        "date": "1974-01-01",
+        "localName": "Ukiortaaq",
+        "name": "New Year's Day",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-01-06",
+        "localName": "Kunngit pingasut ulluat",
+        "name": "Epiphany",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    },
+    {
+        "date": "1974-04-11",
+        "localName": "Sisamanngortoq illernartoq",
+        "name": "Maundy Thursday",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-12",
+        "localName": "Tallimanngorneq tannaartoq",
+        "name": "Good Friday",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-14",
+        "localName": "Poorskip ullua",
+        "name": "Easter Sunday",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-04-15",
+        "localName": "Poorskip-aappaa",
+        "name": "Easter Monday",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-05-10",
+        "localName": "Tussiarfik",
+        "name": "General Prayer Day",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-05-23",
+        "localName": "Qilaliarfik",
+        "name": "Ascension Day",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-05-24",
+        "localName": "Atuanngiffik",
+        "name": "Bank closing day",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    },
+    {
+        "date": "1974-06-02",
+        "localName": "Piinsi",
+        "name": "Pentecost",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-06-03",
+        "localName": "Piinsip-aappaa",
+        "name": "Whit Monday",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-06-21",
+        "localName": "Ullortuneq",
+        "name": "Ullortuneq",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-12-24",
+        "localName": "Juulliaraq",
+        "name": "Christmas Eve",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    },
+    {
+        "date": "1974-12-25",
+        "localName": "Juullip ullua",
+        "name": "Christmas Day",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-12-26",
+        "localName": "Juullip-aappaa",
+        "name": "St. Stephen's Day",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Public"
+        ]
+    },
+    {
+        "date": "1974-12-31",
+        "localName": "Ukiutoqaq",
+        "name": "New Year's Eve",
+        "countryCode": "GL",
+        "fixed": false,
+        "global": true,
+        "counties": null,
+        "launchYear": null,
+        "types": [
+            "Bank",
+            "School",
+            "Optional"
+        ]
+    }
+]
