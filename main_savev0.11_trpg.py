@@ -21002,7 +21002,7 @@ class ChatApp:
             self.tree2_list[role].delete(*self.tree2_list[role].get_children())
 
     def calculator(self):
-        self.dialog = DiceRollDialog(self.new_window, f"信息扩散器 & 调查进度计算器", tree=self.tree_list)
+        self.dialog = DiceRollDialog(self.new_window, title=f"信息扩散器 & 调查进度计算器", tree=self.tree_list["DiceBot"])
         result = self.dialog.result
 
     def expand_information(self, role=None):
@@ -24594,8 +24594,8 @@ class MemoryInfoDialog_public(simpledialog.Dialog):
 
 class DiceRollDialog(simpledialog.Dialog):
     def __init__(self, parent, title=None, tree=None):
-        super().__init__(parent, title)
         self.tree = tree
+        super().__init__(parent, title)
         # self.ChatApp = chat_app_instance
 
     def randomize_info(self):
@@ -24804,17 +24804,17 @@ class DiceRollDialog(simpledialog.Dialog):
             print("Error: 'tree' attribute is not set or is None.")
             return
         #self.ChatApp.add_inference2self(source, source + "的搜查进度", result_percentage, "DiceBot")
-        self.tree["DiceBot"].insert("", "end", values=(source, source + "的搜查进度", result_percentage))
+        self.tree.insert("", "end", values=(source, source + "的搜查进度", result_percentage))
         # 获取 Treeview 中所有条目的ID，并按记忆指数从大到小排序
-        sorted_ids = sorted(self.tree["DiceBot"].get_children(), key=lambda x: self.tree["DiceBot"].set(x, "记忆指数"),
+        sorted_ids = sorted(self.tree.get_children(), key=lambda x: self.tree.set(x, "记忆指数"),
                             reverse=True)
         # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
         for item_id in sorted_ids:
-            values = self.tree["DiceBot"].item(item_id, "values")
+            values = self.tree.item(item_id, "values")
             # 在这里进行你需要的操作，可以根据需要修改 values 的内容
-            self.tree["DiceBot"].insert("", "end", values=values)
-            self.tree["DiceBot"].delete(item_id)
-            self.tree["DiceBot"].update()
+            self.tree.insert("", "end", values=values)
+            self.tree.delete(item_id)
+            self.tree.update()
 
         print(result_text)
 
