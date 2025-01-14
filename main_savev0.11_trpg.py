@@ -2836,7 +2836,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.56" + encouragement
+title_name = "自嗨团 v2.57" + encouragement
 music_autoplay_status = False
 
 
@@ -4414,15 +4414,16 @@ class ChatApp:
             self.role_entries[role].delete("1.0", tk.END)
 
     def set_objective(self):
-        obj = simpledialog.askstring("设置目标", "当前目标")
+        title = simpledialog.askstring("目标标题", "目标类型", initialvalue=f"目标")
+        obj = simpledialog.askstring("设置目标", f"当前{title}")
         global title_name
-        self.root.title(title_name + "  | 【当前目标】" + obj)
+        self.root.title(title_name + f"  | 【当前{title}】" + obj)
         self.new_obj_window = tk.Toplevel(root, takefocus=True)
         # Create widgets
         self.new_obj_frame = tk.Frame(self.new_obj_window)
         self.new_obj_frame.pack()
 
-        self._label = tk.Label(self.new_obj_frame, text="【目标】" + obj, relief=tk.SOLID, font=("幼圆", 26))
+        self._label = tk.Label(self.new_obj_frame, text=f"【{title}】" + obj, relief=tk.SOLID, font=("幼圆", 26))
         self._label.grid(row=0, column=0, sticky="nesw")
 
 
