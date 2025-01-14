@@ -21168,6 +21168,7 @@ class ChatApp:
             json.dump(data, file, indent=4, ensure_ascii=False)
         self.new_window.destroy()
 
+
     # 新窗口
     def open_new_window(self):
         global Is_Opened
@@ -21269,7 +21270,7 @@ class ChatApp:
                 self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=10, undo=True)
                 # 绑定键盘事件到 on_key 函数
                 self.KP_entry.bind("<Key>", lambda event: self.on_key(event, self.KP_entry))
-                self.KP_entry.insert(tk.END, "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响")
+                self.KP_entry.insert(tk.END, "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响\n列表选择时推荐使用ctrl选取，否则无法取消选中")
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
                 self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
@@ -21286,6 +21287,27 @@ class ChatApp:
                 # 设置行和列的权重，使得Treeview可以随窗口的大小变化而调整
                 self.tree_main.grid_rowconfigure(0, weight=1)
                 self.load_treeview_data(self.tree_main, "GameSaves/Deduction_infos_base.json", role)
+
+                # 保存上一次选中的项
+                # self.last_selected_item = None
+                # 绑定单击事件
+                # self.tree_main.bind("<Button-1>", lambda event: toggle_selection(event))
+
+                # def toggle_selection(event):
+                    # 获取点击时的项
+                    # clicked_item = self.tree_main.identify_row(event.y)
+                    # if clicked_item:
+                        # if clicked_item == self.last_selected_item:
+                            # 取消选中
+                             # self.tree_main.selection_remove(clicked_item)
+                             # self.last_selected_item = None
+                        # else:
+                            # 更新选中项
+                            # self.last_selected_item = clicked_item
+                    # else:
+                        # 点击空白处时清除记录
+                        # self.last_selected_item = None
+
             else:
                 entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1, undo=True)
                 # 绑定键盘事件到 on_key 函数
