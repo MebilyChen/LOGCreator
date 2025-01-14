@@ -4413,6 +4413,19 @@ class ChatApp:
             self.chat_log.yview(tk.END)
             self.role_entries[role].delete("1.0", tk.END)
 
+    def set_objective(self):
+        obj = simpledialog.askstring("设置目标", "当前目标")
+        global title_name
+        self.root.title(title_name + "  | 【当前目标】" + obj)
+        self.new_obj_window = tk.Toplevel(root, takefocus=True)
+        # Create widgets
+        self.new_obj_frame = tk.Frame(self.new_obj_window)
+        self.new_obj_frame.pack()
+
+        self._label = tk.Label(self.new_obj_frame, text="【目标】" + obj, relief=tk.SOLID, font=("幼圆", 26))
+        self._label.grid(row=0, column=0, sticky="nesw")
+
+
     def voting_system(self, role):
         if len(self.votes) == 0:
             self.vote_theme = simpledialog.askstring("投票", "投票主题:", initialvalue=f"{self.role_entries_name[role]}发起")
@@ -4614,6 +4627,7 @@ class ChatApp:
                              command=lambda: self.load_backup_game_data(), background="yellow")
             menu.add_command(label="资源管理...",
                              command=lambda: ResourceManagementSystem(self, root, hide_window=False))
+            menu.add_command(label="设置当前目标", command=lambda: self.set_objective())
             menu.add_command(label="GPT设置...",
                              command=lambda: APISettingsWindow(root))
         elif "NPC_name" in role:
@@ -4680,6 +4694,7 @@ class ChatApp:
                                  role_description=api_role_description: self.chat_with_api(
                                  user_message, role, pre_conversation=False, api_role_description=api_role_description))
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
+            menu.add_command(label="设置当前目标", command=lambda: self.set_objective())
         self.show_menu(event, menu)
 
     # 超链接
@@ -20828,7 +20843,7 @@ class ChatApp:
             # 创建一个弹出对话框，让用户输入新的记忆指数或内容
             new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆指数：",
                                                        initialvalue=values[2],
-                                                       minvalue=-5,
+                                                       minvalue=-100,
                                                        maxvalue=100)
             new_memory_ = simpledialog.askstring("修改记忆内容", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆内容：",
                                                  initialvalue=values[1]).strip()
@@ -20858,19 +20873,20 @@ class ChatApp:
             # 创建一个弹出对话框，让用户输入新的记忆指数或内容
             new_memory_index = simpledialog.askinteger("修改记忆指数", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆指数：",
                                                        initialvalue=values[2],
-                                                       minvalue=-5,
+                                                       minvalue=-100,
                                                        maxvalue=100)
             new_memory_ = simpledialog.askstring("修改记忆内容", f"{values[1]}\n\n当前记忆指数：{values[2]}\n请输入新的记忆内容：",
                                                  initialvalue=values[1]).replace("。",
                                                                                  "。\n").replace(
                 "\n\n", "\n")
+            status_ = values[3]
             if new_memory_index is not None:
                 # 更新Treeview中的值
-                self.tree2_list[role].item(item, values=(values[0], values[1], new_memory_index))
+                self.tree2_list[role].item(item, values=(values[0], values[1], new_memory_index, status_))
                 values = self.tree2_list[role].item(item, "values")
             if new_memory_ is not None:
                 # 更新Treeview中的值
-                self.tree2_list[role].item(item, values=(values[0], new_memory_, values[2]))
+                self.tree2_list[role].item(item, values=(values[0], new_memory_, values[2], status_))
         sorted_ids = sorted(self.tree2_list[role].get_children(), key=lambda x: self.tree2_list[role].set(x, "记忆指数"),
                             reverse=True)
         # 遍历排序后的条目ID，将它们插入到新的 Treeview 中
