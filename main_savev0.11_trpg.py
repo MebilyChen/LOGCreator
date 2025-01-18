@@ -4322,9 +4322,10 @@ class ChatApp:
             objective = {}
             for o in self.last_session_data["objectives"]:
                 if 'title' in o and 'obj' in o:
-                    self.set_objective(o['title'], o['obj'], o['desc'])
+                    if o['title'] != "":
+                        self.set_objective(o['title'], o['obj'], o['desc'])
                     objective = o
-            if objective is not None:
+            if 'title' in objective and objective['title'] is not None:
                 self.root.title(title_name + string + f"  | 【当前{objective['title']}】" + objective['obj'])
         else:
             self.root.title(title_name + string)
@@ -4443,7 +4444,9 @@ class ChatApp:
         if desc != "":
             self._label2 = tk.Label(self.new_obj_frame, text=desc, relief=tk.RIDGE, font=("宋体", 14), anchor="w")
             self._label2.grid(row=1, column=0, sticky="nesw")
-        self.new_obj_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_obj_window)
+        #self.new_obj_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_obj_window)
+        new_obj_window = self.new_obj_window
+        self.new_obj_window.protocol("WM_DELETE_WINDOW", lambda: self.on_closing_new_window_obj_window(new_obj_window))
         # 映射窗口 ID 和对象
         self.window_map[self.new_obj_window.winfo_id()] = self.new_obj_window
 
@@ -4458,15 +4461,15 @@ class ChatApp:
         if new_text is not None:  # 如果点击确定
             label.config(text=new_text)
 
-    def on_closing_new_window_obj_window(self):
-        current_window_id = self.new_obj_window.winfo_id()
+    def on_closing_new_window_obj_window(self, window):
+        current_window_id = window.winfo_id()
 
         # 从 objective_lists 和 window_map 中移除
         self.objective_lists = [item for item in self.objective_lists if item["window_id"] != current_window_id]
         self.window_map.pop(current_window_id, None)
 
         # 销毁窗口
-        self.new_obj_window.destroy()
+        window.destroy()
 
 
     def voting_system(self, role):
