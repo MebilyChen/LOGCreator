@@ -1834,7 +1834,7 @@ def load_last_session_data():
         last_session_data = {"Cards_list": Cards_list, "room_info_search": room_info_search,
                              "room_info_list": room_info_list, "Cards_list_by_role": Cards_list_by_role,
                              "NowBGM": ["全部"], "NowImage": [], "NowEffect": [], "NowDialogState": False,
-                             "NowCharacterEffect": [], "BG": "", "current_time_log": "", "unify_time_log": []}
+                             "NowCharacterEffect": [], "BG": "", "current_time_log": "", "unify_time_log": [], "objectives":[{"title": "", "obj": ""}]}
         with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
             json.dump(last_session_data, file, indent=4, ensure_ascii=False)
         return last_session_data
@@ -2921,6 +2921,7 @@ class ChatApp:
         self.health_data_by_name = load_health_data_by_name()
         self.unify_time_log = []
         self.unify_time_log_note = []
+        self.objective_lists = []
         self.role_Icon_paths = load_icon_data()
         self.votes = {}
         self.role_skill_menu = load_role_skill_menu()
@@ -4317,7 +4318,16 @@ class ChatApp:
         string = ""
         for song in BGM_list:
             string += "   ▶ " + song
-        self.root.title(title_name + string)
+        if self.last_session_data["objectives"] is not None:
+            objective = {}
+            for o in self.last_session_data["objectives"]:
+                if 'title' in o and 'obj' in o:
+                    self.set_objective(o['title'], o['obj'], o['desc'])
+                    objective = o
+            if objective is not None:
+                self.root.title(title_name + string + f"  | 【当前{objective['title']}】" + objective['obj'])
+        else:
+            self.root.title(title_name + string)
 
         self.current_time_log = self.last_session_data["current_time_log"]
         self.current_time_log_note = self.last_session_data["current_time_log_note"]
@@ -4413,18 +4423,50 @@ class ChatApp:
             self.chat_log.yview(tk.END)
             self.role_entries[role].delete("1.0", tk.END)
 
-    def set_objective(self):
-        title = simpledialog.askstring("目标标题", "目标类型", initialvalue=f"目标")
-        obj = simpledialog.askstring("设置目标", f"当前{title}")
-        global title_name
-        self.root.title(title_name + f"  | 【当前{title}】" + obj)
+    def set_objective(self, title=None, obj=None, desc=None):
+        self.window_map = {}  # 映射窗口 ID 到窗口对象
+        if title is not None and obj is not None:
+            pass
+        else:
+            title = simpledialog.askstring("目标标题", "目标类型", initialvalue=f"目标")
+            obj = simpledialog.askstring("设置目标", f"当前{title}")
+            desc = simpledialog.askstring("设置详细", f"{title}：{obj}")
+            global title_name
+            self.root.title(title_name + f"  | 【当前{title}】" + obj)
         self.new_obj_window = tk.Toplevel(root, takefocus=True)
         # Create widgets
         self.new_obj_frame = tk.Frame(self.new_obj_window)
         self.new_obj_frame.pack()
 
-        self._label = tk.Label(self.new_obj_frame, text=f"【{title}】" + obj, relief=tk.SOLID, font=("幼圆", 26))
+        self._label = tk.Label(self.new_obj_frame, text=f"【{title}】" + obj, relief=tk.SOLID, font=("楷体", 20))
         self._label.grid(row=0, column=0, sticky="nesw")
+        if desc != "":
+            self._label2 = tk.Label(self.new_obj_frame, text=desc, relief=tk.RIDGE, font=("宋体", 14), anchor="w")
+            self._label2.grid(row=1, column=0, sticky="nesw")
+        self.new_obj_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_obj_window)
+        # 映射窗口 ID 和对象
+        self.window_map[self.new_obj_window.winfo_id()] = self.new_obj_window
+
+        # 添加到列表
+        self.objective_lists.append({"title": title, "obj": obj, "desc": desc, "window_id": self.new_obj_window.winfo_id()})
+
+    def objective_edit_label(self, label, title, current_text):
+        """
+        弹出输入框修改 Label 文本
+        """
+        new_text = simpledialog.askstring(title, "请输入新内容：", initialvalue=current_text)
+        if new_text is not None:  # 如果点击确定
+            label.config(text=new_text)
+
+    def on_closing_new_window_obj_window(self):
+        current_window_id = self.new_obj_window.winfo_id()
+
+        # 从 objective_lists 和 window_map 中移除
+        self.objective_lists = [item for item in self.objective_lists if item["window_id"] != current_window_id]
+        self.window_map.pop(current_window_id, None)
+
+        # 销毁窗口
+        self.new_obj_window.destroy()
 
 
     def voting_system(self, role):
@@ -21732,7 +21774,8 @@ class ChatApp:
                                   "BG": self.BG, "current_time_log": self.current_time_log,
                                   "current_time_log_note": self.current_time_log_note,
                                   "unify_time_log": self.unify_time_log,
-                                  "unify_time_log_note": self.unify_time_log_note}
+                                  "unify_time_log_note": self.unify_time_log_note,
+                                  "objectives": self.objective_lists}
         with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
             json.dump(self.last_session_data, file, indent=4, ensure_ascii=False)
         # 保存小窗内容:

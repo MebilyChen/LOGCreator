@@ -14,5 +14,25 @@
     "current_time_log": "【时间】17:33【地点】夏威夷【天气】晴【日期】2024/10/31 Thursday\n",
     "current_time_log_note": "分流汇合",
     "unify_time_log": [],
-    "unify_time_log_note": []
+    "unify_time_log_note": [],
+    "objectives": [
+        {
+            "title": "目标",
+            "obj": "阿斯顿撒",
+            "desc": null,
+            "window_id": 19403092
+        },
+        {
+            "title": "目标",
+            "obj": "实打实大苏打",
+            "desc": null,
+            "window_id": 4002682
+        },
+        {
+            "title": "目标",
+            "obj": "实打实打算",
+            "desc": "阿萨飒飒飒飒",
+            "window_id": 13701832
+        }
+    ]
 }
