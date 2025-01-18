@@ -3839,6 +3839,7 @@ class ChatApp:
                            "\n【多轮掷骰】命令头部的*表示轮数（3*意志）" \
                            "\n【暗骰】保持焦点在暗骰角色的消息框，点击Bot的掷骰按钮（公式取自暗骰角色，是否显示技能名取决于Bot公式栏）" \
                            "\n【掷骰原因】消息栏填写掷骰原因，可以包括技能文字点掷骰按钮来触发检定（例如“我使用r斗殴击晕敌人”）" \
+                           "\n【命运骰】.fate/.fudge，后接数字可控制骰数" \
                            "\n【HP/MP+-】在公式栏填写（例如“HP+1d3”）" \
                            "\n【.st draw who[+理由] whoabcd[+理由] yesno[+理由]】输入后点击发送按钮或回车（而不是掷骰按钮）" \
                            "\n===以上可删除===\n\n"
@@ -6590,6 +6591,34 @@ class ChatApp:
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", _role_entry)
                 return
+            elif ".fudge" in message or "。fudge" in message or ".fate" in message or "。fate" in message:
+                # 判断命令类型
+                command = message.lower().strip().replace(".fudge","").replace("。fudge","").replace(".fate","").replace("。fate","")
+                # 提取命令中指定的骰子数量（默认为 4）
+                try:
+                    num_dice = int(command.split()[-1])  # 尝试从命令中提取数字
+                    if num_dice < 1:
+                        raise ValueError  # 确保骰子数量合法
+                except (ValueError, IndexError):
+                    num_dice = 4  # 默认 4 颗骰子
+                # 掷骰逻辑
+                dice_results = [random.choice(["+", "-", " "]) for _ in range(num_dice)]  # 四颗Fudge骰
+                numeric_result = dice_results.count("+") - dice_results.count("-")
+                formatted_results = "".join(dice_results).replace(" ", "◯")  # 空白替换为可视化符号
+
+                # 输出消息
+                self.chat_log.insert(
+                    tk.END,
+                    f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n'
+                    f'{self.role_entries_name[role]}掷出了命运骰：【{formatted_results}】 (总值：{numeric_result})\n\n'
+                )
+                self.chat_log.yview(tk.END)
+
+                # 更新窗口输入框
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
             elif ".no" in message.lower() or "。no" in message.lower() or "。yes" in message.lower() or ".yes" in message.lower():
                 message = message.lower().replace(".no", "").replace(".yes", "").replace("。no", "").replace("。yes",
                                                                                                             "").replace(
@@ -6613,7 +6642,6 @@ class ChatApp:
                 self.role_entries[role].insert("1.0", _role_entry)
                 return
         else:
-
             if ".jrrp" in message or "。jrrp" in message:
                 self.jrrp(role)
                 message = ""
@@ -6689,6 +6717,36 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{self.role_entries_name[role]}{reason}抽取幸运顺序：{result}\n\n')
                 self.chat_log.yview(tk.END)
+                _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
+                self.role_entries[role].delete("1.0", tk.END)
+                self.role_entries[role].insert("1.0", _role_entry)
+                return
+            elif ".fudge" in message or "。fudge" in message or ".fate" in message or "。fate" in message:
+                # 判断命令类型
+                command = message.lower().strip().replace(".fudge", "").replace("。fudge", "").replace(".fate",
+                                                                                                      "").replace(
+                    "。fate", "")
+                # 提取命令中指定的骰子数量（默认为 4）
+                try:
+                    num_dice = int(command.split()[-1])  # 尝试从命令中提取数字
+                    if num_dice < 1:
+                        raise ValueError  # 确保骰子数量合法
+                except (ValueError, IndexError):
+                    num_dice = 4  # 默认 4 颗骰子
+                # 掷骰逻辑
+                dice_results = [random.choice(["+", "-", " "]) for _ in range(num_dice)]  # 四颗Fudge骰
+                numeric_result = dice_results.count("+") - dice_results.count("-")
+                formatted_results = "".join(dice_results).replace(" ", "◯")  # 空白替换为可视化符号
+
+                # 输出消息
+                self.chat_log.insert(
+                    tk.END,
+                    f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n'
+                    f'{self.role_entries_name[role]}掷出了命运骰：【{formatted_results}】 (总值：{numeric_result})\n\n'
+                )
+                self.chat_log.yview(tk.END)
+
+                # 更新窗口输入框
                 _role_entry = self.role_entries[role].get("1.0", tk.END).strip()
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", _role_entry)
