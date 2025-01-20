@@ -2861,6 +2861,7 @@ class ChatApp:
         root.bind("<Control-s>", lambda event: self.quickSave())
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", lambda event: self.newline_on_ctrl_enter(event))
+        root.bind("<Up>", lambda event: self.repeat_last_words(send=False))
 
         # self.chat_log_huozi = ""
         self.NPC_appearence = load_NPC_appearence()
@@ -5901,6 +5902,43 @@ class ChatApp:
                 self.role_values_entry[role].grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
             self.trpg_toggle = "off"
 
+    def repeat_last_words(self, role=None, send=True):
+        # +1，获取最近一次说话人的发言并复制发送
+        # 检查聊天日志
+        log_lines = self.chat_log.get("1.0", tk.END).strip().split("\n")
+        last_message = None
+
+        if role is None:
+            role = self.current_role.get()
+
+        # 从最后一行往前找，跳过空行
+        for i in range(len(log_lines) - 1, 0, -1):
+            line = log_lines[i]
+            if line.strip():  # 确保不是空行
+                if i > 0:  # 确保有前一行
+                    prev_line = log_lines[i - 1]
+                    if " " in prev_line:  # 前一行包含发言人和时间戳
+                        parts = prev_line.split(" ", 2)  # 分割为三部分：发言人、时间戳、可能的剩余内容
+                        if len(parts) >= 2:  # 确保格式正确
+                            speaker = parts[0]
+                            # if speaker != self.role_entries_name[role]:  # 确保不是当前角色的发言
+                            last_message = line.strip()  # 当前行是对话内容
+                            break
+
+        # 如果找到最近的消息
+        if last_message and send:
+            timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+            log_ = last_message  # 使用最近的消息
+            self.chat_log.insert(tk.END, f"{self.role_entries_name[role]} {timestamp}\n{log_}\n\n")
+            self.chat_log.yview(tk.END)
+            self.role_entries[role].delete("1.0", tk.END)
+        if last_message and not send:
+            if self.role_entries[role].get("1.0", tk.END).strip() == "":
+                self.role_entries[role].insert("1.0", last_message)
+        else:
+            # 没有找到有效消息
+            return
+
     def select_roles_for_sorting(self, disableText="False"):
         """
         创建一个多选框菜单，允许用户选择哪些角色参加排序。
@@ -5976,7 +6014,6 @@ class ChatApp:
                     var.set(value=True)  # 激活的角色设为 True
                 else:
                     var.set(value=False)  # 其他角色设为 False
-
         # 确定按钮处理
         def confirm_selection():
             self.roles_activated.clear()
@@ -6002,6 +6039,7 @@ class ChatApp:
 
         # 添加确认按钮
         tk.Button(self.selection_window, text="确认", command=confirm_selection).pack()
+
 
     def send_message(self, role):
         global role_Chart_at_name
@@ -6049,35 +6087,7 @@ class ChatApp:
                                send=False)
             return
         if message == "":
-            # +1，获取最近一次说话人的发言并复制发送
-            # 检查聊天日志
-            log_lines = self.chat_log.get("1.0", tk.END).strip().split("\n")
-            last_message = None
-
-            # 从最后一行往前找，跳过空行
-            for i in range(len(log_lines) - 1, 0, -1):
-                line = log_lines[i]
-                if line.strip():  # 确保不是空行
-                    if i > 0:  # 确保有前一行
-                        prev_line = log_lines[i - 1]
-                        if " " in prev_line:  # 前一行包含发言人和时间戳
-                            parts = prev_line.split(" ", 2)  # 分割为三部分：发言人、时间戳、可能的剩余内容
-                            if len(parts) >= 2:  # 确保格式正确
-                                speaker = parts[0]
-                                #if speaker != self.role_entries_name[role]:  # 确保不是当前角色的发言
-                                last_message = line.strip()  # 当前行是对话内容
-                                break
-
-            # 如果找到最近的消息
-            if last_message:
-                timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-                log_ = last_message  # 使用最近的消息
-                self.chat_log.insert(tk.END, f"{self.role_entries_name[role]} {timestamp}\n{log_}\n\n")
-                self.chat_log.yview(tk.END)
-                self.role_entries[role].delete("1.0", tk.END)
-            else:
-                # 没有找到有效消息
-                return
+            self.repeat_last_words(role)
 
         if self.whisper_system(role, whisper=False):
             return
@@ -12113,9 +12123,10 @@ class ChatApp:
             self.resources_module.update_totals()  # Update totals after deletion
 
     def insert_newline(self):
-        current_text = self.role_entries[self.current_role.get()].get("1.0", tk.END)
-        self.role_entries[self.current_role.get()].delete("1.0", tk.END)
-        self.role_entries[self.current_role.get()].insert(tk.END, current_text)
+        pass
+        #current_text = self.role_entries[self.current_role.get()].get("1.0", tk.END)
+        #self.role_entries[self.current_role.get()].delete("1.0", tk.END)
+        #self.role_entries[self.current_role.get()].insert(tk.END, current_text)
         self.highlight_role_frame(self.current_role.get())
 
     def bind_enter_to_send_message(self, event, role):
@@ -12130,6 +12141,10 @@ class ChatApp:
         self.current_role.set(role)
         self.new_combat_window.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
+
+    def info_focus(self, event):
+        self.reset_focus(event)
+        self.root.bind("<Return>", lambda event, role="info": self.send_message_on_enter(event, role))
 
     def env_focus(self, event):
         self.reset_focus(event)
@@ -14896,25 +14911,33 @@ class ChatApp:
             env_text_ = self.send_env_text_to_log()
             self.display_weather_FX(env_text_)
             self.save_settings()
+        elif role == "info":
+            return
         else:
-
             self.current_role.set(role)
             # 判断是否同时按下了 Ctrl 键
             if event.state - 4 == 0:  # 4 表示 Ctrl 键的状态值
                 return
             # 发送消息
             current_role = role or self.current_role.get()
-
             # 获取光标位置
             cursor_pos = self.role_entries[current_role].index(tk.INSERT)
             # 获取文本最后位置
             last_pos = self.role_entries[current_role].index("end-1c")  # "end-1c" 表示最后一个字符的索引
+            # 获取光标前后的文本
+            before_cursor = self.role_entries[current_role].get("1.0", cursor_pos)
+            after_cursor = self.role_entries[current_role].get(cursor_pos, "end-1c")
+            # 合并文本，移除光标处的多余换行
+            new_content = before_cursor.rstrip("\n") + after_cursor.lstrip("\n")
             # 比较光标位置是否在文本末尾
             if cursor_pos != last_pos:
                 # 如果光标不在末尾，将光标移到文本最后
+                # 清空并更新文本框内容
+                self.role_entries[current_role].delete("1.0", "end")
+                self.role_entries[current_role].insert("1.0", new_content)
                 self.role_entries[current_role].mark_set(tk.INSERT, last_pos)
                 # 阻止默认的换行行为
-                return "break"
+                #return "break"
 
             self.send_message(current_role)
             self.highlight_role_frame(current_role)
@@ -20470,7 +20493,9 @@ class ChatApp:
         global is_hiding_health_bar
         status_list_name = []
         status_list = {}
+
         if "NPC_name" in role:
+            self.role_values_entry[role].bind("<FocusIn>", lambda event: self.info_focus(event))
             HP = self.role_values_entry[role].get("2.0", "3.0")
             _HP = int(HP.split("/")[0])
             HP_ = int(HP.split("/")[1].split(":")[0])
@@ -20539,6 +20564,7 @@ class ChatApp:
             else:
                 self.role_statusbar_health[role].config(text=self.draw_health_bar(_HP, HP_, bar_length=18), font=None)
         else:
+            self.role_values_entry[role].bind("<FocusIn>", lambda event: self.info_focus(event))
             HP = self.role_values_entry[role].get("2.0", "3.0")
             _HP = int(HP.split("/")[0])
             HP_ = int(HP.split("/")[1].split(":")[0])
