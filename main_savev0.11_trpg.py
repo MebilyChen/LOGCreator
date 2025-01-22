@@ -4530,6 +4530,11 @@ class ChatApp:
             self.chat_log.yview(tk.END)
             self.votes.clear()
 
+    def clear_all_enter_in_text(self, role):
+        text_ = self.role_entries[role].get("1.0", tk.END).replace("\n", "").strip()
+        self.role_entries[role].delete("1.0", tk.END)
+        self.role_entries[role].insert("1.0", text_)
+
     def add_menu(self, event, role):
         global api_role_description
         menu = tk.Menu(root, tearoff=0)
@@ -4641,6 +4646,8 @@ class ChatApp:
                              command=lambda text=".wholuck", role=role: self.insert_text_to_PC(text, role, send=True))
             menu.add_command(label="全体今日人品",
                              command=lambda text=".jrrp", role=role: self.insert_text_to_Bot(text, send=True))
+            menu.add_command(label="清除换行【复制党福利】",
+                             command=lambda role=role: self.clear_all_enter_in_text(role), background="green")
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         elif role == "chatlog":
             menu.add_command(label="快速保存", command=lambda: self.quickSave())
@@ -4679,7 +4686,15 @@ class ChatApp:
             menu.add_command(label="GPT设置...",
                              command=lambda: APISettingsWindow(root))
         elif "NPC_name" in role:
-            return
+            menu.add_command(label="清除换行【复制党福利】",
+                             command=lambda role=role: self.clear_all_enter_in_text(role), background="green")
+            menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
+            menu.add_command(label="SOLO GME...",
+                             command=lambda: self.solo_GME_window())
+            menu.add_command(label="资源管理...",
+                             command=lambda: ResourceManagementSystem(self, root, hide_window=False))
+            #self.show_menu(event, menu)
+            #return
         else:
             menu.add_command(label="小窗...", command=lambda role=role: self.whisper_system(role))
             menu.add_command(label="投票表决", command=lambda role=role: self.voting_system(role))
@@ -4700,6 +4715,8 @@ class ChatApp:
                              command=lambda text=".draw_?", role=role: self.list_carddecks(event, role, text))
             menu.add_command(label="【暗】抽牌堆(多次，不放回)",
                              command=lambda text=".draw_?*", role=role: self.list_carddecks(event, role, text))
+            menu.add_command(label="清除换行【复制党福利】",
+                             command=lambda role=role: self.clear_all_enter_in_text(role), background="green")
             if role == "KP":
                 menu.add_command(label="战斗【先攻】",
                                  command=lambda text=".initiative", role=role: self.insert_text_to_Bot(text, send=True))
@@ -4741,8 +4758,8 @@ class ChatApp:
                                  user_message=self.role_entries[role].get("1.0", tk.END).strip(), role=role,
                                  role_description=api_role_description: self.chat_with_api(
                                  user_message, role, pre_conversation=False, api_role_description=api_role_description))
-            menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
             menu.add_command(label="设置当前目标", command=lambda: self.set_objective())
+            menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         self.show_menu(event, menu)
 
     # 超链接
@@ -19976,6 +19993,7 @@ class ChatApp:
                             entry = tk.Text(frame, wrap=tk.WORD, width=30, height=3, undo=True)
                             # 绑定键盘事件到 on_key 函数
                             entry.bind("<Key>", lambda event: self.on_key(event, entry))
+                            entry.bind("<Button-3>", lambda event, r=NPC_name: self.add_menu(event, r))
                             entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
                             # entry.bind("<Button-3>", lambda event, r=NPC_name: self.add_menu(event, r))
                             if name != "" and name_type != "":
