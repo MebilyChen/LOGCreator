@@ -2861,7 +2861,7 @@ class ChatApp:
         root.bind("<Control-s>", lambda event: self.quickSave())
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", lambda event: self.newline_on_ctrl_enter(event))
-        root.bind("<Up>", lambda event: self.repeat_last_words(send=False))
+        #root.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
 
         # self.chat_log_huozi = ""
         self.NPC_appearence = load_NPC_appearence()
@@ -3142,6 +3142,7 @@ class ChatApp:
         for role in self.roles:
             entry = self.role_entries[role]
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
+            entry.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
         for role in self.roles:
             entry_roll = self.role_entries_roll[role]
             entry_roll.bind("<FocusIn>", lambda event2, role=role: self.bind_enter_to_send_roll(event2, role))
@@ -3824,6 +3825,7 @@ class ChatApp:
         entry.bind("<Key>", lambda event: self.on_key(event, entry))
         entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
         entry.bind("<Button-3>", lambda event, r=role: self.add_menu(event, r))
+        entry.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
         self.role_entries[role] = entry
         # 加载并显示头像
         self.load_and_display_avatar(role, frame)
@@ -3997,10 +3999,10 @@ class ChatApp:
             self.input_history = []  # 初始化输入历史列表
             self.history_index = {}  # 初始化历史索引
 
-        if self.input_history[str(entry_roll)]:
+        if id(entry_roll) in self.input_history and self.input_history[id(entry_roll)]:
             # 如果有历史记录，移动索引并载入记录
-            self.history_index[str(entry_roll)] = max(self.history_index[str(entry_roll)] - 1, 0)  # 向上移动索引
-            previous_entry = self.input_history[str(entry_roll)][self.history_index[str(entry_roll)]]
+            self.history_index[id(entry_roll)] = max(self.history_index[id(entry_roll)] - 1, 0)  # 向上移动索引
+            previous_entry = self.input_history[id(entry_roll)][self.history_index[id(entry_roll)]]
             entry_roll.delete("1.0", tk.END)  # 清空当前内容
             entry_roll.insert("1.0", previous_entry)  # 插入历史内容
 
@@ -5937,10 +5939,16 @@ class ChatApp:
                     if " " in prev_line:  # 前一行包含发言人和时间戳
                         parts = prev_line.split(" ", 2)  # 分割为三部分：发言人、时间戳、可能的剩余内容
                         if len(parts) >= 2:  # 确保格式正确
-                            speaker = parts[0]
+                            # speaker = parts[0]
                             # if speaker != self.role_entries_name[role]:  # 确保不是当前角色的发言
                             last_message = line.strip()  # 当前行是对话内容
-                            break
+                            # 从当前行往前继续累积消息，直到遇到空行（表示 \n\n 分隔符）
+                            for j in range(len(log_lines) - 1, 0, -1):
+                                previous_line = log_lines[i - j].strip()  # 获取前一行内容
+                                if previous_line == "":  # 遇到空行表示 \n\n 分隔符
+                                    break
+                                last_message += "\n" + previous_line  # 累积消息内容
+                            break  # 退出外层循环
 
         # 如果找到最近的消息
         if last_message and send:
@@ -10156,6 +10164,10 @@ class ChatApp:
         self.QA_system_search_button.grid(row=3, column=0, columnspan=4, sticky="nesw")
 
         self.dict_now = self.QA_dictionary
+
+        # Bind the close event to the test function
+        self.new_window_for_QA_system.protocol("WM_DELETE_WINDOW", lambda: self.save_json_for_QA_system(close=True))
+
         _list = []
         for key, value in self.dict_now.items():
             if isinstance(value, dict):
@@ -10163,9 +10175,10 @@ class ChatApp:
                     _list.append(f"{key2}\n-《{key}》")
             else:
                 _list.append(f"{key}\n-《{self.dict_QA_system_var.get()}》")
-        self.auto_complete_entry(self.new_QA_system_frame, self.input_QA_system, _list)
-        # Bind the close event to the test function
-        self.new_window_for_QA_system.protocol("WM_DELETE_WINDOW", lambda: self.save_json_for_QA_system(close=True))
+        #
+        self.input_QA_system.bind("<Button-1>",
+                                  lambda event: self.auto_complete_entry(self.new_QA_system_frame, self.input_QA_system,
+                                                                         _list, event))
 
     def save_json_for_QA_system(self, close=False):
         with open('AppSettings/QA_dictionary.json', 'w', encoding='utf-8') as file:
@@ -11981,6 +11994,7 @@ class ChatApp:
         for role in self.roles:
             entry = self.role_entries[role]
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
+            entry.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
         for role in self.roles:
             entry_roll = self.role_entries_roll[role]
             entry_roll.bind("<FocusIn>", lambda event2, role=role: self.bind_enter_to_send_roll(event2, role))
@@ -12111,6 +12125,7 @@ class ChatApp:
         for role in self.roles:
             entry = self.role_entries[role]
             entry.bind("<FocusIn>", lambda event, role=role: self.bind_enter_to_send_message(event, role))
+            entry.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
         for role in self.roles:
             entry_roll = self.role_entries_roll[role]
             entry_roll.bind("<FocusIn>", lambda event2, role=role: self.bind_enter_to_send_roll(event2, role))
@@ -14977,10 +14992,10 @@ class ChatApp:
         current_entry = self.role_entries_roll[current_role].get("1.0", tk.END).strip()
         if current_entry.strip():  # 确保非空输入才保存
             if self.role_entries_roll[current_role] not in self.input_history:
-                self.input_history[str(self.role_entries_roll[current_role])] = []
-            self.input_history[str(self.role_entries_roll[current_role])].append(current_entry)
-            self.history_index[str(self.role_entries_roll[current_role])] = len(
-                self.input_history[str(self.role_entries_roll[current_role])])  # 重置索引到最后
+                self.input_history[id(self.role_entries_roll[current_role])] = []
+            self.input_history[id(self.role_entries_roll[current_role])].append(current_entry)
+            self.history_index[id(self.role_entries_roll[current_role])] = len(
+                self.input_history[id(self.role_entries_roll[current_role])])  # 重置索引到最后
 
     def newline_on_ctrl_enter(self, event):
         # 换行
@@ -17709,15 +17724,16 @@ class ChatApp:
         # 创建一个 Toplevel 窗口用于显示下拉列表
         top_level = tk.Toplevel(root)
         top_level.wm_overrideredirect(True)  # 隐藏窗口边框
+        #top_level.transient(root)  # 确保 Toplevel 和主窗口关系
         top_level.withdraw()  # 初始时隐藏 Toplevel 窗口
         listbox = tk.Listbox(top_level, width=24)
         listbox.pack()
 
         def show_suggestions(*args):
-            try:
+            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            if isinstance(entry, tk.Entry):
                 typed_text = entry.get()
-            except:
-                # 获取当前光标位置前的所有文本
+            else:  # Assume tk.Text
                 typed_text = entry.get("1.0", "end-1c")
             if typed_text == "":
                 # listbox.grid_forget()
@@ -17726,23 +17742,39 @@ class ChatApp:
                 matches = [word for word in suggestion_list if
                            typed_text.lower() in word.lower()]  # 联想前缀：word.lower().startswith(typed_text.lower())
                 if matches:
+                    # 获取当前选中项的值（如果有）
+                    current_selection = listbox.curselection()
+                    selected_value = None
+                    if current_selection:
+                        selected_index = current_selection[0]
+                        selected_value = listbox.get(selected_index)
+
+                    # 更新 Listbox 内容
                     listbox.delete(0, tk.END)
                     for match in matches:
                         listbox.insert(tk.END, match)
-                    # listbox.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-                    # listbox.place(x=entry.winfo_x(), y=entry.winfo_y() + entry.winfo_height())
-                    # 获取 Entry 的位置
+
+                    # 恢复选中状态
+                    if selected_value and selected_value in matches:
+                        # 如果之前选中的值仍在新列表中，恢复选中
+                        new_index = matches.index(selected_value)
+                        listbox.selection_set(new_index)
+                        listbox.activate(new_index)
+                    else:
+                        # 否则默认选中第一个
+                        listbox.selection_set(0)
+                        listbox.activate(0)
+
+                    # 更新 Toplevel 的位置
                     entry_x = entry.winfo_rootx()
                     entry_y = entry.winfo_rooty() + entry.winfo_height()
-
-                    # 设置 Toplevel 窗口的位置
                     top_level.geometry(f"+{entry_x}+{entry_y}")
                     top_level.deiconify()  # 显示 Toplevel 窗口
                 else:
-                    # listbox.grid_forget()
                     top_level.withdraw()  # 隐藏 Toplevel 窗口
 
         def complete(event):
+            #top_level.grab_set()  # 捕获焦点到 Toplevel
             if listbox.size() > 0:
                 try:
                     entry.delete(0, tk.END)
@@ -17757,7 +17789,55 @@ class ChatApp:
                 # listbox.grid_forget()
                 top_level.withdraw()  # 隐藏 Toplevel 窗口
 
+        def highlight_item(event):
+            """当按下 Down 键时，将焦点切换到 Listbox 并选中第一个条目"""
+            if listbox.size() > 0:  # 确保 Listbox 有内容
+                listbox.focus_set()  # 将焦点切换到 Listbox
+                # 检查是否有高亮项
+                selected_indices = listbox.curselection()  # 获取当前高亮的索引列表
+                if selected_indices:
+                    # 如果有高亮项，保持当前高亮
+                    current_index = selected_indices[0]  # 获取第一个高亮的索引
+                    listbox.selection_clear(0, tk.END)  # 清除之前的选择
+                    listbox.selection_set(current_index)  # 重新选中当前高亮项
+                    listbox.activate(current_index)  # 激活条目
+                else:
+                    # 如果没有高亮项，选中第一个条目
+                    first_index = 0
+                    listbox.selection_clear(0, tk.END)  # 清除之前的选择
+                    listbox.selection_set(first_index)  # 选中第一个条目
+                    listbox.activate(first_index)  # 激活条目
+
+        #top_level.withdraw()  # 隐藏 Toplevel 窗口
+
         def select_suggestion(event):
+            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            """高亮鼠标所在的条目"""
+            listbox.focus_set()  # 将焦点切换到 Listbox
+            listbox.selection_clear(0, tk.END)  # 清除所有选中项
+            index = listbox.nearest(event.y)  # 获取鼠标指针所在的条目索引
+            listbox.selection_set(index)  # 设置选中
+            listbox.activate(index)  # 激活条目
+            try:
+                entry.delete(0, tk.END)
+                if "\n-《" in listbox.get(tk.ACTIVE):
+                    entry.insert(0, listbox.get(tk.ACTIVE).split("\n")[0])
+                else:
+                    entry.insert(0, listbox.get(tk.ACTIVE))
+                entry.icursor(tk.END)
+            except:
+                entry.delete("1.0", tk.END)
+                entry.insert("1.0", listbox.get(tk.ACTIVE).split(" [")[0])
+            # listbox.grid_forget()
+            #top_level.withdraw()  # 隐藏 Toplevel 窗口
+
+        def confirm_suggestion(event):
+            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            """高亮鼠标所在的条目"""
+            listbox.selection_clear(0, tk.END)  # 清除所有选中项
+            index = listbox.nearest(event.y)  # 获取鼠标指针所在的条目索引
+            listbox.selection_set(index)  # 设置选中
+            listbox.activate(index)  # 激活条目
             try:
                 entry.delete(0, tk.END)
                 if "\n-《" in listbox.get(tk.ACTIVE):
@@ -17773,8 +17853,11 @@ class ChatApp:
 
         entry.bind("<KeyRelease>", show_suggestions)
         entry.bind("<Right>", complete)
-        listbox.bind("<Button-1>", select_suggestion)
+        entry.bind("<Down>", highlight_item)
+        listbox.bind("<Motion>", select_suggestion)  # 鼠标移动高亮
+        listbox.bind("<Button-1>", confirm_suggestion)
         listbox.bind("<Right>", complete)
+        listbox.bind("<FocusOut>", complete)
 
     def new_roles_NPC(self):
         global career_list
@@ -19994,6 +20077,7 @@ class ChatApp:
                             # 绑定键盘事件到 on_key 函数
                             entry.bind("<Key>", lambda event: self.on_key(event, entry))
                             entry.bind("<Button-3>", lambda event, r=NPC_name: self.add_menu(event, r))
+                            entry.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
                             entry.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
                             # entry.bind("<Button-3>", lambda event, r=NPC_name: self.add_menu(event, r))
                             if name != "" and name_type != "":
@@ -20093,6 +20177,7 @@ class ChatApp:
                                                                                    event))
                             entry_roll.bind("<Button-3>",
                                             lambda event, r=NPC_name: self.add_menu_skills(event, r))
+                            entry_roll.bind("<KeyPress-Up>", lambda event: self.load_previous_entry(event, entry_roll))
                             self.role_entries_roll[NPC_name] = entry_roll
                             # roll_button = tk.Button(frame, text="掷骰", command=lambda r=NPC_name: self.get_and_roll(r))
                             # roll_button.grid(row=2, column=2, padx=5, pady=5)
