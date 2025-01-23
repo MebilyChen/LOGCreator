@@ -2836,7 +2836,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.57" + encouragement
+title_name = "自嗨团 v2.60" + encouragement
 music_autoplay_status = False
 
 
@@ -3996,12 +3996,29 @@ class ChatApp:
 
     def load_previous_entry(self, event, entry_roll):
         if not hasattr(self, "input_history"):
-            self.input_history = []  # 初始化输入历史列表
+            self.input_history = {}  # 初始化输入历史列表
             self.history_index = {}  # 初始化历史索引
-
+        addup = False
+        adddown = False
+        #current_ = entry_roll.get()
         if id(entry_roll) in self.input_history and self.input_history[id(entry_roll)]:
             # 如果有历史记录，移动索引并载入记录
-            self.history_index[id(entry_roll)] = max(self.history_index[id(entry_roll)] - 1, 0)  # 向上移动索引
+            if self.history_index[id(entry_roll)] == len(self.input_history[id(entry_roll)]):
+                self.history_index[id(entry_roll)] = max(self.history_index[id(entry_roll)] - 1, 0) - 1  # 向上移动索引
+            else:
+                if self.history_index[id(entry_roll)] < 0:
+                    addup = True
+                    adddown = False
+                if self.history_index[id(entry_roll)] >= len(self.input_history[id(entry_roll)]):
+                    adddown = True
+                    addup = False
+                if 0 <= self.history_index[id(entry_roll)] < len(self.input_history[id(entry_roll)]) and not addup and not adddown:
+                    self.history_index[id(entry_roll)] -= 1
+                if addup and not adddown:
+                    self.history_index[id(entry_roll)] += 1
+                elif adddown and not addup:
+                    self.history_index[id(entry_roll)] -= 1
+
             previous_entry = self.input_history[id(entry_roll)][self.history_index[id(entry_roll)]]
             entry_roll.delete("1.0", tk.END)  # 清空当前内容
             entry_roll.insert("1.0", previous_entry)  # 插入历史内容
@@ -14991,7 +15008,7 @@ class ChatApp:
         # 获取当前输入框内容
         current_entry = self.role_entries_roll[current_role].get("1.0", tk.END).strip()
         if current_entry.strip():  # 确保非空输入才保存
-            if self.role_entries_roll[current_role] not in self.input_history:
+            if id(self.role_entries_roll[current_role]) not in self.input_history:
                 self.input_history[id(self.role_entries_roll[current_role])] = []
             self.input_history[id(self.role_entries_roll[current_role])].append(current_entry)
             self.history_index[id(self.role_entries_roll[current_role])] = len(
