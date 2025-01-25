@@ -360,6 +360,7 @@ create_folder('ReplayResources/SE')
 create_folder('ReplayResources/FX')
 create_folder('ReplayResources/HandOut')
 create_folder('CardDecks')
+create_folder('CardDecks/Gachas')
 create_folder('QuickSaves')
 create_folder(f"AppSettings/APIDatas")
 create_folder(f"AppSettings/APIDatas/Holidays")
@@ -4777,6 +4778,8 @@ class ChatApp:
                                  user_message=self.role_entries[role].get("1.0", tk.END).strip(), role=role,
                                  role_description=api_role_description: self.chat_with_api(
                                  user_message, role, pre_conversation=False, api_role_description=api_role_description))
+            menu.add_command(label="扭蛋（PL版）...", command=lambda role=role: self.gacha(role))
+            menu.add_command(label="扭蛋（PC版）...", command=lambda role=role: self.gacha(role, True))
             menu.add_command(label="设置当前目标", command=lambda: self.set_objective())
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         self.show_menu(event, menu)
@@ -15534,19 +15537,160 @@ class ChatApp:
             self.codename_by_name["_status"] = "True"
         self.new_window_codename.destroy()
 
+    def gacha(self, role, enable_luck_adjustment=False):
+        gacha_name = simpledialog.askstring("扭蛋奖池", "输入奖池名称（留空以选择文件）")
+        self.gacha_core(role, gacha_name, enable_luck_adjustment)
+
+    def gacha_core(self, role, gacha_name=None, enable_luck_adjustment=False):
+        """
+        模拟扭蛋的函数。
+
+        参数：
+        - gacha_name: 扭蛋列表，可为以下几种格式：
+            1. 字典格式：{"名称": {"描述":"（可省略）", "稀有度":"n/r/sr/ssr/sssr"}}
+            2. 字符串：文件名，系统从文件中加载列表。
+            3. 空值：弹出窗口录入（此处需要另加 GUI 逻辑实现）。
+        - role: 执行抽取的角色名称，用于统计和调整概率。
+        - enable_luck_adjustment: 是否启用幸运值调整权重的开关，默认启用。
+        - role_chart: 角色属性字典，包含角色的幸运值（"幸运"）。
+
+        返回：
+        - 抽取结果（一个字典，包含抽取到的物品）。
+        """
+        global role_Chart
+        # 定义稀有度的基础权重
+        rarity_weights = {
+            "n": 80,  # 普通
+            "r": 15,  # 稀有
+            "sr": 4,  # 超级稀有
+            "ssr": 0.9,  # 史诗
+            "sssr": 0.1  # 传奇
+        }
+
+        # 加载角色幸运值
+        LUK = 0
+        if role_Chart and role:
+            role_details = role_Chart.get(role, {}).copy()
+            LUK = role_details.get("幸运", 0)
+
+        # 根据幸运值调整权重（仅在启用开关时生效）
+        if enable_luck_adjustment:
+            for rarity in rarity_weights:
+                if rarity in ["sr", "ssr", "sssr"]:  # 更高稀有度受幸运值加成影响更大
+                    adjustment_factor = (LUK/60) ** 5
+                    rarity_weights[rarity] *= adjustment_factor
+            # 确保权重总和为1
+            total_weight = sum(rarity_weights.values())
+            rarity_weights = {rarity: weight / total_weight for rarity, weight in rarity_weights.items()}
+            print(rarity_weights)
+
+        file_gacha_name = ""
+        # 获取扭蛋列表
+        if isinstance(gacha_name, dict):
+            gacha_list = [
+                {"名称": name, "描述": details["描述"], "稀有度": details["稀有度"]} #{"名称": {"描述":"（可省略）", "稀有度":"n/r/sr/ssr/sssr"}}
+                for name, details in gacha_name.items()
+            ]
+        elif isinstance(gacha_name, str) and gacha_name != "":
+            file_gacha_name = "[" + gacha_name + "]"
+            with open("CardDecks/Gachas/" + gacha_name + ".json", "r", encoding="utf-8") as file:
+                gacha_list = json.load(file)
+        else:
+            #raise ValueError("暂未实现现场录入功能，请传递一个有效的扭蛋列表或文件名！")
+            avatar_path = filedialog.askopenfilename(title="选择Gacha文件",
+                                                     filetypes=[("Json files", "*.json")],
+                                                     initialdir="CardDecks/Gachas")
+            file_name, dotextension = os.path.splitext(os.path.basename(avatar_path))
+            with open(avatar_path, "r", encoding="utf-8") as file:
+                gacha_list = json.load(file)
+                file_gacha_name = "[" + file_name + "]"
+
+        # 按稀有度分类物品
+        rarity_pool = defaultdict(list)
+        for item, details in gacha_list.items():
+            rarity_pool[details["稀有度"].lower()].append({item:details})
+
+        # 保底机制计数器
+        stats = {}
+        try:
+            with open("GameSaves/gacha_stats.json", "r", encoding="utf-8") as f:
+                stats = json.load(f)
+        except FileNotFoundError:
+            stats = {}
+
+        if role not in stats:
+            stats[role] = {"total_draws": 0, "sr_guarantee": 0, "ssr_guarantee": 0}
+
+        # 更新计数器
+        stats[role]["total_draws"] += 1
+        stats[role]["sr_guarantee"] += 1
+        stats[role]["ssr_guarantee"] += 1
+
+        # 抽取逻辑
+        def weighted_random_choice():
+            """根据权重随机选择稀有度。"""
+            total_weight = sum(rarity_weights.values())
+            rand_val = random.uniform(0, total_weight)
+            current_sum = 0
+            for rarity, weight in rarity_weights.items():
+                current_sum += weight
+                if rand_val <= current_sum:
+                    return rarity
+
+        #result = None
+        # 计算最终概率
+        def calculate_final_probability():
+            total_weight = sum(rarity_weights.values())
+            probabilities = {rarity: weight / total_weight / len(rarity_pool[rarity]) for rarity, weight in rarity_weights.items()}
+            return probabilities
+
+        final_probabilities = calculate_final_probability()
+
+        # 保底逻辑
+        if stats[role]["ssr_guarantee"] >= 100 and rarity_pool["ssr"]:
+            result = random.choice(rarity_pool["ssr"])
+            for item, details in result.items():
+                result_name = item + "(保底)"
+                result_desc = details["描述"]
+            stats[role]["ssr_guarantee"] = 0
+            chosen_rarity = "SSR"
+        elif stats[role]["sr_guarantee"] >= 10 and rarity_pool["sr"]:
+            result = random.choice(rarity_pool["sr"])
+            for item, details in result.items():
+                result_name = item+ "(保底)"
+                result_desc = details["描述"]
+            stats[role]["sr_guarantee"] = 0
+            chosen_rarity = "SR"
+        else:
+            # 按权重选择稀有度
+            chosen_rarity = weighted_random_choice()
+            if rarity_pool[chosen_rarity]:
+                result = random.choice(rarity_pool[chosen_rarity])
+                for item, details in result.items():
+                    result_name = item
+                    result_desc = details["描述"]
+        # 保存统计信息
+        with open("GameSaves/gacha_stats.json", "w", encoding="utf-8") as f:
+            json.dump(stats, f, ensure_ascii=False, indent=4)
+        self.search_and_delete_insert_symbol()
+        self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】抽取了扭蛋{file_gacha_name}：{result_name}({chosen_rarity.upper()})\n\n')
+        self.chat_log.yview(tk.END)
+        self.role_entries[role].insert(tk.END, f"{result_name}，{round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%：{result_desc}")
+
+
     def place_resources_in_folder(self, tag=None):
-        global log_file_last_name
-        if tag == "HO":
+            global log_file_last_name
+            if tag == "HO":
+                pass
+            elif tag == "FX":
+                pass
+            elif tag == "BG":
+                pass
+            elif tag == "BGM":
+                pass
+            elif tag == "SE":
+                pass
             pass
-        elif tag == "FX":
-            pass
-        elif tag == "BG":
-            pass
-        elif tag == "BGM":
-            pass
-        elif tag == "SE":
-            pass
-        pass
 
     def replace_inner_quotes(self, text):
         # 结果字符串
