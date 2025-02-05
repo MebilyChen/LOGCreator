@@ -1835,7 +1835,8 @@ def load_last_session_data():
         last_session_data = {"Cards_list": Cards_list, "room_info_search": room_info_search,
                              "room_info_list": room_info_list, "Cards_list_by_role": Cards_list_by_role,
                              "NowBGM": ["全部"], "NowImage": [], "NowEffect": [], "NowDialogState": False,
-                             "NowCharacterEffect": [], "BG": "", "current_time_log": "", "unify_time_log": [], "objectives":[{"title": "", "obj": ""}]}
+                             "NowCharacterEffect": [], "BG": "", "current_time_log": "", "unify_time_log": [],
+                             "objectives": [{"title": "", "obj": ""}]}
         with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
             json.dump(last_session_data, file, indent=4, ensure_ascii=False)
         return last_session_data
@@ -2837,7 +2838,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.60" + encouragement
+title_name = "自嗨团 v2.63" + encouragement
 music_autoplay_status = False
 
 
@@ -2862,7 +2863,7 @@ class ChatApp:
         root.bind("<Control-s>", lambda event: self.quickSave())
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", lambda event: self.newline_on_ctrl_enter(event))
-        #root.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
+        # root.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
 
         # self.chat_log_huozi = ""
         self.NPC_appearence = load_NPC_appearence()
@@ -4001,7 +4002,7 @@ class ChatApp:
             self.history_index = {}  # 初始化历史索引
         addup = False
         adddown = False
-        #current_ = entry_roll.get()
+        # current_ = entry_roll.get()
         if id(entry_roll) in self.input_history and self.input_history[id(entry_roll)]:
             # 如果有历史记录，移动索引并载入记录
             if self.history_index[id(entry_roll)] == len(self.input_history[id(entry_roll)]):
@@ -4013,7 +4014,8 @@ class ChatApp:
                 if self.history_index[id(entry_roll)] >= len(self.input_history[id(entry_roll)]):
                     adddown = True
                     addup = False
-                if 0 <= self.history_index[id(entry_roll)] < len(self.input_history[id(entry_roll)]) and not addup and not adddown:
+                if 0 <= self.history_index[id(entry_roll)] < len(
+                        self.input_history[id(entry_roll)]) and not addup and not adddown:
                     self.history_index[id(entry_roll)] -= 1
                 if addup and not adddown:
                     self.history_index[id(entry_roll)] += 1
@@ -4466,14 +4468,15 @@ class ChatApp:
         if desc != "":
             self._label2 = tk.Label(self.new_obj_frame, text=desc, relief=tk.RIDGE, font=("宋体", 14), anchor="w")
             self._label2.grid(row=1, column=0, sticky="nesw")
-        #self.new_obj_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_obj_window)
+        # self.new_obj_window.protocol("WM_DELETE_WINDOW", self.on_closing_new_window_obj_window)
         new_obj_window = self.new_obj_window
         self.new_obj_window.protocol("WM_DELETE_WINDOW", lambda: self.on_closing_new_window_obj_window(new_obj_window))
         # 映射窗口 ID 和对象
         self.window_map[self.new_obj_window.winfo_id()] = self.new_obj_window
 
         # 添加到列表
-        self.objective_lists.append({"title": title, "obj": obj, "desc": desc, "window_id": self.new_obj_window.winfo_id()})
+        self.objective_lists.append(
+            {"title": title, "obj": obj, "desc": desc, "window_id": self.new_obj_window.winfo_id()})
 
     def objective_edit_label(self, label, title, current_text):
         """
@@ -4492,7 +4495,6 @@ class ChatApp:
 
         # 销毁窗口
         window.destroy()
-
 
     def voting_system(self, role):
         if len(self.votes) == 0:
@@ -4713,8 +4715,8 @@ class ChatApp:
                              command=lambda: self.solo_GME_window())
             menu.add_command(label="资源管理...",
                              command=lambda: ResourceManagementSystem(self, root, hide_window=False))
-            #self.show_menu(event, menu)
-            #return
+            # self.show_menu(event, menu)
+            # return
         else:
             menu.add_command(label="小窗...", command=lambda role=role: self.whisper_system(role))
             menu.add_command(label="投票表决", command=lambda role=role: self.voting_system(role))
@@ -5944,6 +5946,9 @@ class ChatApp:
     def repeat_last_words(self, role=None, send=True):
         # +1，获取最近一次说话人的发言并复制发送
         # 检查聊天日志
+        line__ = self.search_and_delete_insert_symbol()
+        if line__ is None:
+            line__ = ""
         log_lines = self.chat_log.get("1.0", tk.END).strip().split("\n")
         last_message = None
 
@@ -5958,26 +5963,28 @@ class ChatApp:
                     prev_line = log_lines[i - 1]
                     if " " in prev_line:  # 前一行包含发言人和时间戳
                         parts = prev_line.split(" ", 2)  # 分割为三部分：发言人、时间戳、可能的剩余内容
-                        if len(parts) >= 2:  # 确保格式正确
+                        if len(parts) >= 3:  # 确保格式正确
+                            # _temp = prev_line
                             # speaker = parts[0]
                             # if speaker != self.role_entries_name[role]:  # 确保不是当前角色的发言
                             last_message = line.strip()  # 当前行是对话内容
                             # 从当前行往前继续累积消息，直到遇到空行（表示 \n\n 分隔符）
                             for j in range(len(log_lines) - 1, 0, -1):
-                                previous_line = log_lines[i - j].strip()  # 获取前一行内容
-                                if previous_line == "":  # 遇到空行表示 \n\n 分隔符
+                                previous_line = log_lines[j - 1].strip()  # 获取前一行内容
+                                if previous_line == prev_line:  # 遇到空行表示 \n\n 分隔符
                                     break
                                 last_message += "\n" + previous_line  # 累积消息内容
                             break  # 退出外层循环
 
+        self.chat_log.insert(tk.END, f"{line__}")
+        self.chat_log.yview(tk.END)
         # 如果找到最近的消息
         if last_message and send:
             timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-            log_ = last_message  # 使用最近的消息
-            self.chat_log.insert(tk.END, f"{self.role_entries_name[role]} {timestamp}\n{log_}\n\n")
-            self.chat_log.yview(tk.END)
+            # log_ = last_message  # 使用最近的消息
+            self.chat_log.insert(tk.END, f"{self.role_entries_name[role]} {timestamp}\n{last_message}\n\n")
             self.role_entries[role].delete("1.0", tk.END)
-        if last_message and not send:
+        elif last_message and not send:
             if self.role_entries[role].get("1.0", tk.END).strip() == "":
                 self.role_entries[role].insert("1.0", last_message)
         else:
@@ -6059,6 +6066,7 @@ class ChatApp:
                     var.set(value=True)  # 激活的角色设为 True
                 else:
                     var.set(value=False)  # 其他角色设为 False
+
         # 确定按钮处理
         def confirm_selection():
             self.roles_activated.clear()
@@ -6084,7 +6092,6 @@ class ChatApp:
 
         # 添加确认按钮
         tk.Button(self.selection_window, text="确认", command=confirm_selection).pack()
-
 
     def send_message(self, role):
         global role_Chart_at_name
@@ -6648,7 +6655,9 @@ class ChatApp:
                 return
             elif ".fudge" in message or "。fudge" in message or ".fate" in message or "。fate" in message:
                 # 判断命令类型
-                command = message.lower().strip().replace(".fudge","").replace("。fudge","").replace(".fate","").replace("。fate","")
+                command = message.lower().strip().replace(".fudge", "").replace("。fudge", "").replace(".fate",
+                                                                                                      "").replace(
+                    "。fate", "")
                 # 提取命令中指定的骰子数量（默认为 4）
                 try:
                     num_dice = int(command.split()[-1])  # 尝试从命令中提取数字
@@ -9416,26 +9425,26 @@ class ChatApp:
         ]
         HN_wing = [
             "透明翅膀：翅膀完全透明，轻盈且易于隐藏，如蚊子。",
-        "鳞片翅膀：翅膀表面覆盖着细小的鳞片，增加了强度和美观，如蝴蝶。",
-        "毛绒翅膀：翅膀上覆盖着细密的绒毛，增加了保暖性，如飞蛾。",
-        "硬质翅膀：翅膀坚硬，用于保护内部柔软的飞行翅，如金龟子。",
-        "薄膜翅膀：翅膀薄如蝉翼，适合快速飞行，如蜻蜓。",
-        "彩色翅膀：翅膀色彩斑斓，常用于吸引配偶或警告敌人，如蝴蝶。",
-        "多节翅膀：翅膀分为多个部分，每部分都能独立运动，如某些蜻蜓。",
-        "带斑点翅膀：翅膀上有明显的斑点或花纹，用于伪装或警示，如瓢虫。",
-        "纹理复杂：翅膀上有复杂的纹理或图案，用于迷惑敌人或识别同类，如某些飞蛾。",
-        "半透明翅膀：翅膀部分透明，兼具轻盈和保护性，如蜻蜓。",
-        "折叠翅膀：翅膀能够通过折叠收纳到甲壳中，如瓢虫和某些潮虫。",
-        "无特征。",
-        "无特征。", "无特征。",
-        "无特征。",
-        "无特征。",
-        "无特征。", "无特征。",
-        "无特征。",
-        "生而无翼：由于某些原因，你生来就没有翅膀。",
-        "残翼：由于某些原因，你的翅膀破损了。",
-        "残翼：由于某些原因，你的翅膀破损了。",
-        "无翼：由于某些原因，你没有翅膀了。"
+            "鳞片翅膀：翅膀表面覆盖着细小的鳞片，增加了强度和美观，如蝴蝶。",
+            "毛绒翅膀：翅膀上覆盖着细密的绒毛，增加了保暖性，如飞蛾。",
+            "硬质翅膀：翅膀坚硬，用于保护内部柔软的飞行翅，如金龟子。",
+            "薄膜翅膀：翅膀薄如蝉翼，适合快速飞行，如蜻蜓。",
+            "彩色翅膀：翅膀色彩斑斓，常用于吸引配偶或警告敌人，如蝴蝶。",
+            "多节翅膀：翅膀分为多个部分，每部分都能独立运动，如某些蜻蜓。",
+            "带斑点翅膀：翅膀上有明显的斑点或花纹，用于伪装或警示，如瓢虫。",
+            "纹理复杂：翅膀上有复杂的纹理或图案，用于迷惑敌人或识别同类，如某些飞蛾。",
+            "半透明翅膀：翅膀部分透明，兼具轻盈和保护性，如蜻蜓。",
+            "折叠翅膀：翅膀能够通过折叠收纳到甲壳中，如瓢虫和某些潮虫。",
+            "无特征。",
+            "无特征。", "无特征。",
+            "无特征。",
+            "无特征。",
+            "无特征。", "无特征。",
+            "无特征。",
+            "生而无翼：由于某些原因，你生来就没有翅膀。",
+            "残翼：由于某些原因，你的翅膀破损了。",
+            "残翼：由于某些原因，你的翅膀破损了。",
+            "无翼：由于某些原因，你没有翅膀了。"
         ]
         HN_antenna = [
             "长触须：修长的触须，具有极高的灵敏度和探测能力，如蟑螂。",
@@ -9728,7 +9737,8 @@ class ChatApp:
             , "圣巢-雾谷（水母、水族昆虫）：爱好思考和正念的水母部族，但拥有独立意识的个体万里挑一。"
             , "圣巢-王国边境（大型爬虫）：接近荒原，充满危险和大型野兽。"
             , "苍绿小径（苔藓生物、苔藓昆虫）：信仰乌恩大神的弱小苔藓王国。"
-            , "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。", "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。", "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。", "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。"]
+            , "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。", "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。",
+            "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。", "蛮荒之地：来自不属于任何文明的荒原、或是异乡的旅者、或是寻求圣巢庇护的朝圣者。"]
         HN_belief_original = {
             "灵魂（Soul）": {
                 "主色调": "白色",
@@ -9881,7 +9891,8 @@ class ChatApp:
                               "神术未深造:单纯的低等生物，尚未参透生命本质。"]
         HN_additional_skills = ["飞行", "野性", "色感知", "声感知", "虫鸣（专业化）", "信息素（专业化）", "挖掘", "假死", "共生", "保护色", "警示色", "拟态",
                                 "抓握", "螯爪", "毒性", "编织", "甲壳"]
-        HN_additional_weapons = ["骨钉", "骨钉", "骨钉", "骨钉", "酸炮", "毒针", "镰爪刀", "圆锯", "法术", "法术", "法术", "法术", "无", "无", "无", "无", "无", "无", "无", "无", "无"]
+        HN_additional_weapons = ["骨钉", "骨钉", "骨钉", "骨钉", "酸炮", "毒针", "镰爪刀", "圆锯", "法术", "法术", "法术", "法术", "无", "无", "无",
+                                 "无", "无", "无", "无", "无", "无"]
         HN_additional_traits = ["蜕皮：蜕皮后再生的能力，能够恢复健康和修复受损的身体部位。应用：战斗中的自我治疗、长期探索中的持久性、恢复战斗力。",
                                 "分泌腺体（攻击性分泌物）：能够分泌毒液、酸液或其他具有攻击性的物质，直接对敌人造成伤害或削弱其能力。特质技能。角色拥有特殊的分泌腺体，能够分泌各种化学物质。这些分泌物可以用于攻击、防御、治疗或其他特定用途。",
                                 "分泌腺体（防御性分泌物）：能够分泌带有强烈气味或难闻气味的物质，使敌人远离或产生困惑。特质技能。角色拥有特殊的分泌腺体，能够分泌各种化学物质。这些分泌物可以用于攻击、防御、治疗或其他特定用途。",
@@ -12083,7 +12094,7 @@ class ChatApp:
                                                                                                "Food": 0, "Water": 0}
         else:
             self.resources_module.resources['characters'][self.role_entries_name[new_role]] = \
-            self.resources_module.resources['logs'][self.role_entries_name[new_role]]
+                self.resources_module.resources['logs'][self.role_entries_name[new_role]]
         self.resources_module.update_all_frames()
         self.resources_module.update_totals()  # Update totals after deletion
 
@@ -12169,16 +12180,16 @@ class ChatApp:
 
             # self.create_role_frames()
             self.resources_module.resources['logs'][self.role_entries_name[role_to_delete]] = \
-            self.resources_module.resources['characters'][self.role_entries_name[role_to_delete]]
+                self.resources_module.resources['characters'][self.role_entries_name[role_to_delete]]
             self.resources_module.resources['characters'].pop(self.role_entries_name[role_to_delete])
             self.resources_module.update_all_frames()
             self.resources_module.update_totals()  # Update totals after deletion
 
     def insert_newline(self):
         pass
-        #current_text = self.role_entries[self.current_role.get()].get("1.0", tk.END)
-        #self.role_entries[self.current_role.get()].delete("1.0", tk.END)
-        #self.role_entries[self.current_role.get()].insert(tk.END, current_text)
+        # current_text = self.role_entries[self.current_role.get()].get("1.0", tk.END)
+        # self.role_entries[self.current_role.get()].delete("1.0", tk.END)
+        # self.role_entries[self.current_role.get()].insert(tk.END, current_text)
         self.highlight_role_frame(self.current_role.get())
 
     def bind_enter_to_send_message(self, event, role):
@@ -13187,26 +13198,26 @@ class ChatApp:
                 "Rumor about a treasure",
                 "Strange noise or sighting",
                 "Critical failure in an action"
-            ],"Suit Domain": [
+            ], "Suit Domain": [
                 "Clubs – Physical (appearance, existence)",
                 "Diamonds – Technical (mental, operation)",
                 "Spades – Mystical (meaning, capability)",
                 "Hearts – Social (personal, connection)"
-            ],"PACING MOVES (D6)": [
+            ], "PACING MOVES (D6)": [
                 "Foreshadow Trouble",
                 "Reveal a New Detail",
                 "An NPC Takes Action",
                 "Advance a Threat",
                 "Advance a Plot",
                 "Add a RANDOM EVENT to the scene"
-            ],"FAILURE MOVES (D6)": [
+            ], "FAILURE MOVES (D6)": [
                 "Cause Harm",
                 "Put Someone in a Spot",
                 "Offer a Choice",
                 "Advance a Threat",
                 "Reveal an Unwelcome Truth",
                 "Foreshadow Trouble"
-            ],"ORACLE (HOW)": [
+            ], "ORACLE (HOW)": [
                 "Extraordinary",
                 "More than expected",
                 "About average",
@@ -13222,7 +13233,8 @@ class ChatApp:
                 "Twist: A sudden plot twist occurs. It could be a betrayal, a change in the environment, or an unexpected development that changes the course of your adventure.",
                 "Choice: You face a critical decision. Describe the situation and consider your options carefully before making a choice that will impact the story."
             ], "Verb Table": [
-                "Deceive [Suit Domain]","Assist [Suit Domain]","Harm [Suit Domain]","Create [Suit Domain]","Harm [Suit Domain]","Move [Suit Domain]","Communicate [Suit Domain]","Take [Suit Domain]","Forge",
+                "Deceive [Suit Domain]", "Assist [Suit Domain]", "Harm [Suit Domain]", "Create [Suit Domain]",
+                "Harm [Suit Domain]", "Move [Suit Domain]", "Communicate [Suit Domain]", "Take [Suit Domain]", "Forge",
                 "Summon",
                 "Challenge",
                 "Inspire",
@@ -13653,7 +13665,9 @@ class ChatApp:
                 "Power"
             ],
             "NPC Goals": [
-                "Serve [Suit Domain]", "Fulfiil Duty [Suit Domain]", "Enrich Self [Suit Domain]", "Travel [Suit Domain]", "Find [Suit Domain]", "Restore [Suit Domain]", "Harm [Suit Domain]", "Learn [Suit Domain]", "Obtain [Suit Domain]",
+                "Serve [Suit Domain]", "Fulfiil Duty [Suit Domain]", "Enrich Self [Suit Domain]",
+                "Travel [Suit Domain]", "Find [Suit Domain]", "Restore [Suit Domain]", "Harm [Suit Domain]",
+                "Learn [Suit Domain]", "Obtain [Suit Domain]",
                 "Protect [Suit Domain]",
                 "Acquire Wealth",
                 "Revenge/Avenge [Suit Domain]",
@@ -13998,7 +14012,7 @@ class ChatApp:
                                "No clue is found this time.", "No clue is found this time.",
                                "No clue is found this time."],
             "线索池": ["No Clues Added, Edit in Files: CardDecks/Solo_GME_custom_options.json, 或者在自定义中创建名为“线索池”的列表"],
-             "POI Weather Conditions": [
+            "POI Weather Conditions": [
                 "Clear and sunny",
                 "Overcast",
                 "Rainy",
@@ -14080,7 +14094,7 @@ class ChatApp:
                 "Gather Information",
                 "Diplomatic Mission",
                 "Survive a Danger",
-                "Form an Alliance","Eliminate a threat",
+                "Form an Alliance", "Eliminate a threat",
                 "Learn the truth",
                 "Recover something valuable",
                 "Escort or deliver to safety",
@@ -14154,7 +14168,7 @@ class ChatApp:
             "Tarot · Right · Future": Tarot_gme,
             "Tarot · Up · Challenges or obstacles": Tarot_gme,
             "Tarot · Down · Opportunities or hidden aspects": Tarot_gme,
-            "Coin Flip": ["Head", "Tail"],"POI Dungeon LOCATION": [
+            "Coin Flip": ["Head", "Tail"], "POI Dungeon LOCATION": [
                 "Typical area",
                 "Transitional area",
                 "Living area or meeting place",
@@ -14989,7 +15003,7 @@ class ChatApp:
                 self.role_entries[current_role].insert("1.0", new_content)
                 self.role_entries[current_role].mark_set(tk.INSERT, last_pos)
                 # 阻止默认的换行行为
-                #return "break"
+                # return "break"
 
             self.send_message(current_role)
             self.highlight_role_frame(current_role)
@@ -15129,6 +15143,7 @@ class ChatApp:
     def search_and_delete_insert_symbol(self):
         # 搜索包含 ">>>" 的行的起始索引
         start_index = "1.0"
+        line_text = ""
         while True:
             match_index = self.chat_log.search(">>>", start_index, tk.END)
             if not match_index:
@@ -15136,9 +15151,13 @@ class ChatApp:
             # 删除包含 ">>>" 的行
             line_start = self.chat_log.index(match_index)
             line_end = self.chat_log.index(match_index + " lineend")
+            line_text = self.chat_log.get(line_start, line_end)
+
             self.chat_log.delete(line_start, line_end)
             # 更新搜索的起始位置
             start_index = line_end
+        if line_text != None and line_text != "":
+            return line_text
 
     def confirm_selection2(self, var):
         self.top_ask2.destroy()  # 销毁窗口
@@ -15577,7 +15596,7 @@ class ChatApp:
         if enable_luck_adjustment:
             for rarity in rarity_weights:
                 if rarity in ["sr", "ssr", "sssr"]:  # 更高稀有度受幸运值加成影响更大
-                    adjustment_factor = (LUK/60) ** 5
+                    adjustment_factor = (LUK / 60) ** 5
                     rarity_weights[rarity] *= adjustment_factor
             # 确保权重总和为1
             total_weight = sum(rarity_weights.values())
@@ -15588,7 +15607,8 @@ class ChatApp:
         # 获取扭蛋列表
         if isinstance(gacha_name, dict):
             gacha_list = [
-                {"名称": name, "描述": details["描述"], "稀有度": details["稀有度"]} #{"名称": {"描述":"（可省略）", "稀有度":"n/r/sr/ssr/sssr"}}
+                {"名称": name, "描述": details["描述"], "稀有度": details["稀有度"]}
+                # {"名称": {"描述":"（可省略）", "稀有度":"n/r/sr/ssr/sssr"}}
                 for name, details in gacha_name.items()
             ]
         elif isinstance(gacha_name, str) and gacha_name != "":
@@ -15596,7 +15616,7 @@ class ChatApp:
             with open("CardDecks/Gachas/" + gacha_name + ".json", "r", encoding="utf-8") as file:
                 gacha_list = json.load(file)
         else:
-            #raise ValueError("暂未实现现场录入功能，请传递一个有效的扭蛋列表或文件名！")
+            # raise ValueError("暂未实现现场录入功能，请传递一个有效的扭蛋列表或文件名！")
             avatar_path = filedialog.askopenfilename(title="选择Gacha文件",
                                                      filetypes=[("Json files", "*.json")],
                                                      initialdir="CardDecks/Gachas")
@@ -15608,7 +15628,7 @@ class ChatApp:
         # 按稀有度分类物品
         rarity_pool = defaultdict(list)
         for item, details in gacha_list.items():
-            rarity_pool[details["稀有度"].lower()].append({item:details})
+            rarity_pool[details["稀有度"].lower()].append({item: details})
 
         # 保底机制计数器
         stats = {}
@@ -15637,11 +15657,12 @@ class ChatApp:
                 if rand_val <= current_sum:
                     return rarity
 
-        #result = None
+        # result = None
         # 计算最终概率
         def calculate_final_probability():
             total_weight = sum(rarity_weights.values())
-            probabilities = {rarity: weight / total_weight / len(rarity_pool[rarity]) for rarity, weight in rarity_weights.items()}
+            probabilities = {rarity: weight / total_weight / len(rarity_pool[rarity]) for rarity, weight in
+                             rarity_weights.items()}
             return probabilities
 
         final_probabilities = calculate_final_probability()
@@ -15657,7 +15678,7 @@ class ChatApp:
         elif stats[role]["sr_guarantee"] >= 10 and rarity_pool["sr"]:
             result = random.choice(rarity_pool["sr"])
             for item, details in result.items():
-                result_name = item+ "(保底)"
+                result_name = item + "(保底)"
                 result_desc = details["描述"]
             stats[role]["sr_guarantee"] = 0
             chosen_rarity = "SR"
@@ -15673,24 +15694,25 @@ class ChatApp:
         with open("GameSaves/gacha_stats.json", "w", encoding="utf-8") as f:
             json.dump(stats, f, ensure_ascii=False, indent=4)
         self.search_and_delete_insert_symbol()
-        self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】抽取了扭蛋{file_gacha_name}：{result_name}({chosen_rarity.upper()})\n\n')
+        self.chat_log.insert(tk.END,
+                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】抽取了扭蛋{file_gacha_name}：{result_name}({chosen_rarity.upper()}, {round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%)\n\n')
         self.chat_log.yview(tk.END)
-        self.role_entries[role].insert(tk.END, f"{result_name}，{round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%：{result_desc}")
-
+        self.role_entries[role].insert(tk.END,
+                                       f"{result_name}({chosen_rarity.upper()})，{round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%：{result_desc}")
 
     def place_resources_in_folder(self, tag=None):
-            global log_file_last_name
-            if tag == "HO":
-                pass
-            elif tag == "FX":
-                pass
-            elif tag == "BG":
-                pass
-            elif tag == "BGM":
-                pass
-            elif tag == "SE":
-                pass
+        global log_file_last_name
+        if tag == "HO":
             pass
+        elif tag == "FX":
+            pass
+        elif tag == "BG":
+            pass
+        elif tag == "BGM":
+            pass
+        elif tag == "SE":
+            pass
+        pass
 
     def replace_inner_quotes(self, text):
         # 结果字符串
@@ -15944,7 +15966,14 @@ class ChatApp:
                                 line = line.replace(f"【{title[0]}】", f"{title[0]}_")
                             if "【【【" in line:  # ？？？
                                 title = re.findall(r'【【【([^】]*)】】', line)
-                                line = line.replace(f"【{title[0]}】", f"{title[0]}")
+                                for rrr, nnn in self.role_entries_name.items():
+                                    if title[0] in nnn:
+                                        line = line.replace(f"【{title[0]}】", f"{title[0]}·")
+                            elif "【【" in line:  # ？？？
+                                title = re.findall(r'【【([^】]*)】', line)
+                                for rrr, nnn in self.role_entries_name.items():
+                                    if title[0] in nnn:
+                                        line = line.replace(f"【{title[0]}】", f"{title[0]}·")
                             content2 = line.replace(f"<{name[0]}>", "").replace("【【【", "【【").replace("】】】",
                                                                                                      "】】").replace(
                                 "【【", "<color=#FF0000><b><抖动>").replace("】】", "</抖动></b></color>").replace("“",
@@ -16133,7 +16162,14 @@ class ChatApp:
                             line = line.replace(f"【{title[0]}】", f"{title[0]}_")
                         if "【【【" in line:  # ？？？
                             title = re.findall(r'【【【([^】]*)】】', line)
-                            line = line.replace(f"【{title[0]}】", f"{title[0]}")
+                            for rrr, nnn in self.role_entries_name.items():
+                                if title[0] in nnn:
+                                    line = line.replace(f"【{title[0]}】", f"{title[0]}_")
+                        elif "【【" in line:  # ？？？
+                            title = re.findall(r'【【([^】]*)】', line)
+                            for rrr, nnn in self.role_entries_name.items():
+                                if title[0] in nnn:
+                                    line = line.replace(f"【{title[0]}】", f"{title[0]}_")
                         if name:
                             content = line.replace(f"<{name[0]}>", "").replace("[", style_highlight_weak_style2_echo[
                                 0]).replace("]", style_highlight_weak_style2_echo[1]).replace("【【【", "【【").replace(
@@ -16496,7 +16532,7 @@ class ChatApp:
             dialogues = re.findall(dialogue_pattern, line["content"])
             if dialogues and (any(line["name"] == key or line["name"] == value for key, value in
                                   self.role_entries_name_NPC.items()) or any(
-                    line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
+                line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
                 categories_line["对话"].append(line)
                 for dialogue in dialogues:
                     categories["对话"].append(dialogue[0] or dialogue[1])
@@ -16505,7 +16541,7 @@ class ChatApp:
             action = re.findall(action_pattern, line["content"])
             if action and (any(line["name"] == key or line["name"] == value for key, value in
                                self.role_entries_name_NPC.items()) or any(
-                    line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
+                line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
                 categories["行动"].extend(action)
                 categories_line["行动"].append(line)
 
@@ -16513,7 +16549,7 @@ class ChatApp:
             remarks = re.findall(remark_pattern, line["content"])
             if remarks and (any(line["name"] == key or line["name"] == value for key, value in
                                 self.role_entries_name_NPC.items()) or any(
-                    line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
+                line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
                 categories_line["吐槽"].append(line)
                 for remark in remarks:
                     categories["吐槽"].append(remark[0] or remark[1])
@@ -16522,7 +16558,7 @@ class ChatApp:
             if not (dialogues or action or remarks) and (any(
                     line["name"] == key or line["name"] == value for key, value in
                     self.role_entries_name_NPC.items()) or any(
-                    line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
+                line["name"] == key or line["name"] == value for key, value in self.role_entries_name.items())):
                 categories["描述"].append(line["content"])
                 categories_line["描述"].append(line)
 
@@ -17885,13 +17921,13 @@ class ChatApp:
         # 创建一个 Toplevel 窗口用于显示下拉列表
         top_level = tk.Toplevel(root)
         top_level.wm_overrideredirect(True)  # 隐藏窗口边框
-        #top_level.transient(root)  # 确保 Toplevel 和主窗口关系
+        # top_level.transient(root)  # 确保 Toplevel 和主窗口关系
         top_level.withdraw()  # 初始时隐藏 Toplevel 窗口
         listbox = tk.Listbox(top_level, width=24)
         listbox.pack()
 
         def show_suggestions(*args):
-            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            # top_level.grab_set()  # 捕获焦点到 Toplevel
             if isinstance(entry, tk.Entry):
                 typed_text = entry.get()
             else:  # Assume tk.Text
@@ -17935,7 +17971,7 @@ class ChatApp:
                     top_level.withdraw()  # 隐藏 Toplevel 窗口
 
         def complete(event):
-            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            # top_level.grab_set()  # 捕获焦点到 Toplevel
             if listbox.size() > 0:
                 try:
                     entry.delete(0, tk.END)
@@ -17969,10 +18005,10 @@ class ChatApp:
                     listbox.selection_set(first_index)  # 选中第一个条目
                     listbox.activate(first_index)  # 激活条目
 
-        #top_level.withdraw()  # 隐藏 Toplevel 窗口
+        # top_level.withdraw()  # 隐藏 Toplevel 窗口
 
         def select_suggestion(event):
-            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            # top_level.grab_set()  # 捕获焦点到 Toplevel
             """高亮鼠标所在的条目"""
             listbox.focus_set()  # 将焦点切换到 Listbox
             listbox.selection_clear(0, tk.END)  # 清除所有选中项
@@ -17990,10 +18026,10 @@ class ChatApp:
                 entry.delete("1.0", tk.END)
                 entry.insert("1.0", listbox.get(tk.ACTIVE).split(" [")[0])
             # listbox.grid_forget()
-            #top_level.withdraw()  # 隐藏 Toplevel 窗口
+            # top_level.withdraw()  # 隐藏 Toplevel 窗口
 
         def confirm_suggestion(event):
-            #top_level.grab_set()  # 捕获焦点到 Toplevel
+            # top_level.grab_set()  # 捕获焦点到 Toplevel
             """高亮鼠标所在的条目"""
             listbox.selection_clear(0, tk.END)  # 清除所有选中项
             index = listbox.nearest(event.y)  # 获取鼠标指针所在的条目索引
@@ -21562,7 +21598,6 @@ class ChatApp:
             json.dump(data, file, indent=4, ensure_ascii=False)
         self.new_window.destroy()
 
-
     # 新窗口
     def open_new_window(self):
         global Is_Opened
@@ -21664,7 +21699,8 @@ class ChatApp:
                 self.KP_entry = tk.Text(frame, wrap=tk.WORD, width=10, height=10, undo=True)
                 # 绑定键盘事件到 on_key 函数
                 self.KP_entry.bind("<Key>", lambda event: self.on_key(event, self.KP_entry))
-                self.KP_entry.insert(tk.END, "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响\n列表选择时推荐使用ctrl选取，否则无法取消选中")
+                self.KP_entry.insert(tk.END,
+                                     "← 关闭此窗口触发自动保存，也可以手动点击此按钮保存！\n此处可以自由编辑文本，对程序不存在任何影响\n列表选择时推荐使用ctrl选取，否则无法取消选中")
                 self.KP_entry.grid(row=0, column=3, padx=0, pady=0, sticky="nsew")
                 # 创建Treeview
                 self.tree_main = ttk.Treeview(frame, columns=("信息来源", "信息内容", "共享人", "共享想法"), show="headings",
@@ -21688,19 +21724,19 @@ class ChatApp:
                 # self.tree_main.bind("<Button-1>", lambda event: toggle_selection(event))
 
                 # def toggle_selection(event):
-                    # 获取点击时的项
-                    # clicked_item = self.tree_main.identify_row(event.y)
-                    # if clicked_item:
-                        # if clicked_item == self.last_selected_item:
-                            # 取消选中
-                             # self.tree_main.selection_remove(clicked_item)
-                             # self.last_selected_item = None
-                        # else:
-                            # 更新选中项
-                            # self.last_selected_item = clicked_item
-                    # else:
-                        # 点击空白处时清除记录
-                        # self.last_selected_item = None
+                # 获取点击时的项
+                # clicked_item = self.tree_main.identify_row(event.y)
+                # if clicked_item:
+                # if clicked_item == self.last_selected_item:
+                # 取消选中
+                # self.tree_main.selection_remove(clicked_item)
+                # self.last_selected_item = None
+                # else:
+                # 更新选中项
+                # self.last_selected_item = clicked_item
+                # else:
+                # 点击空白处时清除记录
+                # self.last_selected_item = None
 
             else:
                 entry2 = tk.Text(frame, wrap=tk.WORD, width=1, height=1, undo=True)
@@ -22664,7 +22700,7 @@ class ResourceManagementSystem:
         # Calculate the number of PCs and total rows required
         num_pcs = len(self.resources["characters"]) - 2  # Subtract Total(PC) and NPCs
         num_rows = (
-                               num_pcs + 1) // 3 + 1  # Calculate rows dynamically for PCs (Total and NPCs will be handled separately)
+                           num_pcs + 1) // 3 + 1  # Calculate rows dynamically for PCs (Total and NPCs will be handled separately)
 
         # Define grid layout for rows and columns
         self.window.grid_rowconfigure(0, weight=1)  # Total(PC) row
@@ -25236,7 +25272,7 @@ class DiceRollDialog(simpledialog.Dialog):
         if self.tree is None:
             print("Error: 'tree' attribute is not set or is None.")
             return
-        #self.ChatApp.add_inference2self(source, source + "的搜查进度", result_percentage, "DiceBot")
+        # self.ChatApp.add_inference2self(source, source + "的搜查进度", result_percentage, "DiceBot")
         self.tree.insert("", "end", values=(source, source + "的搜查进度", result_percentage))
         # 获取 Treeview 中所有条目的ID，并按记忆指数从大到小排序
         sorted_ids = sorted(self.tree.get_children(), key=lambda x: self.tree.set(x, "记忆指数"),
