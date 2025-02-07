@@ -32,7 +32,8 @@ import numpy as np
 from PIL import Image, ImageTk, ImageSequence
 import json
 import pygame
-
+#from openai import OpenAI
+import anthropic
 
 # import apng
 
@@ -2838,7 +2839,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.63" + encouragement
+title_name = "自嗨团 v2.67" + encouragement
 music_autoplay_status = False
 
 
@@ -4900,7 +4901,7 @@ class ChatApp:
         if api_role_description:
             # 设置聊天消息列表
             messages = [{"role": "system", "content": api_role_description}, {"role": "system",
-                                                                              "content": f"{self.time_log.get('1.0', tk.END).strip()}【现实时间】{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}"}]  # 角色性格和背景设定
+                                                                              "content": f"【游戏内】{self.time_log.get('1.0', tk.END).strip()}【现实时间】{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}"}]  # 角色性格和背景设定
         else:
             messages = []
 
@@ -4944,8 +4945,8 @@ class ChatApp:
             }
             data = {
                 "model": api_model,
-                "messages": messages,
-                "max_tokens": api_max_tokens  # 设置max_tokens限制
+                "max_tokens": api_max_tokens,  # 设置max_tokens限制
+                "messages": messages
             }
         else:
             url = "https://api.gptsapi.net/v1/chat/completions"
@@ -4959,7 +4960,7 @@ class ChatApp:
                 "max_tokens": api_max_tokens  # 设置max_tokens限制
             }
 
-        print("[ChatGPT API]正在调用ChatGPT...")
+        print("[GPT API]正在调用GPT...")
         proxies2 = get_environment_proxy()
         if proxies:
             print(f"使用代理: {proxies}")
@@ -4981,18 +4982,86 @@ class ChatApp:
                 response = requests.post(url, headers=headers, data=json.dumps(data), timeout=timeout, proxies=proxies_)
                 response.raise_for_status()  # 如果响应状态码不是200，抛出HTTPError异常
             except requests.exceptions.RequestException as e:
-                print(f"API请求失败: {e}")
-                return
+                if is_claude_model:
+                    if proxies2:
+                        # 设置代理（如果需要）
+                        os.environ["HTTP_PROXY"] = proxies2['http']
+                        os.environ["HTTPS_PROXY"] = proxies2['https']
+                    anthropic_data = None
+                    print(f"Claude API请求失败, 尝试使用Anthropic重连: {e}")
+                    # 请求URL和请求体
+                    client = anthropic.Anthropic(
+                        api_key=api_key,
+                        base_url="https://api.gptsapi.net"
+                    )
+                    max_retries = 3
+                    # 提取所有 system 消息，合并为一个字符串
+                    system_prompt = " ".join(msg['content'] for msg in messages if msg['role'] == 'system')
+                    # 过滤掉 system 消息，仅保留 user 和 assistant 消息
+                    filtered_messages = [msg for msg in messages if msg['role'] != 'system']
+                    for attempt in range(max_retries):
+                        try:
+                            response = client.messages.create(
+                                model=api_model,
+                                system = system_prompt,
+                                max_tokens=api_max_tokens,
+                                messages=filtered_messages,
+                                timeout = 30
+                            )
+                            anthropic_data = response
+                        except anthropic.APIStatusError as e:
+                            print(f"API请求失败: {e}")
+                            if attempt == max_retries - 1:
+                                print("重试次数用尽，退出")
+                                anthropic_data = None
+                            return
+                else:
+                    print(f"API请求失败: {e}")
+                    return
 
         # 如果请求成功，返回 API 回应的内容
-        if response.status_code == 200:
-            response_data = response.json()
+        if anthropic_data is None:
+            if response.status_code == 200:
+                response_text = ""
+                print(response.text)
+                response_data = response.json()
+                print(response_data)
+                # 判断响应是否包含有效内容
+                if is_claude_model:
+                    if 'content' in response_data:
+                        # 提取 'content' 中的 'text' 字段
+                        response_text = response_data['content'][0].get('text', "No content found.").replace("\n\n", "\n")
+                        # print("API Response:", response_text)
+                else:
+                    if 'message' in response_data["choices"][0]:
+                        # 提取 'content' 中的 'text' 字段
+                        response_text = response_data["choices"][0]['message'].get('content', "No content found.").replace("\n\n", "\n")
+                        # print("API Response:", response_text)
+                if response_text != "":
+                    # 找到最后一个 '-' 的位置
+                    last_dash_index = api_model.rfind('-')
+                    # 截取最后一个 '-' 之前的部分
+                    modelname = api_model[:last_dash_index]
+                    self.chat_log.insert(tk.END,
+                                                 f'GPT({modelname}) {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{response_text}\n\n')
+                    self.chat_log.yview(tk.END)
+            else:
+                # 处理失败的请求
+                api_key = simpledialog.askstring("响应超时", "响应超时！请检查API KEY是否启用并有余额（https://2233.ai/api）！",
+                                                 initialvalue=api_key)
+                return f"Error: {response.status_code} - {response.text}"
+        else:
+            print(anthropic_data)
+            response_data = anthropic_data.content
             print(response_data)
+            response_text = ""
             # 判断响应是否包含有效内容
-            if 'content' in response_data:
+            if response_data[0].text:
                 # 提取 'content' 中的 'text' 字段
-                response_text = response_data['content'][0].get('text', "No content found.").replace("\n\n", "\n")
+                response_text = response_data[0].text.replace("\n\n", "\n") if response_data else "No content found."
                 # print("API Response:", response_text)
+
+            if response_text != "":
                 # 找到最后一个 '-' 的位置
                 last_dash_index = api_model.rfind('-')
                 # 截取最后一个 '-' 之前的部分
@@ -5000,11 +5069,6 @@ class ChatApp:
                 self.chat_log.insert(tk.END,
                                      f'GPT({modelname}) {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{response_text}\n\n')
                 self.chat_log.yview(tk.END)
-        else:
-            # 处理失败的请求
-            api_key = simpledialog.askstring("响应超时", "响应超时！请检查API KEY是否启用并有余额（https://2233.ai/api）！",
-                                             initialvalue=api_key)
-            return f"Error: {response.status_code} - {response.text}"
 
     def check_times(self):
         print("===")
