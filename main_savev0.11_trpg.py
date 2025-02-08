@@ -6206,7 +6206,7 @@ class ChatApp:
             pattern = re.compile(r"时空广播\s+(\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})")
             log_lines_ = log_data.split('\n')
             matches = [
-                (idx + 1, log_lines_[idx + 1] if idx + 1 < len(log_lines_) else "")
+                (idx, log_lines_[idx + 1] if idx + 1 < len(log_lines_) else "")
                 for idx in range(len(log_lines_))
                 if pattern.search(log_lines_[idx])
             ]
