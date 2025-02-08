@@ -1837,7 +1837,7 @@ def load_last_session_data():
                              "room_info_list": room_info_list, "Cards_list_by_role": Cards_list_by_role,
                              "NowBGM": ["全部"], "NowImage": [], "NowEffect": [], "NowDialogState": False,
                              "NowCharacterEffect": [], "BG": "", "current_time_log": "", "unify_time_log": [],
-                             "objectives": [{"title": "", "obj": ""}]}
+                             "objectives": [{"title": "", "obj": ""}], "ct_index": 0, "ct_index_current": 0}
         with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
             json.dump(last_session_data, file, indent=4, ensure_ascii=False)
         return last_session_data
@@ -4357,6 +4357,14 @@ class ChatApp:
 
         self.current_time_log = self.last_session_data["current_time_log"]
         self.current_time_log_note = self.last_session_data["current_time_log_note"]
+
+        if "ct_index" in self.last_session_data and "ct_index_current" in self.last_session_data:
+            self.ct_index = self.last_session_data["ct_index"]
+            self.ct_index_current = self.last_session_data["ct_index_current"]
+        else:
+            self.ct_index = 0
+            self.ct_index_current = self.ct_index
+        self.current_time_log_note = self.current_time_log_note.split("[序号：")[0]
         self.unify_time_log = self.last_session_data["unify_time_log"]
         self.unify_time_log_note = self.last_session_data["unify_time_log_note"]
 
@@ -5117,6 +5125,7 @@ class ChatApp:
             if unified_time_log != "":
                 self.time_log.delete("1.0", tk.END)
                 self.time_log.insert("1.0", unified_time_log)
+            self.trpg_module.add_time_1min()
             self.send_env_text_to_log()
             self.random_discovery()
             self.unify_time_log.clear()
@@ -5128,9 +5137,11 @@ class ChatApp:
         self.check_times()
 
     def save_current_time(self):
+        self.trpg_module.add_time_1min()
         self.current_time_log = self.time_log.get("1.0", tk.END)
         self.current_time_log_note = simpledialog.askstring("备注？", "备注（可留空）:", initialvalue=f"开始分流")
         self.send_env_text_to_log()
+        self.ct_index_current = self.ct_index
         self.random_discovery()
         self.check_times()
 
@@ -5139,6 +5150,8 @@ class ChatApp:
         if self.current_time_log and self.current_time_log != "":
             self.time_log.delete("1.0", tk.END)
             self.time_log.insert("1.0", self.current_time_log)
+        self.trpg_module.add_time_1min()
+        self.current_time_log = self.time_log.get("1.0", tk.END)
         self.send_env_text_to_log()
         self.random_discovery()
         self.check_times()
@@ -6177,6 +6190,7 @@ class ChatApp:
         log_data = self.chat_log.get("1.0", tk.END).strip()
 
         def search_log():
+            log_data = self.chat_log.get("1.0", tk.END).strip()
             query = entry.get().strip()
             if not query:
                 return
@@ -6186,30 +6200,63 @@ class ChatApp:
                     tree.insert("", tk.END, values=(idx + 1, line, ""))
 
         def quick_locate():
+            log_data = self.chat_log.get("1.0", tk.END).strip()
             tree2.delete(*tree2.get_children())
             tree.delete(*tree.get_children())
             pattern = re.compile(r"时空广播\s+(\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})")
-            matches = [(idx, line) for idx, line in enumerate(log_data.split('\n')) if pattern.search(line)]
+            log_lines_ = log_data.split('\n')
+            matches = [
+                (idx + 1, log_lines_[idx + 1] if idx + 1 < len(log_lines_) else "")
+                for idx in range(len(log_lines_))
+                if pattern.search(log_lines_[idx])
+            ]
 
             timecheck = self.check_times()
-            matches_t = re.findall(r"【时间】(.*?)【地点】(.*?)【天气】(.*?)【日期】(.*?)\n→ 备注: (.*?)\n", timecheck)
+            # 预编译正则
+            pattern_no_note = re.compile(r"【时间】(.*?)【地点】(.*?)【天气】(.*?)【日期】(.*?)\n")
+            pattern_with_note = re.compile(r"【时间】(.*?)【地点】(.*?)【天气】(.*?)【日期】(.*?)\n→ 备注: (.*?)\n")
+
+            # 结果列表
+            matches_t_ = []
+
+            # 使用 `finditer` 逐行匹配，保证顺序
+            for match in pattern_no_note.finditer(timecheck):
+                time, location, weather, date = match.groups()
+                # 试图匹配带备注的
+                note_match = pattern_with_note.match(timecheck, match.start())
+                if note_match:  # 匹配到带备注的
+                    note = note_match.group(5)
+                else:
+                    note = ""
+                # 记录匹配项，同时标记顺序
+                matches_t_.append((time, location, weather, date, note))
+
+            matches_t = matches_t_
             seen = {}
-            for match_t in matches_t:
+            for idx_t__, match_t in enumerate(matches_t):
                 time, location, weather, date, note = match_t
+                note = note if note else ""
                 formatted_text = f"【时间】{time}【地点】{location}【天气】{weather}【日期】{date}"
                 log_lines = log_data.split('\n')
                 occurrences = [i + 1 for i, line in enumerate(log_lines) if time in line and location in line]
                 count = seen.get((time, location), 0)
                 seen[(time, location)] = count + 1
-                line_idx = occurrences[count] if count < len(occurrences) else "N/"
+                # 如果是最后一项，使用 `line_idx` 来填充
+                #if idx_t__ == len(matches_t) - 1 and "无分流列表！" not in timecheck :
+                    # 假设 `matches` 是从 `log_data` 中找出的包含时空广播信息的匹配项
+                    #pattern__ = re.compile(r"时空广播\s+(\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})")
+                    #matches__ = [(idx, line) for idx, line in enumerate(log_data.split('\n')) if pattern__.search(line)]
+                    #tree2.insert("", tk.END, values=(matches__[self.ct_index_current][0]+2 if self.ct_index_current < len(matches__) else "N/A", formatted_text, note))
+                #else:
+                line_idx = occurrences[count] if count < len(occurrences) else "N/A"
                 tree2.insert("", tk.END, values=(line_idx, formatted_text, note))
 
             if matches:
                 closest_idx, _ = max(matches, key=lambda x: x[0])
                 for idx, line in matches:
-                    tree.insert("", tk.END, values=(idx + 1, line))
-                    if idx == closest_idx:
-                        tree.selection_set(tree.get_children()[-1])
+                    tree.insert("", tk.END, values=(idx + 2, line))
+                    #if idx == closest_idx:
+                        #tree.selection_set(tree.get_children()[-1])
 
         def on_double_click(event):
             selected_item = tree.selection()
@@ -6232,6 +6279,7 @@ class ChatApp:
                 self.chat_log.tag_config("highlight", background="yellow")
 
         def scroll_to_bottom():
+            log_data = self.chat_log.get("1.0", tk.END).strip()
             self.chat_log.yview(tk.END)
 
         def on_entry_return(event):
@@ -15038,6 +15086,7 @@ class ChatApp:
         return f"天气似乎发生了变化...【{current_weather_condition}】（{str(current_temperature)}℃）"
 
     def send_env_text_to_log(self, sendText=True):
+        self.ct_index += 1 #search_log
         env_text = self.time_log.get("1.0", tk.END).strip()
         # self.chat_log.insert(tk.END,
         # f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text}\n\n')
@@ -22345,7 +22394,9 @@ class ChatApp:
                                   "current_time_log_note": self.current_time_log_note,
                                   "unify_time_log": self.unify_time_log,
                                   "unify_time_log_note": self.unify_time_log_note,
-                                  "objectives": self.objective_lists}
+                                  "objectives": self.objective_lists,
+                                  "ct_index":self.ct_index,
+                                  "ct_index_current":self.ct_index_current}
         with open("GameSaves/last_session_data.json", "w", encoding='utf-8') as file:
             json.dump(self.last_session_data, file, indent=4, ensure_ascii=False)
         # 保存小窗内容:
