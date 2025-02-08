@@ -2839,7 +2839,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.67" + encouragement
+title_name = "自嗨团 v2.70" + encouragement
 music_autoplay_status = False
 
 
@@ -4706,6 +4706,7 @@ class ChatApp:
             menu.add_command(label="资源管理...",
                              command=lambda: ResourceManagementSystem(self, root, hide_window=False))
             menu.add_command(label="设置当前目标", command=lambda: self.set_objective())
+            menu.add_command(label="查找LOG...", command=lambda: self.search_log())
             menu.add_command(label="GPT设置...",
                              command=lambda: APISettingsWindow(root))
         elif "NPC_name" in role:
@@ -5071,24 +5072,33 @@ class ChatApp:
                 self.chat_log.yview(tk.END)
 
     def check_times(self):
-        print("===")
+        output = []  # 用于存储所有输出内容
+
+        def log(message):
+            """同时打印并存储信息"""
+            print(message)
+            output.append(message)
+
+        log("===")
         if len(self.unify_time_log) > 0:
             k = 1
-            print("[分流]分流列表：")
+            log("[分流]分流列表：")
             for i in self.unify_time_log:
-                print("(" + str(k) + ") " + i.strip())
+                log(f"({k}) {i.strip()}")
                 if len(self.unify_time_log_note) > 0 and self.unify_time_log_note[k - 1] != "":
-                    print("→ 备注: " + self.unify_time_log_note[k - 1].strip())
+                    log(f"→ 备注: {self.unify_time_log_note[k - 1].strip()}")
                 k += 1
         else:
-            print("[分流]无分流列表！")
+            log("[分流]无分流列表！")
+
         if self.current_time_log != "":
-            print("[分流]暂存分流: " + self.current_time_log.strip())
+            log(f"[分流]暂存分流: {self.current_time_log.strip()}")
             if self.current_time_log_note != "":
-                print("→ 备注: " + self.current_time_log_note.strip())
+                log(f"→ 备注: {self.current_time_log_note.strip()}")
         else:
-            print("[分流]无暂存分流！")
-        print("===")
+            log("[分流]无暂存分流！")
+        log("===")
+        return "\n".join(output)  # 返回所有输出内容的字符串
 
     def unify_times(self, auto=False):
         self.unify_time_log.append(self.time_log.get("1.0", tk.END))
@@ -6156,6 +6166,115 @@ class ChatApp:
 
         # 添加确认按钮
         tk.Button(self.selection_window, text="确认", command=confirm_selection).pack()
+
+    def search_log(self):
+        # 搜索log内容：弹出面板window，上有一个text输入框，底部有两个按钮，分别是查询和快速定位
+        # 1. 输入text后点击查询，支持全log模糊搜索并定位至所在行，若有多行则显示一个面板treeview，将所有行使用treeview逐一列出，用户双击某行则定位到该行
+        # 2. 点击快速定位，则支持快速查找时空广播，自动定位到距离log最后一行最近的时空广播，同时将log内所有时空广播行显示在treeview，用户双击某行则定位到该行，同时，执行timecheck = self.check_times()函数，获取该函数返回文本，并显示在treeview右侧。时空广播格式：
+        # 时空广播 2025/02/08 23:50:58
+        # 【时间】06:42㏂凌晨-昼☀【地点】美国
+        # 【天气】晴☀【日期】夏♨1922/07/11 周二
+        log_data = self.chat_log.get("1.0", tk.END).strip()
+
+        def search_log():
+            query = entry.get().strip()
+            if not query:
+                return
+            tree.delete(*tree.get_children())
+            for idx, line in enumerate(log_data.split('\n')):
+                if query in line:
+                    tree.insert("", tk.END, values=(idx + 1, line, ""))
+
+        def quick_locate():
+            tree2.delete(*tree2.get_children())
+            tree.delete(*tree.get_children())
+            pattern = re.compile(r"时空广播\s+(\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})")
+            matches = [(idx, line) for idx, line in enumerate(log_data.split('\n')) if pattern.search(line)]
+
+            timecheck = self.check_times()
+            matches_t = re.findall(r"【时间】(.*?)【地点】(.*?)【天气】(.*?)【日期】(.*?)\n→ 备注: (.*?)\n", timecheck)
+            seen = {}
+            for match_t in matches_t:
+                time, location, weather, date, note = match_t
+                formatted_text = f"【时间】{time}【地点】{location}【天气】{weather}【日期】{date}"
+                log_lines = log_data.split('\n')
+                occurrences = [i + 1 for i, line in enumerate(log_lines) if time in line and location in line]
+                count = seen.get((time, location), 0)
+                seen[(time, location)] = count + 1
+                line_idx = occurrences[count] if count < len(occurrences) else "N/"
+                tree2.insert("", tk.END, values=(line_idx, formatted_text, note))
+
+            if matches:
+                closest_idx, _ = max(matches, key=lambda x: x[0])
+                for idx, line in matches:
+                    tree.insert("", tk.END, values=(idx + 1, line))
+                    if idx == closest_idx:
+                        tree.selection_set(tree.get_children()[-1])
+
+        def on_double_click(event):
+            selected_item = tree.selection()
+            if selected_item:
+                item = tree.item(selected_item[0])
+                line_number = item["values"][0] - 1
+                self.chat_log.tag_remove("highlight", "1.0", tk.END)
+                self.chat_log.tag_add("highlight", f"{line_number + 1}.0", f"{line_number + 1}.end")
+                self.chat_log.see(f"{line_number + 1}.0")
+                self.chat_log.tag_config("highlight", background="yellow")
+
+        def on_double_click_2(event):
+            selected_item = tree2.selection()
+            if selected_item:
+                item = tree2.item(selected_item[0])
+                line_number = item["values"][0] - 1
+                self.chat_log.tag_remove("highlight", "1.0", tk.END)
+                self.chat_log.tag_add("highlight", f"{line_number + 1}.0", f"{line_number + 1}.end")
+                self.chat_log.see(f"{line_number + 1}.0")
+                self.chat_log.tag_config("highlight", background="yellow")
+
+        def scroll_to_bottom():
+            self.chat_log.yview(tk.END)
+
+        def on_entry_return(event):
+            search_log()
+
+        def on_close():
+            self.chat_log.tag_remove("highlight", "1.0", tk.END)
+            window.destroy()
+
+        window = tk.Toplevel(root)
+        window.title("搜索日志")
+        window.geometry("700x500")
+        window.attributes('-topmost', True)
+        window.protocol("WM_DELETE_WINDOW", on_close)
+        entry = tk.Entry(window, width=50)
+        entry.pack(pady=5)
+        entry.bind("<Return>", on_entry_return)
+        btn_frame = tk.Frame(window)
+        btn_frame.pack()
+        search_btn = tk.Button(btn_frame, text="查询", command=search_log)
+        search_btn.pack(side=tk.LEFT, padx=5)
+        locate_btn = tk.Button(btn_frame, text="分流定位", command=quick_locate)
+        locate_btn.pack(side=tk.LEFT, padx=5)
+        scroll_btn = tk.Button(btn_frame, text="回到底部", command=scroll_to_bottom)
+        scroll_btn.pack(side=tk.LEFT, padx=5)
+
+        tree = ttk.Treeview(window, columns=("行号", "内容"), show="headings")
+        tree.column("行号", width=50)
+        tree.column("内容", width=650)
+        tree.heading("行号", text="行号")
+        tree.heading("内容", text="内容")
+        tree.pack(fill=tk.BOTH, expand=True, pady=5)
+        tree.bind("<Double-1>", on_double_click)
+
+        tree2 = ttk.Treeview(window, columns=("行号", "分流", "备注"), show="headings")
+        tree2.column("行号", width=50)
+        tree2.column("分流", width=450)
+        tree2.column("备注", width=200)
+        tree2.heading("行号", text="行号")
+        tree2.heading("分流", text="分流")
+        tree2.heading("备注", text="备注")
+        tree2.pack(fill=tk.BOTH, expand=True, pady=5)
+        tree2.bind("<Double-1>", on_double_click_2)
 
     def send_message(self, role):
         global role_Chart_at_name
