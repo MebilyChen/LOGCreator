@@ -4468,6 +4468,7 @@ class ChatApp:
             global title_name
             self.root.title(title_name + f"  | 【当前{title}】" + obj)
         self.new_obj_window = tk.Toplevel(root, takefocus=True)
+        self.new_obj_window.attributes('-topmost', True)
         # Create widgets
         self.new_obj_frame = tk.Frame(self.new_obj_window)
         self.new_obj_frame.pack()
