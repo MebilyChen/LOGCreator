@@ -4092,7 +4092,7 @@ class ChatApp:
             else:
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", text_)
-            result_list = self.get_and_roll(role)
+            result_list = self.get_and_roll(role, pass_=False)
             if self.role_entries_roll[role].get("1.0", tk.END).strip() == text:
                 self.role_entries_roll[role].delete("1.0", tk.END)
             else:
@@ -4102,7 +4102,7 @@ class ChatApp:
             # print("返回的："+str(result_list))
             return result_list
         elif send and self.role_entries_roll[role].get("1.0", tk.END).strip() != "":
-            result_list = self.get_and_roll(role)
+            result_list = self.get_and_roll(role, pass_=False)
             if self.role_entries_roll[role].get("1.0", tk.END).strip() == text:
                 self.role_entries_roll[role].delete("1.0", tk.END)
             else:
@@ -17524,10 +17524,10 @@ class ChatApp:
                         lambda event, role=role, frame=frame: self.hide_icon_on_avatar(role, frame))
             # label2.bind("<Button-3>", lambda event, role=role: self.on_avatar_right_click(role))
 
-    def get_and_roll(self, role):
+    def get_and_roll(self, role, pass_=True):
         global reason_string_list
         self.search_and_delete_insert_symbol()
-        if self.current_role.get() == "":
+        if self.current_role.get() == "" and pass_:
             return
         if self.role_entries_roll[self.current_role.get()].get("1.0", tk.END).strip() == "":
             text = self.role_entries_roll[role].get("1.0", tk.END).strip()
