@@ -3977,6 +3977,9 @@ class ChatApp:
         entry_roll.bind("<Button-3>", lambda event, r=role: self.add_menu_skills(event, role))
 
         suggestion_list = []
+        #role_Chart___ = load_Chart().copy()
+        #role_Chart_detail___ = role_Chart___.get(role, {}).copy()
+        #print(role_Chart_detail.get("ARMOR"))
         for skills, value4 in role_Chart_detail.items():
             if isinstance(value4, int):
                 suggestion_list.append(
@@ -5850,14 +5853,14 @@ class ChatApp:
                                     if " " in expression:
                                         exp_list = expression.split(" ")
                                         for exp_ in exp_list:
-                                            if "极难成功" in results_:
+                                            if "极难成功" in results_ or "大成功" in results_:
                                                 text = exp_.replace("D", "*")
                                             else:
                                                 text = exp_
                                             self.insert_roll_to_PC(text, target_index, send=True)
 
                                     else:
-                                        if "极难成功" in results_:
+                                        if "极难成功" in results_ or "大成功" in results_:
                                             text = expression.replace("D", "*")
                                         else:
                                             text = expression
@@ -7070,12 +7073,122 @@ class ChatApp:
                     name_ = role.split("NPC_name")[1]
                 else:
                     name_ = "NPC"
-                log = f"{name_} {timestamp}\n{message}\n\n"  # 不加引号
-                self.chat_log.insert(tk.END, log)
-                # 滚动到最底部
-                self.chat_log.yview(tk.END)
-                self.role_entries[role].delete("1.0", tk.END)
+                if message.startswith(".st") or message.startswith("。st"):
+                    message = message[len("st") + 1:].strip()
+
+                    parts_skill = re.findall(r'([\u4e00-\u9fa5a-zA-Z\s]+)(\d+)', message)
+                    if ("+" or "-" or "*" or "/") in message and "#" not in message:
+                        parts = re.findall(r'([#+]?[\u4e00-\u9fa5a-zA-Z\s]+)([-+*/^])(\d+)', message)
+                        print(parts)
+                        # print(str(parts[0][0]).upper())
+                        if parts and len(parts) > 0 and len(parts[0]) > 0:
+                            role_Chart_at_name[role.split("NPC_name")[0]][str(parts[0][0]).upper()] = eval(
+                                str(role_Chart_detail[str(parts[0][0]).upper()]) + parts[0][1] + parts[0][2])
+                        # print(str(parts[0][0]).upper()+":"+str(role_Chart[role][str(parts[0][0]).upper()]))
+                        self.chat_log.insert(tk.END,
+                                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n\n')
+                        # self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts[0][0]).upper()}】变更为{str(role_Chart[role][str(parts[0][0]).upper()])}\n"
+                        # 滚动到最底部
+                        self.chat_log.yview(tk.END)
+                    else:
+                        new_chart = self.parse_input_skill(message.upper()).copy()
+                        print(new_chart)
+
+                        self.update_skills(role_Chart_at_name[role.split("NPC_name")[0]], new_chart)
+                        if "NPC_name" in role:
+                            role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                        else:
+                            role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                        # if self.role_entries_name[role] in role_Chart_at_name:
+                        #role_Chart_at_name[role.split("NPC_name")[0]] = role_Chart_at_name[role.split("NPC_name")[0]].copy()
+                        if role in self.role_avatar_paths:
+                            role_Chart_at_name[role.split("NPC_name")[0]]["_AvatarPath"] = self.role_avatar_paths[
+                                role]
+                        self.save_role_skill_at_name()
+
+                        suggestion_list = []
+                        for skills, value4 in role_Chart_detail.items():
+                            if isinstance(value4, int):
+                                suggestion_list.append(
+                                    skills + f" [{value4}/{int(round(int(value4) / 2, 0))}/{int(round(int(value4) / 5, 0))}]")
+                            else:
+                                suggestion_list.append(skills + f" [{value4}]")
+                        self.role_entries_roll[role].bind("<Button-1>",
+                                                          lambda event: self.auto_complete_entry(
+                                                              self.role_entries_frame[role],
+                                                              self.role_entries_roll[role],
+                                                              suggestion_list, event))
+
+                        # print(role_Chart_at_name[self.role_entries_name[role]])
+                    SAN = role_Chart_detail.get("SAN")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    HP = role_Chart_detail.get("HP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    MP = role_Chart_detail.get("MP")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    MOV = role_Chart_detail.get("MOV")  # edu_value = sub_dict.get("EDU")  # 获取 "EDU" 对应的值
+                    POW = role_Chart_detail.get("POW")
+                    DB = role_Chart_detail.get("DB")
+                    if "#SAN" in role_Chart_detail:
+                        _SAN = role_Chart_detail.get("#SAN")
+                    else:
+                        _SAN = 100
+                    if "HP" in message.upper():
+                        HP_ = self.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip()
+                        self.role_values_entry[role].delete("2.0", "3.0")
+                        self.role_values_entry[role].insert("2.0",
+                                                            f'{HP_}/{HP}:HP\n')
+                    if "MP" in message.upper():
+                        MP_ = self.role_values_entry[role].get("3.0", "4.0").split("/")[0].strip()
+                        self.role_values_entry[role].delete("3.0", "4.0")
+                        self.role_values_entry[role].insert("3.0",
+                                                            f'{MP_}/{MP}:MP\n')
+                    if "SAN" in message.upper():
+                        SAN_ = self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip()
+                        # if SAN_ == 0 or SAN_ == "":
+                        # SAN_ = POW
+                        self.role_values_entry[role].delete("1.0", "2.0")
+                        self.role_values_entry[role].insert("1.0",
+                                                            f'{SAN_}/{_SAN}:SAN\n')
+                    if "MOV" in message.upper():
+                        MOV_ = self.role_values_entry[role].get("4.0", "5.0").split("/")[0].strip()
+                        self.role_values_entry[role].delete("4.0", "5.0")
+                        self.role_values_entry[role].insert("4.0",
+                                                            f'{MOV_}/{MOV}:MOV\n')
+                    if "DB" in message.upper():
+                        self.role_values_entry[role].delete("5.0", "6.0")
+                        self.role_values_entry[role].insert("5.0",
+                                                            f'\n{DB}:DB\n')
+                    else:
+                        self.role_values_entry[role].insert("1.0",
+                                                            f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                    self.role_entries[role].delete("1.0", tk.END)
+                    # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
+                    # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
+                    # MOV}\n\n\n')
+                    if parts_skill and len(parts_skill) > 0 and len(parts_skill[0]) > 0:
+                        self.role_entries[role].insert(tk.END, "已录入！")
+                        if "HP" in str(parts_skill[0][0]).upper() or "MP" in str(
+                                parts_skill[0][0]).upper() or "SAN" in str(
+                                parts_skill[0][0]).upper() or "MOV" in str(parts_skill[0][0]).upper():
+                            self.chat_log.insert(tk.END,
+                                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\nNPC【{role.split("NPC_name")[1]}】的状态：\n{self.role_values_entry[role].get("1.0", "5.0").strip()}\n\n')
+                            # self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的状态：\n{self.role_values_entry[role].get('1.0', '5.0').strip()}\n"
+                            self.chat_log.yview(tk.END)
+                        else:
+                            if len(parts_skill) == 1 and "#" not in message:
+                                self.chat_log.insert(tk.END,
+                                                     f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\nNPC【{role.split("NPC_name")[1]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart_at_name[role.split("NPC_name")[0]][str(parts_skill[0][0]).upper()])}！\n\n')
+                            # self.chat_log_huozi = self.chat_log_huozi + f"<{self.role_entries_name['DiceBot']}>【{self.role_entries_name[role]}】的【{str(parts_skill[0][0]).upper()}】成长为{str(role_Chart[role][str(parts_skill[0][0]).upper()])}！\n"
+                            self.chat_log.yview(tk.END)
+                    else:
+                        self.role_entries[role].insert(tk.END, "已刷新！")
+                    self.update_health_bar(role)
+                else:
+                    log = f"{name_} {timestamp}\n{message}\n\n"  # 不加引号
+                    self.chat_log.insert(tk.END, log)
+                    # 滚动到最底部
+                    self.chat_log.yview(tk.END)
+                    self.role_entries[role].delete("1.0", tk.END)
                 return
+
             log = f"{self.role_entries_name[role]} {timestamp}\n{message}\n\n"  # 不加引号
             if message.startswith(".st") or message.startswith("。st"):
                 message = message[len("st") + 1:].strip()
@@ -17702,7 +17815,7 @@ class ChatApp:
                                     self.chat_log.insert(tk.END,
                                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
                                     self.chat_log.yview(tk.END)
-                        if any(op in expression.upper() for op in ["HP", "MP", "MOV", "SAN"]):
+                        if any(op in expression.upper() for op in ["HP", "MP", "MOV", "SAN", "ARMOR"]):
                             expression = ""
                             reason = ""
                             return
@@ -17786,7 +17899,7 @@ class ChatApp:
                                         for role_armor in self.roles:
                                             if role_armor != roles and "ARMOR:" in str(
                                                     self.role_entries_roll[role_armor]):
-                                                role_Chart_detail_armor = role_Chart.get(roles, {}).copy()
+                                                role_Chart_detail_armor = role_Chart.get(role_armor, {}).copy()
                                                 if "ARMOR" in role_Chart_detail_armor:
                                                     value_armor = role_Chart_detail_armor["ARMOR"]
                                                 else:
@@ -17835,7 +17948,7 @@ class ChatApp:
                             self.SAN[role] += int(result_.split("扣除")[1].split("点")[0])
                             self.san_cal_status(role)
                     # 妙语
-                    if role != "DiceBot" and "NOC_name" not in role:
+                    if role != "DiceBot" and "NPC_name" not in role:
                         rand_num = random.random()  # 生成0到1之间的随机数
                         if rand_num >= 1 - mav_prob:
                             if expression in bot_personality["妙语"]:
@@ -17849,7 +17962,7 @@ class ChatApp:
                                 self.chat_log.insert(tk.END,
                                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
                                 self.chat_log.yview(tk.END)
-                    if any(op in expression.upper() for op in ["HP", "MP", "MOV", "SAN"]):
+                    if any(op in expression.upper() for op in ["HP", "MP", "MOV", "SAN", "ARMOR"]):
                         expression = ""
                         reason = ""
                         # message = f'【骰子】 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n(【{self.role_entries_name[role]}】因【{reason}】掷骰{SANC}{adv_comment}){result}{expressionUPP}={parts_[0]}\n\n'
@@ -17939,14 +18052,30 @@ class ChatApp:
                                         self.role_entries[role].insert(tk.END,
                                                                        f"[{weapon}伤害]{random.choice(hurt_position)}")
                                     if "极难成功" in parts_[1] or "大成功" in parts_[1]:
-                                        self.role_entries[role].insert(tk.END,
-                                                                       f"[极难以上且非反击]非贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}\n贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}，额外重骰武器伤害。\n")
+                                        if "穿" in value:
+                                            print(value)
+                                            self.role_entries[role].insert(tk.END,
+                                                                       f"[极难以上且非反击]贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('穿', '').replace('+烧', '').replace('烧', '').replace('+穿', ''))}-{value}(额外重骰的武器伤害)\n")
+                                        elif "穿" not in value and "烧" in value:
+                                            self.role_entries[role].insert(tk.END,
+                                                                       f"[极难以上且非反击]非贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('+烧', '').replace('烧', ''))}+燃烧\n")
+                                        elif "穿" not in value and "烧" not in value:
+                                            self.role_entries[role].insert(tk.END,
+                                                                       f"[极难以上且非反击]非贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}\n")
+
                                         self.role_entries_roll[role].delete("1.0", tk.END)
-                                        self.role_entries_roll[role].insert("1.0",
-                                                                            f"HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}")
+                                        if "穿" in value:
+                                            self.role_entries_roll[role].insert("1.0",
+                                                                            f"HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('穿', '').replace('+烧', '').replace('烧', '').replace('+穿', ''))}-{value}")
+                                        elif "穿" not in value and "烧" in value:
+                                            self.role_entries_roll[role].insert("1.0",
+                                                                                f"HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('+烧', '').replace('烧', ''))}烧")
+                                        elif "穿" not in value and "烧" not in value:
+                                            self.role_entries_roll[role].insert("1.0",
+                                                                                f"HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}")
                                     for role_armor in self.roles:
                                         if role_armor != role:
-                                            role_Chart_detail_armor = role_Chart.get(role, {}).copy()
+                                            role_Chart_detail_armor = role_Chart.get(role_armor, {}).copy()
                                             if "ARMOR" in role_Chart_detail_armor:
                                                 value_armor = role_Chart_detail_armor["ARMOR"]
                                             else:
@@ -17974,7 +18103,7 @@ class ChatApp:
                                 if weapon in expression:
                                     for role_armor in self.roles:
                                         if role_armor != role:
-                                            role_Chart_detail_armor = role_Chart.get(role, {}).copy()
+                                            role_Chart_detail_armor = role_Chart.get(role_armor, {}).copy()
                                             if "ARMOR" in role_Chart_detail_armor:
                                                 value_armor = role_Chart_detail_armor["ARMOR"]
                                             else:
@@ -17999,6 +18128,10 @@ class ChatApp:
                 if len(parts_) > 1:
                     if parts_ and "成功" in parts_[1]:
                         role_Chart_detail__ = role_Chart.get(role, {}).copy()
+                        DB_ = role_Chart_detail__["DB"]
+                        DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0", "")
+                        if ("D" not in DB_) and ("-" not in DB_):
+                            DB_ = "+" + DB_
                         for skill, value in role_Chart_detail__.items():
                             if "#" in skill:
                                 weapon_list__[skill.replace("#", "")] = value
@@ -18008,9 +18141,26 @@ class ChatApp:
                                     self.role_entries[role].insert("1.0",
                                                                    f"[{weapon}伤害]{random.choice(hurt_position)}\n")
                                 if "极难成功" in parts_[1] or "大成功" in parts_[1]:
-                                    self.role_entries[role].insert(tk.END,
-                                                                   f"[极难以上且非反击]\n非贯穿：最大伤害+最大伤害加值\n贯穿：最大伤害+最大伤害加值，额外重骰武器伤害。\n")
+                                    if "穿" in value:
+                                        self.role_entries[role].insert(tk.END,
+                                                                       f"[极难以上且非反击]贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('穿', '').replace('+烧', '').replace('烧', '').replace('+穿', ''))}-{value}(额外重骰的武器伤害)\n")
+                                    elif "穿" not in value and "烧" in value:
+                                        self.role_entries[role].insert(tk.END,
+                                                                       f"[极难以上且非反击]非贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('+烧', '').replace('烧', ''))}+燃烧\n")
+                                    elif "穿" not in value and "烧" not in value:
+                                        self.role_entries[role].insert(tk.END,
+                                                                       f"[极难以上且非反击]非贯穿武器：HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}\n")
 
+                                    self.role_entries_roll[role].delete("1.0", tk.END)
+                                    if "穿" in value:
+                                        self.role_entries_roll[role].insert("1.0",
+                                                                            f"HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('D', '*').replace('穿', '').replace('+烧', '').replace('烧', '').replace('+穿', ''))}-{value}")
+                                    elif "穿" not in value and "烧" in value:
+                                        self.role_entries_roll[role].insert("1.0",
+                                                                            f"HP-{eval(value.replace('+DB', DB_).replace('D', '*').replace('+烧', '').replace('烧', ''))}烧")
+                                    elif "穿" not in value and "烧" not in value:
+                                        self.role_entries_roll[role].insert("1.0",
+                                                                            f"HP-{eval(value.replace('+DB', DB_).replace('D', '*'))}")
                                 break
                         if "急救" in expression:
                             # self.role_entries[role].insert("1.0", f"HP+1，若濒死请继续骰[医学]\n")
@@ -23421,8 +23571,8 @@ class TRPGModule:
             part_eng = pattern_user.findall(expression)
             part_combine = pattern_combine.findall(expression)
             # print(part_eng)
-            if "HP" in expression.upper() or "MP" in expression.upper() or "SAN" in expression.upper() or "MOV" in expression.upper():
-                print("HP/MP/SAN/MOV变化")
+            if "HP" in expression.upper() or "MP" in expression.upper() or "SAN" in expression.upper() or "MOV" in expression.upper() or "ARMOR" in expression.upper():
+                print("HP/MP/SAN/MOV/ARMOR变化")
                 if "HP" in expression.upper():
                     HP_MP_check = "HP"
                 elif "MP" in expression.upper():
@@ -23431,9 +23581,12 @@ class TRPGModule:
                     HP_MP_check = "SAN"
                 elif "MOV" in expression.upper():
                     HP_MP_check = "MOV"
+                elif "ARMOR" in expression.upper():
+                    HP_MP_check = "ARMOR"
                 else:
                     HP_MP_check = ""
                 expression = expression.upper().replace("HP", "").replace("MP", "").replace("SAN", "").replace("MOV",
+                                                                                                               "").replace("ARMOR",
                                                                                                                "")
             if pattern_combine.match(expression) and len(part_combine) > 1:
                 if "NPC_name" in role:
@@ -23922,6 +24075,7 @@ class TRPGModule:
                     MP = role_Chart_at_name[role.split("NPC_name")[0]].get("MP")
                     SAN = role_Chart_at_name[role.split("NPC_name")[0]].get("#SAN")
                     MOV = role_Chart_at_name[role.split("NPC_name")[0]].get("MOV")
+                    ARMOR = role_Chart_at_name[role.split("NPC_name")[0]].get("ARMOR")
                     if ("+" in expression) or ("-" in expression) or ("*" in expression) or ("/" in expression):
                         # if 有多个d 有多个符号
                         seen_letters = set()
@@ -23988,8 +24142,20 @@ class TRPGModule:
                     # if str(role_Chart[role].get(temp_HP_MP_check)) != itm:
                     # role_Chart[role][temp_HP_MP_check] = itm
                     # itm = eval(str(role_Chart[role].get(temp_HP_MP_check)) + fuhao + str(result))
-
-                    if HP_MP_check == "HP":
+                    if HP_MP_check == "ARMOR":
+                        role_Chart_at_name[role.split("NPC_name")[0]]["ARMOR"] += eval(fuhao + str(result))
+                        des = f"{fuhao}{exp}={result}点{HP_MP_check}".replace("-=", "减少").replace("+=", "增加")
+                        des2 = "已" + des
+                        des2 = des2.replace("已+", "已增加").replace("已-", "已减少")
+                        self.ChatApp.chat_log.insert(tk.END,
+                                                     f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{role.split("NPC_name")[1]}】的状态[{des2}]：{role_Chart_at_name[role.split("NPC_name")[0]]["ARMOR"]}\n\n')
+                        self.ChatApp.chat_log.yview(tk.END)
+                        self.ChatApp.role_entries[role].delete("1.0", tk.END)
+                        self.ChatApp.insert_text_to_PC(".st", role, send=True)
+                        self.ChatApp.role_entries[role].delete("1.0", tk.END)
+                        self.ChatApp.role_entries[role].insert("1.0", des + "。")
+                        return
+                    elif HP_MP_check == "HP":
                         itm = eval(str(self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[
                                            0].strip()) + fuhao + result)
                     elif HP_MP_check == "SAN":
@@ -24044,6 +24210,7 @@ class TRPGModule:
                 MP = role_Chart[role].get("MP")
                 SAN = role_Chart[role].get("#SAN")
                 MOV = role_Chart[role].get("MOV")
+                ARMOR = role_Chart[role].get("ARMOR")
                 if ("+" in expression) or ("-" in expression) or ("*" in expression) or ("/" in expression):
                     # if 有多个d 有多个符号
                     seen_letters = set()
@@ -24093,7 +24260,28 @@ class TRPGModule:
                 else:
                     result = expression
                     exp = ""
-                if HP_MP_check == "HP":
+                if HP_MP_check == "ARMOR":
+                    #print(ARMOR)
+                    role_Chart_at_name[self.ChatApp.role_entries_name[role]]["ARMOR"] = ARMOR + eval(fuhao + str(result))
+                    role_Chart[role]["ARMOR"] = ARMOR + eval(fuhao + str(result))
+                    with open("GameSaves/pl_Chart_at_name.json", "w", encoding='utf-8') as file:
+                        json.dump(role_Chart_at_name, file, indent=4, ensure_ascii=False)
+                    with open('GameSaves/pl_Chart.json', 'w', encoding='utf-8') as file:
+                        json.dump(role_Chart, file, indent=4, ensure_ascii=False)
+                        # ARMOR没有办法及时更新（得参考技能实时更新的），而且攻击成功调用显示时（elif parts_ and "失败" in parts_[1]:）还是0（role_Chart? ）
+                        # ARMOR没有实现掷骰运算，只能+—整数
+                    des = f"{fuhao}{exp}={result}点{HP_MP_check}".replace("-=", "减少").replace("+=", "增加")
+                    des2 = "已" + des
+                    des2 = des2.replace("已+", "已增加").replace("已-", "已减少")
+                    self.ChatApp.chat_log.insert(tk.END,
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{role_Chart_at_name[self.ChatApp.role_entries_name[role]]["ARMOR"]}\n\n')
+                    self.ChatApp.chat_log.yview(tk.END)
+                    self.ChatApp.role_entries[role].delete("1.0", tk.END)
+                    self.ChatApp.insert_text_to_PC(".st", role, send=True)
+                    self.ChatApp.role_entries[role].delete("1.0", tk.END)
+                    self.ChatApp.role_entries[role].insert("1.0", des + "。")
+                    return
+                elif HP_MP_check == "HP":
                     temp_HP_MP_check = HP_MP_check + "_"
                     itm = self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[0].strip()
                 elif HP_MP_check == "SAN":
@@ -24851,17 +25039,17 @@ class DraggableItem:
             if Is_fill:
                 draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
                                                     random.randint(20, 150), fill='white',
-                                                    outline='black', label='标签', type=self.itemType)
+                                                    outline='black', label=self.label, type=self.itemType)
                 Is_fill = False
             else:
                 if Is_square:
                     draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, 100, 80, fill='',
-                                                        outline='black', label='标签', type=self.itemType)
+                                                        outline='black', label=self.label, type=self.itemType)
                     Is_square = False
                 else:
                     draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
                                                         random.randint(20, 150), fill='',
-                                                        outline='black', label='标签', type=self.itemType)
+                                                        outline='black', label=self.label, type=self.itemType)
                     Is_square = True
                 Is_fill = True
         elif self.itemType == "image_temp" or self.itemType == "image_temp_animate":
@@ -25021,12 +25209,12 @@ class DraggableItem:
             if Is_fill:
                 draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
                                                     random.randint(20, 150), fill='white',
-                                                    outline='black', label='标签', type=self.itemType)
+                                                    outline='black', label=self.label, type=self.itemType)
                 Is_fill = False
             else:
                 draggable_rectangle = DraggableItem(self.canvas, event.x + 2, event.y + 2, random.randint(20, 150),
                                                     random.randint(20, 150), fill='',
-                                                    outline='black', label='标签', type=self.itemType)
+                                                    outline='black', label=self.label, type=self.itemType)
                 Is_fill = True
 
         # def select_weapon(self, event):
