@@ -6309,6 +6309,7 @@ class ChatApp:
         self.search_window.protocol("WM_DELETE_WINDOW", on_close)
         entry = tk.Entry(self.search_window, width=50)
         entry.pack(pady=5)
+        entry.focus_set()  # 让光标自动聚焦在输入框
         entry.bind("<Return>", on_entry_return)
         btn_frame = tk.Frame(self.search_window)
         btn_frame.pack()
