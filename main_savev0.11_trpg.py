@@ -2839,7 +2839,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.70" + encouragement
+title_name = "自嗨团 v2.72" + encouragement
 music_autoplay_status = False
 
 
@@ -2864,6 +2864,7 @@ class ChatApp:
         root.bind("<Control-s>", lambda event: self.quickSave())
         root.bind("<Alt-Return>", lambda event: self.insert_newline())
         root.bind("<Control-Return>", lambda event: self.newline_on_ctrl_enter(event))
+        root.bind("<Control-f>", lambda event: self.search_log())
         # root.bind("<KeyPress-Up>", lambda event: self.repeat_last_words(send=False))
 
         # self.chat_log_huozi = ""
@@ -3008,6 +3009,7 @@ class ChatApp:
         self.chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=20, undo=True)
         self.chat_log.grid(row=0, column=0, padx=10, pady=10, rowspan=3, sticky="nsew")
         self.chat_log.bind("<Button-3>", lambda event, r="chatlog": self.add_menu(event, r))
+        self.chat_log.bind("<Key>", lambda event: self.on_key(event, self.chat_log))
         # 在 Text 组件中插入初始文本
         initial_text = "Updates/Todo：详情见readme" \
                        "\nTips:\n.st HP、MP时均修改的是上限，修改实时hp/mp需使用掷骰栏掷骰，或者直接修改\n使用 .st#斗殴@1D3+5 " \
@@ -6185,6 +6187,12 @@ class ChatApp:
         tk.Button(self.selection_window, text="确认", command=confirm_selection).pack()
 
     def search_log(self):
+        # 如果窗口已存在，直接focus
+        if hasattr(self, "search_window") and self.search_window is not None and tk.Toplevel.winfo_exists(
+                self.search_window):
+            self.search_window.lift()
+            self.search_window.focus_force()
+            return
         # 搜索log内容：弹出面板window，上有一个text输入框，底部有两个按钮，分别是查询和快速定位
         # 1. 输入text后点击查询，支持全log模糊搜索并定位至所在行，若有多行则显示一个面板treeview，将所有行使用treeview逐一列出，用户双击某行则定位到该行
         # 2. 点击快速定位，则支持快速查找时空广播，自动定位到距离log最后一行最近的时空广播，同时将log内所有时空广播行显示在treeview，用户双击某行则定位到该行，同时，执行timecheck = self.check_times()函数，获取该函数返回文本，并显示在treeview右侧。时空广播格式：
@@ -6291,17 +6299,18 @@ class ChatApp:
 
         def on_close():
             self.chat_log.tag_remove("highlight", "1.0", tk.END)
-            window.destroy()
+            self.search_window.destroy()
+            self.search_window = None  # 清空窗口引用
 
-        window = tk.Toplevel(root)
-        window.title("搜索日志")
-        window.geometry("700x500")
-        window.attributes('-topmost', True)
-        window.protocol("WM_DELETE_WINDOW", on_close)
-        entry = tk.Entry(window, width=50)
+        self.search_window = tk.Toplevel(root)
+        self.search_window.title("搜索日志")
+        self.search_window.geometry("700x500")
+        #self.search_window.attributes('-topmost', True)
+        self.search_window.protocol("WM_DELETE_WINDOW", on_close)
+        entry = tk.Entry(self.search_window, width=50)
         entry.pack(pady=5)
         entry.bind("<Return>", on_entry_return)
-        btn_frame = tk.Frame(window)
+        btn_frame = tk.Frame(self.search_window)
         btn_frame.pack()
         search_btn = tk.Button(btn_frame, text="查询", command=search_log)
         search_btn.pack(side=tk.LEFT, padx=5)
@@ -6310,7 +6319,7 @@ class ChatApp:
         scroll_btn = tk.Button(btn_frame, text="回到底部", command=scroll_to_bottom)
         scroll_btn.pack(side=tk.LEFT, padx=5)
 
-        tree = ttk.Treeview(window, columns=("行号", "内容"), show="headings")
+        tree = ttk.Treeview(self.search_window, columns=("行号", "内容"), show="headings")
         tree.column("行号", width=50)
         tree.column("内容", width=650)
         tree.heading("行号", text="行号")
@@ -6318,7 +6327,7 @@ class ChatApp:
         tree.pack(fill=tk.BOTH, expand=True, pady=5)
         tree.bind("<Double-1>", on_double_click)
 
-        tree2 = ttk.Treeview(window, columns=("行号", "分流", "备注"), show="headings")
+        tree2 = ttk.Treeview(self.search_window, columns=("行号", "分流", "备注"), show="headings")
         tree2.column("行号", width=50)
         tree2.column("分流", width=450)
         tree2.column("备注", width=200)
