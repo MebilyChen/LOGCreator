@@ -2839,7 +2839,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.72" + encouragement
+title_name = "自嗨团 v2.74" + encouragement
 music_autoplay_status = False
 
 
@@ -2941,6 +2941,10 @@ class ChatApp:
         # 保存角色选择状态的字典
         self.roles_activated = {}
         self.roles_activated_NPC = {}
+
+        # 连抽gacha暂存列表
+        self.gacha_lists_log = []
+        self.gacha_lists_role = []
 
         self.NowBGM = ["全部"]
         self.NowImage = []
@@ -4798,6 +4802,8 @@ class ChatApp:
                                  user_message, role, pre_conversation=False, api_role_description=api_role_description))
             menu.add_command(label="扭蛋（PL版）...", command=lambda role=role: self.gacha(role))
             menu.add_command(label="扭蛋（PC版）...", command=lambda role=role: self.gacha(role, True))
+            menu.add_command(label="连抽10次扭蛋（PL版）...", command=lambda role=role: self.gacha(role, gacha_time = 10))
+            menu.add_command(label="连抽10次扭蛋（PC版）...", command=lambda role=role: self.gacha(role, True, gacha_time = 10))
             menu.add_command(label="设置当前目标", command=lambda: self.set_objective())
             menu.add_command(label="清空", command=lambda role=role: self.clearAll(role), background="red")
         self.show_menu(event, menu)
@@ -15912,11 +15918,27 @@ class ChatApp:
             self.codename_by_name["_status"] = "True"
         self.new_window_codename.destroy()
 
-    def gacha(self, role, enable_luck_adjustment=False):
+    def gacha(self, role, enable_luck_adjustment=False, gacha_time=1):
         gacha_name = simpledialog.askstring("扭蛋奖池", "输入奖池名称（留空以选择文件）")
-        self.gacha_core(role, gacha_name, enable_luck_adjustment)
+        if gacha_time == 1:
+            self.gacha_core(role, gacha_name, enable_luck_adjustment)
+        elif gacha_time > 1:
+            ttime = gacha_time
+            while ttime > 0:
+                self.gacha_core(role, gacha_name, enable_luck_adjustment, send=False)
+                ttime -= 1
+            self.search_and_delete_insert_symbol()
+            self.chat_log.insert(tk.END,
+                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】连抽{gacha_time}次[{gacha_name}]扭蛋：\n' + "\n".join(self.gacha_lists_log) + "\n\n")
+            self.chat_log.yview(tk.END)
+            self.role_entries[role].insert(tk.END,
+                                           '\n'.join(self.gacha_lists_role))
+            self.gacha_lists_role = []
+            self.gacha_lists_log = []
+        else:
+            return
 
-    def gacha_core(self, role, gacha_name=None, enable_luck_adjustment=False):
+    def gacha_core(self, role, gacha_name=None, enable_luck_adjustment=False, send=True):
         """
         模拟扭蛋的函数。
 
@@ -16017,44 +16039,68 @@ class ChatApp:
         # 计算最终概率
         def calculate_final_probability():
             total_weight = sum(rarity_weights.values())
-            probabilities = {rarity: weight / total_weight / len(rarity_pool[rarity]) for rarity, weight in
-                             rarity_weights.items()}
+            probabilities = {}
+
+            for rarity, weight in rarity_weights.items():
+                pool_size = len(rarity_pool[rarity])
+                if pool_size > 0:
+                    probabilities[rarity] = weight / total_weight / pool_size
+                else:
+                    probabilities[rarity] = 0  # 避免除以0，可以设为0或其他合理的默认值
             return probabilities
 
         final_probabilities = calculate_final_probability()
 
+        def get_valid_rarity_pool(chosen_rarity):
+            """若当前稀有度池为空，则递降选择下一级奖池"""
+            rarity_order = ["sssr", "ssr", "sr", "r", "n"]  # 按稀有度从高到低排序
+            chosen_index = rarity_order.index(chosen_rarity)
+
+            # 从当前稀有度往下找，直到找到非空的奖池
+            for i in range(chosen_index, len(rarity_order)):
+                if rarity_pool[rarity_order[i]]:  # 只要池子里有数据就返回
+                    return rarity_order[i]
+
+            return None  # 如果所有奖池都为空，返回 None
+
         # 保底逻辑
-        if stats[role]["ssr_guarantee"] >= 100 and rarity_pool["ssr"]:
-            result = random.choice(rarity_pool["ssr"])
-            for item, details in result.items():
-                result_name = item + "(保底)"
-                result_desc = details["描述"]
-            stats[role]["ssr_guarantee"] = 0
-            chosen_rarity = "SSR"
-        elif stats[role]["sr_guarantee"] >= 10 and rarity_pool["sr"]:
-            result = random.choice(rarity_pool["sr"])
-            for item, details in result.items():
-                result_name = item + "(保底)"
-                result_desc = details["描述"]
-            stats[role]["sr_guarantee"] = 0
-            chosen_rarity = "SR"
+        if stats[role]["ssr_guarantee"] >= 100:
+            chosen_rarity = get_valid_rarity_pool("ssr")  # 若 ssr 为空，降级
+            stats[role]["ssr_guarantee"] = 0 if chosen_rarity == "ssr" else stats[role]["ssr_guarantee"]
+        elif stats[role]["sr_guarantee"] >= 10:
+            chosen_rarity = get_valid_rarity_pool("sr")  # 若 sr 为空，降级
+            stats[role]["sr_guarantee"] = 0 if chosen_rarity == "sr" else stats[role]["sr_guarantee"]
         else:
             # 按权重选择稀有度
             chosen_rarity = weighted_random_choice()
-            if rarity_pool[chosen_rarity]:
-                result = random.choice(rarity_pool[chosen_rarity])
-                for item, details in result.items():
-                    result_name = item
-                    result_desc = details["描述"]
+            chosen_rarity = get_valid_rarity_pool(chosen_rarity)  # 若池子为空，降级
+
+        # 抽取物品
+        if chosen_rarity:
+            result = random.choice(rarity_pool[chosen_rarity])
+            for item, details in result.items():
+                result_name = item + ("(保底)" if chosen_rarity in ["ssr", "sr"] else "")
+                result_desc = details["描述"]
+        else:
+            # 所有奖池为空
+            result_name = "未获得物品"
+            result_desc = "稀有度池为空"
+            chosen_rarity = "-"
+
         # 保存统计信息
         with open("GameSaves/gacha_stats.json", "w", encoding="utf-8") as f:
             json.dump(stats, f, ensure_ascii=False, indent=4)
-        self.search_and_delete_insert_symbol()
-        self.chat_log.insert(tk.END,
-                             f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】抽取了扭蛋{file_gacha_name}：{result_name}({chosen_rarity.upper()}, {round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%)\n\n')
-        self.chat_log.yview(tk.END)
-        self.role_entries[role].insert(tk.END,
-                                       f"{result_name}({chosen_rarity.upper()})，{round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%：{result_desc}")
+        if send:
+            self.search_and_delete_insert_symbol()
+            self.chat_log.insert(tk.END,
+                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】抽取了扭蛋{file_gacha_name}：{result_name}({chosen_rarity.upper()}, {round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%)\n\n')
+            self.chat_log.yview(tk.END)
+            self.role_entries[role].insert(tk.END,
+                                           f"{result_name}({chosen_rarity.upper()})，{round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%：{result_desc}")
+        else:
+            self.gacha_lists_log.append(f"{result_name}({chosen_rarity.upper()}, {round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%)")
+            self.gacha_lists_role.append(
+                f"{result_name}({chosen_rarity.upper()})，{round(final_probabilities[chosen_rarity.lower()] * 100, 2)}%：{result_desc}")
 
     def place_resources_in_folder(self, tag=None):
         global log_file_last_name
