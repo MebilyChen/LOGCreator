@@ -15924,12 +15924,20 @@ class ChatApp:
             self.gacha_core(role, gacha_name, enable_luck_adjustment)
         elif gacha_time > 1:
             ttime = gacha_time
+            if isinstance(gacha_name, str) and gacha_name != "":
+                file_name = gacha_name
+            else:
+                # raise ValueError("暂未实现现场录入功能，请传递一个有效的扭蛋列表或文件名！")
+                avatar_path = filedialog.askopenfilename(title="选择Gacha文件",
+                                                         filetypes=[("Json files", "*.json")],
+                                                         initialdir="CardDecks/Gachas")
+                file_name, dotextension = os.path.splitext(os.path.basename(avatar_path))
             while ttime > 0:
-                self.gacha_core(role, gacha_name, enable_luck_adjustment, send=False)
+                self.gacha_core(role, gacha_name, enable_luck_adjustment, send=False, _gacha_name=file_name)
                 ttime -= 1
             self.search_and_delete_insert_symbol()
             self.chat_log.insert(tk.END,
-                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】连抽{gacha_time}次[{gacha_name}]扭蛋：\n' + "\n".join(self.gacha_lists_log) + "\n\n")
+                                 f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】连抽{gacha_time}次[{file_name}]扭蛋：\n' + "\n".join(self.gacha_lists_log) + "\n\n")
             self.chat_log.yview(tk.END)
             self.role_entries[role].insert(tk.END,
                                            '\n'.join(self.gacha_lists_role))
@@ -15938,7 +15946,7 @@ class ChatApp:
         else:
             return
 
-    def gacha_core(self, role, gacha_name=None, enable_luck_adjustment=False, send=True):
+    def gacha_core(self, role, gacha_name=None, enable_luck_adjustment=False, send=True, _gacha_name=None):
         """
         模拟扭蛋的函数。
 
@@ -15983,6 +15991,8 @@ class ChatApp:
 
         file_gacha_name = ""
         # 获取扭蛋列表
+        if send is not True:
+            gacha_name = _gacha_name
         if isinstance(gacha_name, dict):
             gacha_list = [
                 {"名称": name, "描述": details["描述"], "稀有度": details["稀有度"]}
@@ -16009,7 +16019,7 @@ class ChatApp:
             rarity_pool[details["稀有度"].lower()].append({item: details})
 
         # 保底机制计数器
-        stats = {}
+        #stats = {}
         try:
             with open("GameSaves/gacha_stats.json", "r", encoding="utf-8") as f:
                 stats = json.load(f)
@@ -16066,10 +16076,10 @@ class ChatApp:
         # 保底逻辑
         if stats[role]["ssr_guarantee"] >= 100:
             chosen_rarity = get_valid_rarity_pool("ssr")  # 若 ssr 为空，降级
-            stats[role]["ssr_guarantee"] = 0 if chosen_rarity == "ssr" else stats[role]["ssr_guarantee"]
+            stats[role]["ssr_guarantee"] = 0 if chosen_rarity.lower() == "ssr" else stats[role]["ssr_guarantee"]
         elif stats[role]["sr_guarantee"] >= 10:
             chosen_rarity = get_valid_rarity_pool("sr")  # 若 sr 为空，降级
-            stats[role]["sr_guarantee"] = 0 if chosen_rarity == "sr" else stats[role]["sr_guarantee"]
+            stats[role]["sr_guarantee"] = 0 if chosen_rarity.lower() == "sr" else stats[role]["sr_guarantee"]
         else:
             # 按权重选择稀有度
             chosen_rarity = weighted_random_choice()
@@ -16079,7 +16089,7 @@ class ChatApp:
         if chosen_rarity:
             result = random.choice(rarity_pool[chosen_rarity])
             for item, details in result.items():
-                result_name = item + ("(保底)" if chosen_rarity in ["ssr", "sr"] else "")
+                result_name = item + ("(保底)" if stats[role]["total_draws"] != 0 and (stats[role]["sr_guarantee"] == 0 or stats[role]["sr_guarantee"] == 0) else "")
                 result_desc = details["描述"]
         else:
             # 所有奖池为空
