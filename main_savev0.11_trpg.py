@@ -2839,7 +2839,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.74" + encouragement
+title_name = "自嗨团 v2.77" + encouragement
 music_autoplay_status = False
 
 
@@ -17813,11 +17813,18 @@ class ChatApp:
                             role_ = key
                         elif enemy in nickname:
                             role_ = key
+                    if role_ == "":
+                        for key2, nickname2 in self.role_entries_name_NPC.items():
+                            if enemy == nickname2:
+                                role_ = key2
+                            elif enemy in nickname2:
+                                role_ = key2
+
                     expression_ = self.enemy_matches[enemy]
                     if "NPC_name" not in role:
                         reason_ = f"与{self.role_entries_name[role]}对抗"
                     else:
-                        reason_ = f"与{role.split('NPC_name')[1]}对抗"
+                        reason_ = f"与NPC-{role.split('NPC_name')[1]}对抗"
                     self.roll_dice(role_, expression_, reason_)
             else:
                 return self.roll_dice(role, expression, reason)
@@ -17834,7 +17841,7 @@ class ChatApp:
             # 多轮掷骰应该分开计算
             # 多人格式：【骰子】（内容理由）D100=73/40;（内容理由）D100=73/40;（内容理由）D100=73/40
             # 单人格式：【骰子】（内容理由）D100=73/40; D100=73/40; D100=73/40
-            if not role or "NPC_name" in role:
+            if role or "NPC_name" in role:
                 self.role_entries[role].delete("1.0", tk.END)
         multi_num = 1
         pattern_multi = re.compile(r'\d+\*[\u4e00-\u9fa5a-zA-Z]+')
@@ -17857,6 +17864,57 @@ class ChatApp:
             if role == "全员":
                 for roles in self.roles:
                     if roles != "DiceBot":
+                        # 在备忘中找技能调整值
+                        pattern__ = r'(\w+)([+\-*/]\d+)'
+                        matches__ = re.findall(pattern__, expression)
+                        if len(matches__) > 0:
+                            exp2 = matches__[0][0]
+                        else:
+                            exp2 = expression
+                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip():
+                            # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
+                            role_values_entry_ = self.role_values_entry[roles].get("1.0",
+                                                                                  tk.END).strip() + "\n" + expression
+                            pattern___ = r'(\w+)([+\-*/]\d+)'
+                            matches___ = re.findall(pattern___, role_values_entry_)
+                            # 统计所有调整项
+                            adjustments___ = {}
+                            for m in matches___:
+                                skill = m[0]  # 技能名
+                                if skill != exp2:
+                                    continue
+                                operation = m[1]  # 运算符和数字部分，例如 "-20", "*2"
+
+                                # 提取操作符和数值
+                                op = operation[0]  # 操作符，例如 +, -, *, /
+                                value = int(operation[1:])  # 数值部分，例如 20, 2
+
+                                if skill not in adjustments___:
+                                    adjustments___[skill] = 0
+
+                                # 根据运算符处理数值
+                                if op == '+':
+                                    adjustments___[skill] += value
+                                elif op == '-':
+                                    adjustments___[skill] -= value
+                                elif op == '*':
+                                    if adjustments___[skill] == 0:
+                                        adjustments___[skill] = operation
+                                    else:
+                                        adjustments___[skill] *= value
+                                elif op == '/':
+                                    if adjustments___[skill] == 0:
+                                        adjustments___[skill] = operation
+                                    else:
+                                        adjustments___[skill] /= value
+
+                            # 计算最终的技能调整值
+                            if exp2 in adjustments___:
+                                if isinstance(adjustments___[exp2], str):
+                                    expression = f"{exp2}{adjustments___[exp2]}"
+                                else:
+                                    total_adjustment = adjustments___[exp2]
+                                    expression = f"{exp2}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
                         if result_:
                             self.jrrp_record(roles, result_ + "###" + expression, "all")
@@ -18005,6 +18063,59 @@ class ChatApp:
                 if role == "DiceBot":
                     pass
                 else:
+                    # 在备忘中找技能调整值
+                    print(role)
+                    pattern__ = r'(\w+)([+\-*/]\d+)'
+                    matches__ = re.findall(pattern__, expression)
+                    print(expression)
+                    if len(matches__) > 0:
+                        exp2 = matches__[0][0]
+                    else:
+                        exp2 = expression
+                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip():
+                        # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
+                        role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
+                        pattern___ = r'(\w+)([+\-*/]\d+)'
+                        matches___ = re.findall(pattern___, role_values_entry_)
+                        # 统计所有调整项
+                        adjustments___ = {}
+                        for m in matches___:
+                            skill = m[0]  # 技能名
+                            if skill != exp2:
+                                continue
+                            operation = m[1]  # 运算符和数字部分，例如 "-20", "*2"
+
+                            # 提取操作符和数值
+                            op = operation[0]  # 操作符，例如 +, -, *, /
+
+                            value = int(operation[1:])  # 数值部分，例如 20, 2
+
+                            if skill not in adjustments___:
+                                adjustments___[skill] = 0
+
+                            # 根据运算符处理数值
+                            if op == '+':
+                                adjustments___[skill] += value
+                            elif op == '-':
+                                adjustments___[skill] -= value
+                            elif op == '*':
+                                if adjustments___[skill] == 0:
+                                    adjustments___[skill] = operation
+                                else:
+                                    adjustments___[skill] *= value
+                            elif op == '/':
+                                if adjustments___[skill] == 0:
+                                    adjustments___[skill] = operation
+                                else:
+                                    adjustments___[skill] /= value
+
+                        # 计算最终的技能调整值
+                        if exp2 in adjustments___:
+                            if isinstance(adjustments___[exp2], str):
+                                expression = f"{exp2}{adjustments___[exp2]}"
+                            else:
+                                total_adjustment = adjustments___[exp2]
+                                expression = f"{exp2}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
                     result_ = self.trpg_module.roll(expression, role)
                     if result_ and "d100" in expression.lower():
                         self.jrrp_record(role, result_ + "###" + expression, "solo")
@@ -18353,6 +18464,56 @@ class ChatApp:
                         pass
                     else:
                         shutil.copyfile(avatar_path, 'ReplayResources/SE/' + "掷骰" + dotextension)
+                        # 在备忘中找技能调整值
+                        pattern__ = r'(\w+)([+\-*/]\d+)'
+                        matches__ = re.findall(pattern__, expression)
+                        if len(matches__) > 0:
+                            exp2 = matches__[0][0]
+                        else:
+                            exp2 = expression
+                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip():
+                            # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
+                            role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
+                            pattern___ = r'(\w+)([+\-*/]\d+)'
+                            matches___ = re.findall(pattern___, role_values_entry_)
+                            # 统计所有调整项
+                            adjustments___ = {}
+                            for m in matches___:
+                                skill = m[0]  # 技能名
+                                if skill != exp2:
+                                    continue
+                                operation = m[1]  # 运算符和数字部分，例如 "-20", "*2"
+
+                                # 提取操作符和数值
+                                op = operation[0]  # 操作符，例如 +, -, *, /
+                                value = int(operation[1:])  # 数值部分，例如 20, 2
+
+                                if skill not in adjustments___:
+                                    adjustments___[skill] = 0
+
+                                # 根据运算符处理数值
+                                if op == '+':
+                                    adjustments___[skill] += value
+                                elif op == '-':
+                                    adjustments___[skill] -= value
+                                elif op == '*':
+                                    if adjustments___[skill] == 0:
+                                        adjustments___[skill] = operation
+                                    else:
+                                        adjustments___[skill] *= value
+                                elif op == '/':
+                                    if adjustments___[skill] == 0:
+                                        adjustments___[skill] = operation
+                                    else:
+                                        adjustments___[skill] /= value
+
+                                # 计算最终的技能调整值
+                            if exp2 in adjustments___:
+                                if isinstance(adjustments___[exp2], str):
+                                    expression = f"{exp2}{adjustments___[exp2]}"
+                                else:
+                                    total_adjustment = adjustments___[exp2]
+                                    expression = f"{exp2}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
             result = self.trpg_module.roll(expression, role)
             # jrrp录入
             if result:
@@ -21561,13 +21722,16 @@ class ChatApp:
         else:
             name = key.split("NPC_name")[1]
         # 如果HP归零，判断为战斗场景敌人死亡：
-        if int(self.role_values_entry[key].get("2.0", "3.0").split("/")[0]) <= 1:
-            if key.split("NPC_name")[0] in self.NPC_appearence:
-                _appearence = random.choice(self.NPC_appearence[key.split("NPC_name")[0]]['_out'])
-            else:
-                _appearence = random.choice(list_appearence_out)
-            self.chat_log.insert(tk.END,
-                                 f'{name} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{_appearence}\n\n')
+        try:
+            if int(self.role_values_entry[key].get("2.0", "3.0").split("/")[0]) <= 1:
+                if key.split("NPC_name")[0] in self.NPC_appearence:
+                    _appearence = random.choice(self.NPC_appearence[key.split("NPC_name")[0]]['_out'])
+                else:
+                    _appearence = random.choice(list_appearence_out)
+                self.chat_log.insert(tk.END,
+                                     f'{name} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{_appearence}\n\n')
+        except:
+            pass
         self.role_values_entry.pop(key)
         self.new_combat_windows.pop(key).destroy()
         self.role_entries.pop(key)
@@ -23874,14 +24038,32 @@ class TRPGModule:
                 # print(part_eng[0][0])
                 # print(part_eng[0][1])
                 print(expression)
-                if "+" in expression or "-" in expression:
+                if "+" in expression or "-" in expression or "*" in expression or "/" in expression:
                     print("补正骰")
                     if "+" in expression:
-                        expression_num = expression.split("+")[1]
+                        expression_num = int(expression.split("+")[1])
                         expression = expression.split("+")[0]
-                    if "-" in expression:
-                        expression_num = expression.split("-")[1] * (-1)
+                    elif "-" in expression:
+                        expression_num = int(expression.split("-")[1]) * (-1)
                         expression = expression.split("-")[0]
+                    elif "*" in expression:
+                        if "NPC_name" in role:
+                            role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                        else:
+                            role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                        expression_num_ = expression.split("*")[1]
+                        expression = expression.split("*")[0]
+                        print(role_Chart_detail[expression])
+                        expression_num = int(role_Chart_detail[expression]) * (int(expression_num_)-1)
+                    elif "/" in expression:
+                        if "NPC_name" in role:
+                            role_Chart_detail = role_Chart_at_name.get(role.split("NPC_name")[0], {}).copy()
+                        else:
+                            role_Chart_detail = role_Chart.get(role, {}).copy()  # 获取 "KP" 对应的字典，如果没有则返回空字典
+                        expression_num_ = expression.split("/")[1]
+                        expression = expression.split("/")[0]
+                        print(role_Chart_detail[expression])
+                        expression_num = round(int(role_Chart_detail[expression])/int(expression_num_), 0) * (-1) * (int(expression_num_)-1)
                 if part_eng and part_eng[0] and part_eng[0][1] is not None:
                     print("技能检定+数值")
                     expression = part_eng[0][0]
