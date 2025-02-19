@@ -134,6 +134,13 @@ def create_folder(folder_path):
     except FileExistsError:
         print(f"文件夹 '{folder_path}' 已经存在")
 
+last_focus = None
+last_focus_role = None
+def write_last_focus(event, role):
+    global last_focus
+    global last_focus_role
+    last_focus = event.widget
+    last_focus_role = role
 
 tooltip = None
 babel_on = False
@@ -12558,6 +12565,7 @@ class ChatApp:
         self.current_role.set(role)
         self.root.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
+        write_last_focus(event, role)
 
     def bind_enter_to_send_message_NPC(self, event, role):
         # 为当前文本框绑定回车键发送消息
@@ -12565,6 +12573,7 @@ class ChatApp:
         self.current_role.set(role)
         self.new_combat_window.bind("<Return>", lambda event, role=role: self.send_message_on_enter(event, role))
         self.highlight_role_frame(role)
+        #write_last_focus(event, role)
 
     def info_focus(self, event):
         self.reset_focus(event)
@@ -15437,9 +15446,11 @@ class ChatApp:
         self.role_entries_roll[self.highlighted_role.get()].config(relief=tk.SOLID)
         # self.create_role_frames()
 
-    def on_at_click(self, role):
+    def on_at_click(self, role, combat_window = None):
         # @点击事件处理
         # self.current_at_role.set(role)
+        global last_focus_role
+        global last_focus
         self.avatar_click_event = role
         current_role = self.current_role.get()
         if "NPC_name" in role:
@@ -15447,8 +15458,10 @@ class ChatApp:
                 name_ = role.split("NPC_name")[1]
             else:
                 name_ = role.split("NPC_name")[0]
-            self.role_entries[current_role].insert(tk.END, "@" + name_ + " ")
+            last_focus.focus_set()
+            self.role_entries[last_focus_role].insert(tk.END, "@" + name_ + " ")
         else:
+            current_role = self.current_role.get()
             self.role_entries[current_role].insert(tk.END, "@" + self.role_entries_name[role] + " ")
 
     def on_at_right_click(self, role):
@@ -20965,7 +20978,7 @@ class ChatApp:
                             label = tk.Label(frame, text="@", relief=tk.FLAT)
                             label.grid(row=0, column=0, pady=0, sticky="nsew")
                             # label点击事件绑定
-                            label.bind("<Button-1>", lambda event, role=NPC_name: self.on_at_click(role))
+                            label.bind("<Button-1>", lambda event, role=NPC_name: self.on_at_click(role, self.new_combat_windows[NPC_name]))
                             label.bind("<Button-3>", lambda event, role=NPC_name: self.on_at_right_click(role))
 
                             # 添加掷骰按钮和面数输入框
