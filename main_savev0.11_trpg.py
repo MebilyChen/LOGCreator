@@ -17884,7 +17884,7 @@ class ChatApp:
                             exp2 = matches__[0][0]
                         else:
                             exp2 = expression
-                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[roles].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[roles].get("1.0", tk.END).strip()):
+                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[roles].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[roles].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower():
                             # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                             role_values_entry_ = self.role_values_entry[roles].get("1.0",
                                                                                   tk.END).strip() + "\n" + expression
@@ -18135,7 +18135,7 @@ class ChatApp:
                         exp2 = matches__[0][0]
                     else:
                         exp2 = expression
-                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()):
+                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower():
                         # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                         role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
                         pattern___ = r'(\w+)([+\-*/]\d+)'
@@ -18585,7 +18585,7 @@ class ChatApp:
                             exp2 = matches__[0][0]
                         else:
                             exp2 = expression
-                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip()  or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()):
+                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip()  or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower():
                             # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                             role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
                             pattern___ = r'(\w+)([+\-*/]\d+)'
