@@ -17884,24 +17884,61 @@ class ChatApp:
                             exp2 = matches__[0][0]
                         else:
                             exp2 = expression
-                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip():
+                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[roles].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[roles].get("1.0", tk.END).strip()):
                             # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                             role_values_entry_ = self.role_values_entry[roles].get("1.0",
                                                                                   tk.END).strip() + "\n" + expression
                             pattern___ = r'(\w+)([+\-*/]\d+)'
                             matches___ = re.findall(pattern___, role_values_entry_)
+
+                            pattern___2 = r'([+\-])(\w+)'
+                            matches___2 = re.findall(pattern___2, role_values_entry_)
+
+                            # 统计所有调整项
+                            adjustments___2 = {}
+                            for m2 in matches___2:
+                                skill2 = m2[1]  # 技能名
+                                if skill2 != exp2.replace('+', '').replace('-', '') and "全部" not in skill2 and "所有" not in skill2:
+                                    continue
+                                op2 = m2[0]  # 运算符和数字部分，例如 "-20", "*2"
+
+                                if "全部" in skill2 or "所有" in skill2 or "任意" in skill2 or "任何" in skill2:
+                                    skill2 = "全部"
+                                if skill2 not in adjustments___2:
+                                    adjustments___2[skill2] = ""
+
+                                # 根据运算符处理数值
+                                if op2 == '+':
+                                    adjustments___2[skill2] += "+"
+                                elif op2 == '-':
+                                    adjustments___2[skill2] += "-"
+
+                            if "全部" in adjustments___2:
+                                # 根据运算符处理数值
+                                for skills2 in adjustments___2:
+                                    if skills2 != "全部":
+                                        adjustments___2[skills2] += adjustments___2["全部"]
+                            # 计算最终的技能调整值
+                            if exp2.replace('+', '').replace('-', '') in adjustments___2:
+                                if isinstance(adjustments___2[exp2.replace('+', '').replace('-', '')], str):
+                                    expression = f"{adjustments___2[exp2.replace('+', '').replace('-', '')]}{exp2.replace('+', '').replace('-', '')}"
+                            elif "全部" in adjustments___2:
+                                if isinstance(adjustments___2["全部"], str):
+                                    expression = f"{adjustments___2['全部']}{expression.replace('+', '').replace('-', '')}"
+
                             # 统计所有调整项
                             adjustments___ = {}
                             for m in matches___:
                                 skill = m[0]  # 技能名
-                                if skill != exp2:
+                                if skill != exp2 and "全部" not in skill and "所有" not in skill:
                                     continue
                                 operation = m[1]  # 运算符和数字部分，例如 "-20", "*2"
 
                                 # 提取操作符和数值
                                 op = operation[0]  # 操作符，例如 +, -, *, /
                                 value = int(operation[1:])  # 数值部分，例如 20, 2
-
+                                if "全部" in skill or "所有" in skill or "任意" in skill or "任何" in skill:
+                                    skill = "全部"
                                 if skill not in adjustments___:
                                     adjustments___[skill] = 0
 
@@ -17921,6 +17958,11 @@ class ChatApp:
                                     else:
                                         adjustments___[skill] /= value
 
+                            if "全部" in adjustments___:
+                                # 根据运算符处理数值
+                                for skills in adjustments___:
+                                    if skills != "全部":
+                                        adjustments___[skills] += adjustments___["全部"]
                             # 计算最终的技能调整值
                             if exp2 in adjustments___:
                                 if isinstance(adjustments___[exp2], str):
@@ -17928,6 +17970,14 @@ class ChatApp:
                                 else:
                                     total_adjustment = adjustments___[exp2]
                                     expression = f"{exp2}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
+                            elif "全部" in adjustments___:
+                                if isinstance(adjustments___["全部"], str):
+                                    expression = f"{expression}{adjustments___['全部']}"
+                                else:
+                                    total_adjustment = adjustments___["全部"]
+                                    expression = f"{expression}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
+
+
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
                         if result_:
                             self.jrrp_record(roles, result_ + "###" + expression, "all")
@@ -18085,16 +18135,53 @@ class ChatApp:
                         exp2 = matches__[0][0]
                     else:
                         exp2 = expression
-                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip():
+                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()):
                         # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                         role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
                         pattern___ = r'(\w+)([+\-*/]\d+)'
                         matches___ = re.findall(pattern___, role_values_entry_)
+
+                        pattern___2 = r'([+\-])(\w+)'
+                        matches___2 = re.findall(pattern___2, role_values_entry_)
+
+                        # 统计所有调整项
+                        adjustments___2 = {}
+                        for m2 in matches___2:
+                            skill2 = m2[1]  # 技能名
+                            if skill2 != exp2.replace('+', '').replace('-',
+                                                                       '') and "全部" not in skill2 and "所有" not in skill2:
+                                continue
+                            op2 = m2[0]  # 运算符和数字部分，例如 "-20", "*2"
+
+                            if "全部" in skill2 or "所有" in skill2 or "任意" in skill2 or "任何" in skill2:
+                                skill2 = "全部"
+                            if skill2 not in adjustments___2:
+                                adjustments___2[skill2] = ""
+
+                            # 根据运算符处理数值
+                            if op2 == '+':
+                                adjustments___2[skill2] += "+"
+                            elif op2 == '-':
+                                adjustments___2[skill2] += "-"
+
+                        if "全部" in adjustments___2:
+                            # 根据运算符处理数值
+                            for skills2 in adjustments___2:
+                                if skills2 != "全部":
+                                    adjustments___2[skills2] += adjustments___2["全部"]
+                        # 计算最终的技能调整值
+                        if exp2.replace('+', '').replace('-', '') in adjustments___2:
+                            if isinstance(adjustments___2[exp2.replace('+', '').replace('-', '')], str):
+                                expression = f"{adjustments___2[exp2.replace('+', '').replace('-', '')]}{exp2.replace('+', '').replace('-', '')}"
+                        elif "全部" in adjustments___2:
+                            if isinstance(adjustments___2["全部"], str):
+                                expression = f"{adjustments___2['全部']}{expression.replace('+', '').replace('-', '')}"
+
                         # 统计所有调整项
                         adjustments___ = {}
                         for m in matches___:
                             skill = m[0]  # 技能名
-                            if skill != exp2:
+                            if skill != exp2 and "全部" not in skill and "所有" not in skill:
                                 continue
                             operation = m[1]  # 运算符和数字部分，例如 "-20", "*2"
 
@@ -18103,6 +18190,8 @@ class ChatApp:
 
                             value = int(operation[1:])  # 数值部分，例如 20, 2
 
+                            if "全部" in skill or "所有" in skill or "任意" in skill or "任何" in skill:
+                                skill = "全部"
                             if skill not in adjustments___:
                                 adjustments___[skill] = 0
 
@@ -18122,6 +18211,12 @@ class ChatApp:
                                 else:
                                     adjustments___[skill] /= value
 
+                        if "全部" in adjustments___:
+                            # 根据运算符处理数值
+                            for skills in adjustments___:
+                                if skills != "全部":
+                                    adjustments___[skills] += adjustments___["全部"]
+
                         # 计算最终的技能调整值
                         if exp2 in adjustments___:
                             if isinstance(adjustments___[exp2], str):
@@ -18129,6 +18224,12 @@ class ChatApp:
                             else:
                                 total_adjustment = adjustments___[exp2]
                                 expression = f"{exp2}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
+                        elif "全部" in adjustments___:
+                            if isinstance(adjustments___["全部"], str):
+                                expression = f"{expression}{adjustments___['全部']}"
+                            else:
+                                total_adjustment = adjustments___["全部"]
+                                expression = f"{expression}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
                     result_ = self.trpg_module.roll(expression, role)
                     if result_ and "d100" in expression.lower():
                         self.jrrp_record(role, result_ + "###" + expression, "solo")
@@ -18484,23 +18585,61 @@ class ChatApp:
                             exp2 = matches__[0][0]
                         else:
                             exp2 = expression
-                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip():
+                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip()  or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()):
                             # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                             role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
                             pattern___ = r'(\w+)([+\-*/]\d+)'
                             matches___ = re.findall(pattern___, role_values_entry_)
+
+                            pattern___2 = r'([+\-])(\w+)'
+                            matches___2 = re.findall(pattern___2, role_values_entry_)
+
+                            # 统计所有调整项
+                            adjustments___2 = {}
+                            for m2 in matches___2:
+                                skill2 = m2[1]  # 技能名
+                                if skill2 != exp2.replace('+', '').replace('-',
+                                                                           '') and "全部" not in skill2 and "所有" not in skill2:
+                                    continue
+                                op2 = m2[0]  # 运算符和数字部分，例如 "-20", "*2"
+
+                                if "全部" in skill2 or "所有" in skill2 or "任意" in skill2 or "任何" in skill2:
+                                    skill2 = "全部"
+                                if skill2 not in adjustments___2:
+                                    adjustments___2[skill2] = ""
+
+                                # 根据运算符处理数值
+                                if op2 == '+':
+                                    adjustments___2[skill2] += "+"
+                                elif op2 == '-':
+                                    adjustments___2[skill2] += "-"
+
+                            if "全部" in adjustments___2:
+                                # 根据运算符处理数值
+                                for skills2 in adjustments___2:
+                                    if skills2 != "全部":
+                                        adjustments___2[skills2] += adjustments___2["全部"]
+                            # 计算最终的技能调整值
+                            if exp2.replace('+', '').replace('-', '') in adjustments___2:
+                                if isinstance(adjustments___2[exp2.replace('+', '').replace('-', '')], str):
+                                    expression = f"{adjustments___2[exp2.replace('+', '').replace('-', '')]}{exp2.replace('+', '').replace('-', '')}"
+                            elif "全部" in adjustments___2:
+                                if isinstance(adjustments___2["全部"], str):
+                                    expression = f"{adjustments___2['全部']}{expression.replace('+', '').replace('-', '')}"
+
                             # 统计所有调整项
                             adjustments___ = {}
                             for m in matches___:
                                 skill = m[0]  # 技能名
-                                if skill != exp2:
+                                if skill != exp2 and "全部" not in skill and "所有" not in skill:
                                     continue
                                 operation = m[1]  # 运算符和数字部分，例如 "-20", "*2"
 
                                 # 提取操作符和数值
                                 op = operation[0]  # 操作符，例如 +, -, *, /
                                 value = int(operation[1:])  # 数值部分，例如 20, 2
-
+                                if "全部" in skill or "所有" in skill or "任意" in skill or "任何" in skill:
+                                    skill = "全部"
                                 if skill not in adjustments___:
                                     adjustments___[skill] = 0
 
@@ -18520,13 +18659,24 @@ class ChatApp:
                                     else:
                                         adjustments___[skill] /= value
 
-                                # 计算最终的技能调整值
+                            if "全部" in adjustments___:
+                                # 根据运算符处理数值
+                                for skills in adjustments___:
+                                    if skills != "全部":
+                                        adjustments___[skills] += adjustments___["全部"]
+                            # 计算最终的技能调整值
                             if exp2 in adjustments___:
                                 if isinstance(adjustments___[exp2], str):
                                     expression = f"{exp2}{adjustments___[exp2]}"
                                 else:
                                     total_adjustment = adjustments___[exp2]
                                     expression = f"{exp2}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
+                            elif "全部" in adjustments___:
+                                if isinstance(adjustments___["全部"], str):
+                                    expression = f"{expression}{adjustments___['全部']}"
+                                else:
+                                    total_adjustment = adjustments___["全部"]
+                                    expression = f"{expression}{total_adjustment:+d}"  # 确保带上符号，例如 "潜行-40"
             result = self.trpg_module.roll(expression, role)
             # jrrp录入
             if result:
