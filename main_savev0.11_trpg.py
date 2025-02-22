@@ -4359,7 +4359,7 @@ class ChatApp:
         string = ""
         for song in BGM_list:
             string += "   ▶ " + song
-        if self.last_session_data["objectives"] is not None:
+        if len(self.last_session_data["objectives"]) > 0:
             objective = {}
             for o in self.last_session_data["objectives"]:
                 if 'title' in o and 'obj' in o:
@@ -7180,8 +7180,9 @@ class ChatApp:
                         self.role_values_entry[role].insert("5.0",
                                                             f'\n{DB}:DB\n')
                     else:
-                        self.role_values_entry[role].insert("1.0",
-                                                            f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                        pass
+                        #self.role_values_entry[role].insert("1.0",
+                                                            #f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                     self.role_entries[role].delete("1.0", tk.END)
                     # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                     # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
@@ -7295,8 +7296,9 @@ class ChatApp:
                     self.role_values_entry[role].insert("5.0",
                                                         f'\n{DB}:DB\n')
                 else:
-                    self.role_values_entry[role].insert("1.0",
-                                                        f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
+                    pass
+                    #self.role_values_entry[role].insert("1.0",
+                                                        #f'{SAN}/{_SAN}:SAN\n{HP}/{HP}:HP\n{MP}/{MP}:MP\n{MOV}/{MOV}:MOV\n{DB}:DB\n===\n')
                 self.role_entries[role].delete("1.0", tk.END)
                 # self.chat_log.insert(tk.END, f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime(
                 # "%Y/%m/%d %H:%M:%S")}\n【{self.role_entries_name[role]}】的状态：\nSAN:{SAN}\nHP:{HP}\nMP:{MP}\nMOV:{
@@ -15384,8 +15386,33 @@ class ChatApp:
         # 判断是否同时按下了 Ctrl 键
         if event.state - 4 == 0:  # 4 表示 Ctrl 键的状态值
             return
+
+        # 不允许换行
+        self.current_role.set(role)
+        # 判断是否同时按下了 Ctrl 键
+        if event.state - 4 == 0:  # 4 表示 Ctrl 键的状态值
+            return
         # 发送消息
         current_role = role or self.current_role.get()
+        # 获取光标位置
+        cursor_pos = self.role_entries_roll[current_role].index(tk.INSERT)
+        # 获取文本最后位置
+        last_pos = self.role_entries_roll[current_role].index("end-1c")  # "end-1c" 表示最后一个字符的索引
+        # 获取光标前后的文本
+        before_cursor = self.role_entries_roll[current_role].get("1.0", cursor_pos)
+        after_cursor = self.role_entries_roll[current_role].get(cursor_pos, "end-1c")
+        # 合并文本，移除光标处的多余换行
+        new_content = before_cursor.rstrip("\n") + after_cursor.lstrip("\n")
+        # 比较光标位置是否在文本末尾
+        if cursor_pos != last_pos:
+            # 如果光标不在末尾，将光标移到文本最后
+            # 清空并更新文本框内容
+            self.role_entries_roll[current_role].delete("1.0", "end")
+            self.role_entries_roll[current_role].insert("1.0", new_content)
+            self.role_entries_roll[current_role].mark_set(tk.INSERT, last_pos)
+            # 阻止默认的换行行为
+            # return "break"
+
         self.get_and_roll(current_role)
         self.highlight_role_frame_roll(current_role)
 
@@ -17719,13 +17746,24 @@ class ChatApp:
     def get_and_roll(self, role, pass_=True):
         global reason_string_list
         self.search_and_delete_insert_symbol()
-        if self.current_role.get() == "" and pass_:
-            return
-        if self.role_entries_roll[self.current_role.get()].get("1.0", tk.END).strip() == "":
-            text = self.role_entries_roll[role].get("1.0", tk.END).strip()
-            self.role_entries_roll[self.current_role.get()].delete("1.0", tk.END)
-            self.role_entries_roll[self.current_role.get()].insert(tk.END, text)
-            # 回车不换行
+        try:
+            if self.current_role.get() == "" and pass_:
+                return
+            elif self.current_role.get() == "" and not pass_:
+                self.current_role.set("DiceBot")
+            if self.role_entries_roll[self.current_role.get()].get("1.0", tk.END).strip() == "":
+                text = self.role_entries_roll[role].get("1.0", tk.END).strip()
+                self.role_entries_roll[self.current_role.get()].delete("1.0", tk.END)
+                self.role_entries_roll[self.current_role.get()].insert(tk.END, text)
+                # 回车不换行
+        except:
+            if self.current_role.get() == "" and pass_:
+                return
+            self.current_role.set("DiceBot")
+            if self.role_entries_roll[self.current_role.get()].get("1.0", tk.END).strip() == "":
+                text = self.role_entries_roll[role].get("1.0", tk.END).strip()
+                self.role_entries_roll[self.current_role.get()].delete("1.0", tk.END)
+                self.role_entries_roll[self.current_role.get()].insert(tk.END, text)
 
         text = self.role_entries_roll[self.current_role.get()].get("1.0", tk.END).strip()
         self.role_entries_roll[self.current_role.get()].delete("1.0", tk.END)
@@ -17884,7 +17922,7 @@ class ChatApp:
                             exp2 = matches__[0][0]
                         else:
                             exp2 = expression
-                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[roles].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[roles].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower():
+                        if exp2 in self.role_values_entry[roles].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[roles].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[roles].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower() and "san" not in exp2.lower() and "hp" not in exp2.lower() and "mp" not in exp2.lower() and "mov" not in exp2.lower():
                             # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                             role_values_entry_ = self.role_values_entry[roles].get("1.0",
                                                                                   tk.END).strip() + "\n" + expression
@@ -18135,7 +18173,7 @@ class ChatApp:
                         exp2 = matches__[0][0]
                     else:
                         exp2 = expression
-                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower():
+                    if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip() or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower() and "san" not in exp2.lower() and "hp" not in exp2.lower() and "mp" not in exp2.lower() and "mov" not in exp2.lower():
                         # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                         role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
                         pattern___ = r'(\w+)([+\-*/]\d+)'
@@ -18419,10 +18457,11 @@ class ChatApp:
                 if len(parts_) > 1:
                     if parts_ and "成功" in parts_[1]:
                         role_Chart_detail__ = role_Chart.get(role, {}).copy()
-                        DB_ = role_Chart_detail__["DB"]
-                        DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0", "")
-                        if ("D" not in DB_) and ("-" not in DB_):
-                            DB_ = "+" + DB_
+                        if "DB" in role_Chart_detail__:
+                            DB_ = role_Chart_detail__["DB"]
+                            DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0", "")
+                            if ("D" not in DB_) and ("-" not in DB_):
+                                DB_ = "+" + DB_
                         for skill, value in role_Chart_detail__.items():
                             if "#" in skill:
                                 weapon_list__[skill.replace("#", "")] = value
@@ -18585,7 +18624,7 @@ class ChatApp:
                             exp2 = matches__[0][0]
                         else:
                             exp2 = expression
-                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip()  or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower():
+                        if exp2 in self.role_values_entry[role].get("1.0", tk.END).strip()  or ("所有" in self.role_values_entry[role].get("1.0", tk.END).strip() or "全部" in self.role_values_entry[role].get("1.0", tk.END).strip()) and "d" not in exp2.lower() and "sc" not in exp2.lower() and "san" not in exp2.lower() and "hp" not in exp2.lower() and "mp" not in exp2.lower() and "mov" not in exp2.lower():
                             # 正则匹配技能调整条目，例如 "潜行-20" 或 "意志+30"
                             role_values_entry_ = self.role_values_entry[role].get("1.0", tk.END).strip() + "\n" + expression
                             pattern___ = r'(\w+)([+\-*/]\d+)'
@@ -21898,6 +21937,8 @@ class ChatApp:
         self.role_values_entry.pop(key)
         self.new_combat_windows.pop(key).destroy()
         self.role_entries.pop(key)
+        self.role_entries_name_NPC.pop(key)
+        self.role_entries_frame.pop(key)
 
         self.chat_log.insert(tk.END,
                              f'活字命令 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【角色退场】{name}\n\n')
@@ -22722,10 +22763,13 @@ class ChatApp:
                         self.image_references_new_map[_avatar] = photo
                 else:
                     photo = ""
-                if _avatar in self.role_avatar_paths and os.path.exists(self.role_avatar_paths[_avatar]):
-                    self.draggable_items[_avatar].config(label=label_text, label2=label_text2, image=photo)
-                else:
-                    self.draggable_items[_avatar].config(label=label_text, label2=label_text2, image=photo)
+                try:
+                    if _avatar in self.role_avatar_paths and os.path.exists(self.role_avatar_paths[_avatar]):
+                        self.draggable_items[_avatar].config(label=label_text, label2=label_text2, image=photo)
+                    else:
+                        self.draggable_items[_avatar].config(label=label_text, label2=label_text2)
+                except:
+                    pass
         self.canvas.after(500, self.update_map)
 
     # 地图新窗口
