@@ -13160,7 +13160,7 @@ class ChatApp:
                         "你内心的恶魔",
                         f"你被恐惧症所困扰的记忆：{random.choice(fear_list)}"]
         done = []
-        order = self.roles
+        order = self.roles.copy()
         random.shuffle(order)
         goods = [
             "获得了黄铜指虎\n检定技能:斗殴\n伤害:1D3+1+DB\n射程:接触\n贯穿:×\n每轮:1\n装弹量:——\n故障值:——\n常见时代:1920s,现代\n价格20s/现代($):1/10\n发明时间:——",
@@ -14995,7 +14995,9 @@ class ChatApp:
 
         year_code = date.split("/")[0]
         year_code_original = year_code
-        if int(year_code) <= 1973:
+        if "?" in date or "？" in date:
+            return
+        elif int(year_code) <= 1973:
             year_code = 1974
 
         country_code = ""
@@ -15282,7 +15284,7 @@ class ChatApp:
                 season = "冬♦"
         else:
             date_ = "???"
-            season = "冬♦"
+            season = "???"
         # 昼夜
         if "夏" in date_:
             if 19 >= int(time.split(":")[0]) >= 6:
@@ -15323,12 +15325,17 @@ class ChatApp:
             "Friday", datenamelist[4]).replace("Saturday", datenamelist[5]).replace("Sunday", datenamelist[6])
         env_text_ = f"【时间】{time_}【地点】{place}\n【天气】{weather_}【日期】{date_}"
         env_text = f"【时间】{time}【地点】{place}【天气】{weather}【日期】{date}"
-        if sendText:
+        if sendText and ("?" not in date and "？" not in date):
             holiday, birthday = self.get_holiday_and_birthday()
             holiday_birthday = f"{holiday}\n{birthday}".strip()
             self.search_and_delete_insert_symbol()
             self.chat_log.insert(tk.END,
                                  f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text_} {holiday_birthday}\n\n')
+            self.chat_log.yview(tk.END)
+        elif sendText and ("?" in date or "？" in date):
+            self.search_and_delete_insert_symbol()
+            self.chat_log.insert(tk.END,
+                                 f'时空广播 {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{env_text_}\n\n')
             self.chat_log.yview(tk.END)
         self.time_log.delete("1.0", tk.END)
         self.time_log.insert("1.0", env_text)
@@ -15342,7 +15349,7 @@ class ChatApp:
 
     def send_message_on_enter(self, event, role=None):
         global datenamelist
-
+        print(self.roles)
         if role == None:
             pass
         elif role == "env":
@@ -15350,6 +15357,7 @@ class ChatApp:
             env_text_ = self.send_env_text_to_log()
             self.display_weather_FX(env_text_)
             self.save_settings()
+
         elif role == "info":
             return
         else:
@@ -22440,6 +22448,7 @@ class ChatApp:
         self.frames = {}
 
         num_cols = 3
+        print(self.roles)
         for idx, role in enumerate(self.roles):
             self.info_toggle[role] = "off"
             row = idx % num_cols
@@ -22584,7 +22593,11 @@ class ChatApp:
                 self.tree2.tag_configure('red_background', background='red')
                 self.tree2.bind("<Double-1>", lambda event, role=role: self.on_double_click2(event, role))
                 self.tree.bind("<Double-1>", lambda event, role=role: self.on_double_click(event, role))
-                self.tree_main.bind("<Double-1>", lambda event: self.on_double_click_main(event))
+                if self.tree_main.winfo_exists():
+                    self.tree_main.bind("<Double-1>", lambda event: self.on_double_click_main(event))
+                else:
+                    print("tree_main widget has been destroyed.")
+                    return
 
                 self.tree2.bind("<Motion>", lambda event, role=role: self.on_tree_hover2(event, role))
                 self.tree.bind("<Motion>", lambda event, role=role: self.on_tree_hover(event, role))
