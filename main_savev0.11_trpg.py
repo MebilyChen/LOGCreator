@@ -1667,8 +1667,9 @@ def load_san_loss():
     except FileNotFoundError:
         # 如果文件不存在，返回默认设置
         print(f"文件路径[GameSaves/san_loss.json]不存在，已重新创建json文件！")
-        return {'KP': 0, 'DiceBot': 0,
-                'PL 1': 0}
+        return {"san_loss":{'KP': 0, 'DiceBot': 0,
+                'PL 1': 0},"start_san":{'KP': 0, 'DiceBot': 0,
+                'PL 1': 0}}
 
 
 def load_whisper_data():
@@ -2846,7 +2847,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.77" + encouragement
+title_name = "自嗨团 v2.80" + encouragement
 music_autoplay_status = False
 
 
@@ -7619,16 +7620,16 @@ class ChatApp:
         max_SAN = role_Chart_detail.get("#SAN")
         if role not in self.SAN_:
             self.SAN_[role] = 0
-        if role not in self.SAN:
+        if role not in self.SAN["san_loss"]:
             # self.SAN[role] = int(start_SAN)
-            self.SAN[role] = 0
+            self.SAN["san_loss"][role] = 0
         # self.SAN_loss[role] = self.SAN[role] - int(self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip())
-        self.SAN_loss[role] = self.SAN[role]
+        self.SAN_loss[role] = self.SAN["san_loss"][role]
         if self.SAN_loss[role] < 0:
             # self.SAN[role] -= self.SAN_loss[role]
-            self.SAN[role] = 0
-            self.SAN_loss[role] = self.SAN[role]
-        if self.SAN_loss[role] >= int(round(max_SAN * 0.2, 0)) and "不定性疯狂：" not in self.role_values_entry[role].get(
+            self.SAN["san_loss"][role] = 0
+            self.SAN_loss[role] = self.SAN["san_loss"][role]
+        if self.SAN_loss[role] >= int(round(self.SAN["start_san"][role] * 0.2, 0)) and "不定性疯狂：" not in self.role_values_entry[role].get(
                 "1.0", tk.END):
             madness_temp = random.choice(madness_temp_list)
             madness_sum = random.choice(madness_sum_list)
@@ -7655,7 +7656,7 @@ class ChatApp:
                     break
             self.reset_san_cal_status(role)
             # print("不定性疯狂：")
-        elif self.SAN_[role] >= 5 and "临时疯狂(" not in self.role_values_entry[role].get("1.0", tk.END):
+        elif self.SAN_[role] >= 5 and "临时疯狂(" not in self.role_values_entry[role].get("1.0", tk.END) and "不定性疯狂：" not in self.role_values_entry[role].get("1.0", tk.END):
             INT = role_Chart_detail.get("智力")
             ran = random.randint(1, 100)
             if ran > INT:
@@ -7693,20 +7694,23 @@ class ChatApp:
                         break
             # print("临时疯狂：")
         elif role in self.last_SAN:
-            diff = self.SAN[role] - self.last_SAN[role]
-            self.last_SAN[role] = self.SAN[role]
-            if self.SAN[role] != 0 and diff > 0 and (
+            diff = self.SAN["san_loss"][role] - self.last_SAN[role]
+            self.last_SAN[role] = self.SAN["san_loss"][role]
+            if self.SAN["san_loss"][role] != 0 and diff > 0 and (
                     "不定性疯狂：" in self.role_values_entry[role].get("1.0", tk.END) or "临时疯狂(" in self.role_values_entry[
                 role].get("1.0", tk.END)):
                 self.search_and_delete_insert_symbol()
                 self.chat_log.insert(tk.END,
                                      f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n[陷入疯狂]【{self.role_entries_name[role]}】的疯狂再次发作！\n\n')
+                self.chat_log.yview(tk.END)
+                self.reset_san_cal_status(role)
         # print(self.SAN[role])
 
     def reset_san_cal_status(self, role):
         if role == "all":
             for roles in self.roles:
-                self.SAN[roles] = 0
+                self.SAN["san_loss"][roles] = 0
+                self.SAN["start_san"][roles] = int(self.role_values_entry[roles].get("1.0", "2.0").split("/")[0].strip())
             self.last_session_data["current_time_log"] = ""
             self.last_session_data["current_time_log_note"] = ""
             self.last_session_data["unify_time_log"] = []
@@ -7716,8 +7720,8 @@ class ChatApp:
             self.unify_time_log_note = self.last_session_data["unify_time_log_note"]
             self.unify_time_log = self.last_session_data["unify_time_log"]
         else:
-            # self.SAN[role] = int(self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip())
-            self.SAN[role] = 0
+            self.SAN["start_san"][role] = int(self.role_values_entry[role].get("1.0", "2.0").split("/")[0].strip())
+            self.SAN["san_loss"][role] = 0
 
     def update_jrrp(self, role):
         if role in self.role_entries_name:
@@ -15349,7 +15353,7 @@ class ChatApp:
 
     def send_message_on_enter(self, event, role=None):
         global datenamelist
-        print(self.roles)
+        #print(self.roles)
         if role == None:
             pass
         elif role == "env":
@@ -18026,12 +18030,12 @@ class ChatApp:
 
                         result_ = self.trpg_module.roll(expression, roles, allin=True)
                         if result_:
-                            self.jrrp_record(roles, result_ + "###" + expression, "all")
                             if "扣除" in result_ and "SAN" in result_:
                                 self.SAN_[roles] = int(result_.split("扣除")[1].split("点")[0])
                                 # self.SAN[roles] -= int(result_.split("扣除")[1].split("点")[0])
-                                self.SAN[roles] += int(result_.split("扣除")[1].split("点")[0])
+                                self.SAN["san_loss"][roles] += int(result_.split("扣除")[1].split("点")[0])
                                 self.san_cal_status(roles)
+                            self.jrrp_record(roles, result_ + "###" + expression, "all")
                         # 妙语
                         if role != "DiceBot" and "NPC_name" not in role:
                             rand_num = random.random()  # 生成0到1之间的随机数
@@ -18049,9 +18053,7 @@ class ChatApp:
                                                          f'{self.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n{mav_words_}\n\n')
                                     self.chat_log.yview(tk.END)
                         if any(op in expression.upper() for op in ["HP", "MP", "MOV", "SAN", "ARMOR"]):
-                            expression = ""
-                            reason = ""
-                            return
+                            continue
                         parts_ = result_.split('：')
                         SANC = ""
                         expressionUPP = expression.upper()
@@ -18279,11 +18281,11 @@ class ChatApp:
                     result_ = self.trpg_module.roll(expression, role)
                     if result_ and "d100" in expression.lower():
                         self.jrrp_record(role, result_ + "###" + expression, "solo")
-                        if "扣除" in result_ and "SAN" in result_:
-                            self.SAN_[role] = int(result_.split("扣除")[1].split("点")[0])
-                            # self.SAN[role] -= int(result_.split("扣除")[1].split("点")[0])
-                            self.SAN[role] += int(result_.split("扣除")[1].split("点")[0])
-                            self.san_cal_status(role)
+                    if "扣除" in result_ and "SAN" in result_:
+                        self.SAN_[role] = int(result_.split("扣除")[1].split("点")[0])
+                        # self.SAN[role] -= int(result_.split("扣除")[1].split("点")[0])
+                        self.SAN["san_loss"][role] += int(result_.split("扣除")[1].split("点")[0])
+                        self.san_cal_status(role)
                     # 妙语
                     if role != "DiceBot" and "NPC_name" not in role:
                         rand_num = random.random()  # 生成0到1之间的随机数
@@ -18727,12 +18729,12 @@ class ChatApp:
             result = self.trpg_module.roll(expression, role)
             # jrrp录入
             if result:
-                self.jrrp_record(role, result + "###" + expression, "silent")
                 if "扣除" in result and "SAN" in result:
                     self.SAN_[role] = int(result.split("扣除")[1].split("点")[0])
                     # self.SAN[role] -= int(result.split("扣除")[1].split("点")[0])
-                    self.SAN[role] += int(result.split("扣除")[1].split("点")[0])
+                    self.SAN["san_loss"][role] += int(result.split("扣除")[1].split("点")[0])
                     self.san_cal_status(role)
+                self.jrrp_record(role, result + "###" + expression, "silent")
             self.role_entries[role].insert(tk.END, result)
             multi_num -= 1
 
@@ -22448,7 +22450,7 @@ class ChatApp:
         self.frames = {}
 
         num_cols = 3
-        print(self.roles)
+        #print(self.roles)
         for idx, role in enumerate(self.roles):
             self.info_toggle[role] = "off"
             row = idx % num_cols
@@ -24405,6 +24407,7 @@ class TRPGModule:
                                 self.ChatApp.chat_log.insert(tk.END,
                                                              f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除{result2}点SAN]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                                 self.ChatApp.update_health_bar(role)
+                                self.ChatApp.chat_log.yview(tk.END)
                                 return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，扣除{result2}点SAN。"
                         else:
                             expression = sc_success
@@ -24431,6 +24434,7 @@ class TRPGModule:
                                 self.ChatApp.chat_log.insert(tk.END,
                                                              f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除{result2}点SAN]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                                 self.ChatApp.update_health_bar(role)
+                                self.ChatApp.chat_log.yview(tk.END)
                                 return f"{result}/{info}={sc_success.upper()}={result2}：San Check成功，扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_success)
@@ -24451,6 +24455,7 @@ class TRPGModule:
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除{result2}点SAN]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             self.ChatApp.update_health_bar(role)
+                            self.ChatApp.chat_log.yview(tk.END)
                             return f"{result}/{info}={result2}：San Check成功，扣除{result2}点SAN。"
                 else:
                     self.san_check_fail(role)
@@ -24500,6 +24505,7 @@ class TRPGModule:
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除最大值{max_san}点SAN]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             self.ChatApp.update_health_bar(role)
+                            self.ChatApp.chat_log.yview(tk.END)
                             return f"{result}/{info}={sc_fail.upper()}={max_san}：San Check大失败！扣除{max_san}点SAN。"
                         else:
                             role_Chart[role]["SAN"] = role_Chart[role]["SAN"] - result2
@@ -24515,6 +24521,7 @@ class TRPGModule:
                             self.ChatApp.chat_log.insert(tk.END,
                                                          f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除{result2}点SAN]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                             self.ChatApp.update_health_bar(role)
+                            self.ChatApp.chat_log.yview(tk.END)
                             return f"{result}/{info}={sc_fail.upper()}={result2}：San Check失败！扣除{result2}点SAN。"
                     else:
                         result2 = int(sc_fail)
@@ -24531,6 +24538,7 @@ class TRPGModule:
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[已扣除{result2}点SAN]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
                         self.ChatApp.update_health_bar(role)
+                        self.ChatApp.chat_log.yview(tk.END)
                         return f"{result}/{info}={result2}：San Check失败！扣除{result2}点SAN。"
 
             if HP_MP_check != "":
@@ -24617,11 +24625,11 @@ class TRPGModule:
                         des2 = des2.replace("已+", "已增加").replace("已-", "已减少")
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{role.split("NPC_name")[1]}】的状态[{des2}]：{role_Chart_at_name[role.split("NPC_name")[0]]["ARMOR"]}\n\n')
-                        self.ChatApp.chat_log.yview(tk.END)
                         self.ChatApp.role_entries[role].delete("1.0", tk.END)
                         self.ChatApp.insert_text_to_PC(".st", role, send=True)
                         self.ChatApp.role_entries[role].delete("1.0", tk.END)
                         self.ChatApp.role_entries[role].insert("1.0", des + "。")
+                        self.ChatApp.chat_log.yview(tk.END)
                         return
                     elif HP_MP_check == "HP":
                         itm = eval(str(self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[
@@ -24660,8 +24668,9 @@ class TRPGModule:
                     elif HP_MP_check == "SAN":
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{role.split("NPC_name")[1]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
-                        self.ChatApp.SAN[role] = eval(str(self.ChatApp.SAN[role]) + "-" + fuhao + result)
-                        self.ChatApp.SAN_[role] = eval(str(self.ChatApp.SAN[role]) + "-" + fuhao + result)
+                        #self.ChatApp.chat_log.yview(tk.END)
+                        self.ChatApp.SAN["san_loss"][role] = eval(str(self.ChatApp.SAN["san_loss"][role]) + "-" + fuhao + result)
+                        self.ChatApp.SAN_[role] = eval(str("-" + fuhao + result))
                         # self.ChatApp.reset_san_cal_status(role)
                         self.ChatApp.san_cal_status(role)
                     elif HP_MP_check == "MOV":
@@ -24804,8 +24813,9 @@ class TRPGModule:
                 elif HP_MP_check == "SAN":
                     self.ChatApp.chat_log.insert(tk.END,
                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
-                    self.ChatApp.SAN[role] = eval(str(self.ChatApp.SAN[role]) + "-" + fuhao + result)
-                    self.ChatApp.SAN_[role] = eval(str(self.ChatApp.SAN[role]) + "-" + fuhao + result)
+                    #self.ChatApp.chat_log.yview(tk.END)
+                    self.ChatApp.SAN["san_loss"][role] = eval(str(self.ChatApp.SAN["san_loss"][role]) + "-" + fuhao + result)
+                    self.ChatApp.SAN_[role] = eval(str("-" + fuhao + result))
                     # self.ChatApp.reset_san_cal_status(role)
                     self.ChatApp.san_cal_status(role)
                 elif HP_MP_check == "MOV":
