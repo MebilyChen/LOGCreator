@@ -34,6 +34,7 @@ import json
 import pygame
 #from openai import OpenAI
 import anthropic
+import matplotlib.pyplot as plt
 
 # import apng
 
@@ -2847,7 +2848,7 @@ string_list_encouragement = [" - Made by 咩碳@mebily & ChatGPT", " - 人品100
                              "", "", "", "", ""]
 # 从列表中随机选择一个字符串
 encouragement = random.choice(string_list_encouragement)
-title_name = "自嗨团 v2.80" + encouragement
+title_name = "自嗨团 v2.82" + encouragement
 music_autoplay_status = False
 
 
@@ -17044,6 +17045,12 @@ class ChatApp:
             formatted_output += f"  字符量: {data['字符量']}\n"
             formatted_output += f"  占比: {data['占比']}%\n"
 
+        # SAN\HP 统计折线图预留位置
+        # 解析游戏数据
+        hourly_data = self.parse_game_data(log_text)
+        # 生成SAN变化折线图
+        self.plot_san_data(hourly_data)
+
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         with open(f"Log_Analysis_{timestamp}.txt", 'w', encoding='utf-8') as f:
             # 写入统计信息
@@ -17074,6 +17081,108 @@ class ChatApp:
 
         return formatted_output
 
+    # 解析游戏数据的函数
+    def parse_game_data(self, game_data):
+        """
+        解析游戏数据，统计每小时的HP和SAN变化。
+
+        参数:
+            game_data (str): 游戏数据的字符串
+
+        返回:
+            dict: 每小时的HP和SAN变化数据
+        """
+        hourly_data = defaultdict(lambda: {'HP': 0, 'SAN': 0, 'hp_count': 0, 'san_count': 0})
+
+        # 将字符串按行分割
+        lines = game_data.splitlines()
+
+        for i in range(1, len(lines)):  # 每次处理两行，第一行为时间，第二行为状态
+            # 获取当前行和上一行
+            current_line = lines[i].strip()
+            previous_line = lines[i-1].strip()
+
+            # 提取日期时间 (第一行包含日期时间)
+            timestamp_match = re.match(r".*(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})", previous_line)
+            if timestamp_match:
+                timestamp_str = timestamp_match.group(1)
+                timestamp = datetime.strptime(timestamp_str, "%Y/%m/%d %H:%M:%S")
+
+                # 只保留日期部分
+                date = timestamp.date()
+
+                # 检查当前行是否包含 SAN 或 HP 变化
+                if "点SAN]：" in current_line:
+                    san_change_match = re.search(r"(\d+)点SAN", current_line)
+                    if san_change_match:
+                        san_change = int(san_change_match.group(1))
+                        hourly_data[date]['SAN'] += san_change
+                        hourly_data[date]['san_count'] += 1
+                if "点HP]：" in current_line:
+                    hp_change_match = re.search(r"(\d+)点HP", current_line)
+                    if hp_change_match:
+                        hp_change = int(hp_change_match.group(1))
+                        hourly_data[date]['HP'] += hp_change
+                        hourly_data[date]['hp_count'] += 1
+
+        return hourly_data
+
+    # 生成折线图的函数
+    def plot_san_data(self, hourly_data):
+        """
+        生成HP和SAN变化的折线图，显示在同一张图上。
+
+        参数:
+            hourly_data (dict): 每小时的HP和SAN变化数据
+        """
+
+        # 按照日期时间排序
+        sorted_keys = sorted(hourly_data.keys())
+        san_values = []
+        hp_values = []
+        labels = []
+
+        # 计算每个时间段的平均SAN和HP变化
+        for date in sorted_keys:
+            if hourly_data[date]['san_count'] > 0:
+                san_values.append(hourly_data[date]['SAN'] / hourly_data[date]['san_count'])
+            else:
+                san_values.append(0)
+
+            if hourly_data[date]['hp_count'] > 0:
+                hp_values.append(hourly_data[date]['HP'] / hourly_data[date]['hp_count'])
+            else:
+                hp_values.append(0)
+
+            labels.append(f"{date}")  # 标签显示日期和小时
+
+        # 创建一个图形
+        plt.figure(figsize=(6, 4))  # 图形大小：400x600
+
+        # 绘制SAN和HP变化的折线图
+        plt.plot(labels, san_values, label='SAN', color='red', marker='o')
+        plt.plot(labels, hp_values, label='HP', color='blue', marker='x')
+
+        # 设置图标的标签和标题
+        plt.xlabel('Time (Per DAY)')
+        plt.ylabel('Delta')
+        plt.title('HP & SAN Delta')
+
+        # 添加图例
+        plt.legend()
+
+        # 添加网格
+        plt.grid(True)
+
+        # 设置X轴的刻度
+        plt.xticks(rotation=45, ha='right')
+        # 设置X轴范围从第一个数据点开始，确保0点在X轴上
+        #plt.xlim(-0.5, len(labels) - 0.5)  # 强制将X轴的起点从 0 作为基准，确保显示所有数据点
+        # 显示图像
+        plt.tight_layout()
+        plt.show()
+
+    #自动补全符号
     def on_key(self, event, text):
         # 获取当前输入符号
         symbol = event.char
@@ -18281,7 +18390,7 @@ class ChatApp:
                     result_ = self.trpg_module.roll(expression, role)
                     if result_ and "d100" in expression.lower():
                         self.jrrp_record(role, result_ + "###" + expression, "solo")
-                    if "扣除" in result_ and "SAN" in result_:
+                    if result_ and "扣除" in result_ and "SAN" in result_:
                         self.SAN_[role] = int(result_.split("扣除")[1].split("点")[0])
                         # self.SAN[role] -= int(result_.split("扣除")[1].split("点")[0])
                         self.SAN["san_loss"][role] += int(result_.split("扣除")[1].split("点")[0])
@@ -24665,6 +24774,52 @@ class TRPGModule:
                     if HP_MP_check == "HP":
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{role.split("NPC_name")[1]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("2.0", "3.0").strip()}\n\n')
+                        descriptions_ = ""
+                        # 单次攻击伤害：
+                        if "已减少" in des2 and round(int(HP) / 2, 0) <= int(result) < int(HP):
+                            # print("info增加重伤：大于等于最大HP的一半，倒地，（需要体质鉴定，失败则info增加昏迷）")
+                            descriptions_ = f"受到重伤，已经倒地！"
+                            for index, line in enumerate(
+                                    self.ChatApp.role_values_entry[role].get("1.0", tk.END).split("\n")):
+                                if line == "===状态===":
+                                    self.ChatApp.role_values_entry[role].insert(f"{index + 2}.0", f"重伤(倒地)\n")
+                            self.ChatApp.role_entries[role].insert(tk.END, "重伤")
+                            # 体质检定
+                            if "失败" in self.ChatApp.insert_roll_to_PC("体质", role, send=True)[0]:
+                                self.ChatApp.role_entries[role].insert(tk.END, "此人受到重伤，体质鉴定失败，已倒地昏迷！")
+                                descriptions_ += f"因体质鉴定失败陷入昏迷！"
+                            else:
+                                self.ChatApp.role_entries[role].insert(tk.END, "此人受到重伤！立即倒地。")
+                        elif "已减少" in des2 and int(result) >= int(HP):
+                            # print("info增加假死：大于等于最大生命值")
+                            for index, line in enumerate(
+                                    self.ChatApp.role_values_entry[role].get("1.0", tk.END).split("\n")):
+                                if line == "===状态===":
+                                    self.ChatApp.role_values_entry[role].insert(f"{index + 2}.0", f"死亡(假死)\n")
+                            descriptions_ = f"HP归零，已失去行动能力！"
+
+                        # 生命值归0：
+                        if int(self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[
+                                   0].strip()) <= 0 and "死亡(假死)" not in self.ChatApp.role_values_entry[role].get("1.0",
+                                                                                                                 tk.END).strip() and "濒死(每轮体质检定)" not in self.ChatApp.role_values_entry[role].get("1.0",
+                                                                                                             tk.END).strip():
+                            # print("info已有重伤：濒死：“此人需要立即急救！(急救成功：HP+1，需继续医学，成功获得1D3生命，休息后去除重伤；医学失败需要每轮体质检定，成功继续尝试医学，失败需返回急救)(急救失败：每轮体质，失败则假死)”没有重伤：昏迷")
+                            if "重伤(倒地)" in self.ChatApp.role_values_entry[role].get("1.0", tk.END).strip():
+                                self.ChatApp.role_entries[role].insert(tk.END,
+                                                                       "濒死：此人需要立即急救！\n急救成功：HP+1，需继续医学，成功则获得1D3生命，休息后去除重伤；医学失败需要每轮体质检定，成功继续尝试医学，失败需重新急救\n急救失败：每轮体质，失败则进入死亡(假死)")
+                                descriptions_ = f"HP归零陷入濒死，需要立即急救！！"
+                                for index, line in enumerate(
+                                        self.ChatApp.role_values_entry[role].get("1.0", tk.END).split("\n")):
+                                    if line == "===状态===":
+                                        self.ChatApp.role_values_entry[role].insert(f"{index + 2}.0", f"濒死(每轮体质检定)\n")
+                            else:
+                                self.ChatApp.role_entries[role].insert(tk.END, "HP归0：此人已昏迷！")
+                                descriptions_ = f"HP归零，已陷入昏迷！"
+
+                        if descriptions_ != "":
+                            self.ChatApp.chat_log.insert(tk.END,
+                                                         f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】{descriptions_}\n\n')
+
                     elif HP_MP_check == "SAN":
                         self.ChatApp.chat_log.insert(tk.END,
                                                      f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{role.split("NPC_name")[1]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
@@ -24756,7 +24911,7 @@ class TRPGModule:
                     self.ChatApp.role_entries[role].delete("1.0", tk.END)
                     self.ChatApp.insert_text_to_PC(".st", role, send=True)
                     self.ChatApp.role_entries[role].delete("1.0", tk.END)
-                    self.ChatApp.role_entries[role].insert("1.0", des + "。")
+                    self.ChatApp.role_entries[role].insert("1.0", des2 + "。")
                     return
                 elif HP_MP_check == "HP":
                     temp_HP_MP_check = HP_MP_check + "_"
@@ -24810,6 +24965,51 @@ class TRPGModule:
                 if HP_MP_check == "HP":
                     self.ChatApp.chat_log.insert(tk.END,
                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("2.0", "3.0").strip()}\n\n')
+                    descriptions_ = ""
+                    # 单次攻击伤害：
+                    if "已减少" in des2 and round(int(HP) / 2, 0) <= int(result) < int(HP):
+                        # print("info增加重伤：大于等于最大HP的一半，倒地，（需要体质鉴定，失败则info增加昏迷）")
+                        descriptions_ = f"受到重伤，已经倒地！"
+                        for index, line in enumerate(
+                                self.ChatApp.role_values_entry[role].get("1.0", tk.END).split("\n")):
+                            if line == "===状态===":
+                                self.ChatApp.role_values_entry[role].insert(f"{index + 2}.0", f"重伤(倒地)\n")
+                        self.ChatApp.role_entries[role].insert(tk.END, "重伤")
+                        # 体质检定
+                        if "失败" in self.ChatApp.insert_roll_to_PC("体质", role, send=True)[0]:
+                            self.ChatApp.role_entries[role].insert(tk.END, "此人受到重伤，体质鉴定失败，已倒地昏迷！")
+                            descriptions_ += f"因体质鉴定失败陷入昏迷！"
+                        else:
+                            self.ChatApp.role_entries[role].insert(tk.END, "此人受到重伤！立即倒地。")
+                    elif "已减少" in des2 and int(result) >= int(HP):
+                        # print("info增加假死：大于等于最大生命值")
+                        for index, line in enumerate(
+                                self.ChatApp.role_values_entry[role].get("1.0", tk.END).split("\n")):
+                            if line == "===状态===":
+                                self.ChatApp.role_values_entry[role].insert(f"{index + 2}.0", f"死亡(假死)\n")
+                        descriptions_ = f"HP归零，已失去行动能力！"
+
+                    # 生命值归0：
+                    if int(self.ChatApp.role_values_entry[role].get("2.0", "3.0").split("/")[
+                               0].strip()) <= 0 and "死亡(假死)" not in self.ChatApp.role_values_entry[role].get("1.0",
+                                                                                                             tk.END).strip() and "濒死(每轮体质检定)" not in self.ChatApp.role_values_entry[role].get("1.0",
+                                                                                                             tk.END).strip():
+                        # print("info已有重伤：濒死：“此人需要立即急救！(急救成功：HP+1，需继续医学，成功获得1D3生命，休息后去除重伤；医学失败需要每轮体质检定，成功继续尝试医学，失败需返回急救)(急救失败：每轮体质，失败则假死)”没有重伤：昏迷")
+                        if "重伤(倒地)" in self.ChatApp.role_values_entry[role].get("1.0", tk.END).strip():
+                            self.ChatApp.role_entries[role].insert(tk.END,
+                                                                   "濒死：此人需要立即急救！\n急救成功：HP+1，需继续医学，成功则获得1D3生命，休息后去除重伤；医学失败需要每轮体质检定，成功继续尝试医学，失败需重新急救\n急救失败：每轮体质，失败则进入死亡(假死)")
+                            descriptions_ = f"HP归零陷入濒死，需要立即急救！！"
+                            for index, line in enumerate(
+                                    self.ChatApp.role_values_entry[role].get("1.0", tk.END).split("\n")):
+                                if line == "===状态===":
+                                    self.ChatApp.role_values_entry[role].insert(f"{index + 2}.0", f"濒死(每轮体质检定)\n")
+                        else:
+                            self.ChatApp.role_entries[role].insert(tk.END, "HP归0：此人已昏迷！")
+                            descriptions_ = f"HP归零，已陷入昏迷！"
+                    if descriptions_ != "":
+                        self.ChatApp.chat_log.insert(tk.END,
+                                                 f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】{descriptions_}\n\n')
+
                 elif HP_MP_check == "SAN":
                     self.ChatApp.chat_log.insert(tk.END,
                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("1.0", "2.0").strip()}\n\n')
@@ -24825,7 +25025,7 @@ class TRPGModule:
                     self.ChatApp.chat_log.insert(tk.END,
                                                  f'{self.ChatApp.role_entries_name["DiceBot"]} {datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n【{self.ChatApp.role_entries_name[role]}】的状态[{des2}]：{self.ChatApp.role_values_entry[role].get("3.0", "4.0").strip()}\n\n')
                 self.ChatApp.chat_log.yview(tk.END)
-                self.ChatApp.role_entries[role].insert(tk.END, des + "。")
+                self.ChatApp.role_entries[role].insert(tk.END, des2 + "。")
                 self.ChatApp.update_health_bar(role)
                 return
 
