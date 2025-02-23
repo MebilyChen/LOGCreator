@@ -162,7 +162,7 @@ room_info_search = {}
 room_info_list = {}
 opened_resources = False
 resouece_win = None
-hurt_position = ["【头部】", "【左眼】", "【右眼】", "【颈部】", "【腹部】", "【胸部】", "【躯干】", "【躯干】", "【躯干】", "【躯干】", "【躯干】", "【躯干】", "【躯干】",
+hurt_position = ["【头部】", "【左眼】", "【右眼】", "【颈部】", "【腹部】", "【胸部】", "【腹部】", "【胸部】", "【胸部】", "【躯干】", "【躯干】", "【右腿】", "【左腿】",
                  "【躯干】", "【躯干】", "【躯干】", "【左臂】", "【右臂】", "【左手】", "【右手】", "【下腹】", "【左腿】", "【右腿】", "【左脚】", "【右脚】"]
 
 artefacts_list_ = {
@@ -6632,7 +6632,7 @@ class ChatApp:
                 self.role_entries[role].delete("1.0", tk.END)
                 self.role_entries[role].insert("1.0", _role_entry)
                 self.open_new_window_map(root,
-                                         text="战斗>>" + result + "\n【TIPS】突袭：被突袭方感知技能失败（侦查、聆听、心理学），突袭方首轮攻击自动成功/+1奖励骰 | 射击准备：+50 DEX")
+                                         text="战斗>>" + result + "\n【TIPS】突袭：被突袭方感知技能失败（侦查、聆听、心理学），突袭方首轮攻击自动成功/+1奖励骰 | 射击准备：+50 DEX\n寡不敌众：一轮进行过动作后，所有后续格斗攻击获得1个奖励骰，一轮多动则耗尽行动点后应用此效果")
                 return
 
             if ".chasev" in message.lower() or "。chasev" in message.lower():
@@ -18489,7 +18489,7 @@ class ChatApp:
                                 if "#" in skill:
                                     weapon_list[skill.replace("#", "")] = value
                             DB_ = role_Chart_detail["DB"]
-                            DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0", "")
+                            DB_ = re.findall(r'\((.*?)\)', DB_)[0]
                             if ("D" not in DB_) and ("-" not in DB_):
                                 DB_ = "+" + DB_
                             for weapon, value in weapon_list.items():
@@ -18578,7 +18578,7 @@ class ChatApp:
                         role_Chart_detail__ = role_Chart.get(role, {}).copy()
                         if "DB" in role_Chart_detail__:
                             DB_ = role_Chart_detail__["DB"]
-                            DB_ = re.findall(r'\((.*?)\)', DB_)[0].replace("0", "")
+                            DB_ = re.findall(r'\((.*?)\)', DB_)[0]
                             if ("D" not in DB_) and ("-" not in DB_):
                                 DB_ = "+" + DB_
                         for skill, value in role_Chart_detail__.items():
